@@ -54,7 +54,8 @@ export function useSocket(handlers?: SocketHandlers) {
       }
       shouldReconnectRef.current = true;
       const wsUrl =
-        import.meta.env.VITE_WS_URL ?? "ws://localhost:8080/ws";
+        import.meta.env.VITE_WS_URL ??
+        `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}/ws`;
       const ws = new WebSocket(`${wsUrl}?token=${encodeURIComponent(token)}`);
       wsRef.current = ws;
 

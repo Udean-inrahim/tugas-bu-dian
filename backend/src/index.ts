@@ -1,6 +1,10 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import websocket from "@fastify/websocket";
+import fastifyStatic from "@fastify/static";
+import { fileURLToPath } from "node:url";
+import path from "node:path";
+import { existsSync } from "node:fs";
 import { config } from "./config/index.js";
 import { authPlugin } from "./plugins/auth.plugin.js";
 import { authRoutes } from "./routes/auth.js";
@@ -61,6 +65,25 @@ if (process.env.SIMULATE_SENSOR === "true") {
     tempBase: Number(process.env.SIM_TEMP_BASE ?? 28.5),
     humidityBase: Number(process.env.SIM_HUMIDITY_BASE ?? 65),
   });
+}
+
+const backendDir = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
+const frontendDist = path.resolve(backendDir, "..", "frontend", "dist");
+if (existsSync(path.join(frontendDist, "index.html"))) {
+  app.register(fastifyStatic, {
+    root: frontendDist,
+    prefix: "/",
+    wildcard: false,
+  });
+  app.setNotFoundHandler((req, reply) => {
+    if (req.url.startsWith("/api") || req.url.startsWith("/ws")) {
+      return reply.code(404).send({ error: "Not Found" });
+    }
+    return reply.sendFile("index.html");
+  });
+  console.log(`🌐 Frontend di-serve dari: ${frontendDist}`);
+} else {
+  console.warn("⚠️  frontend/dist belum ada — jalankan build frontend dulu (frontend/dist/index.html tidak ditemukan). API tetap jalan.");
 }
 
 try {
