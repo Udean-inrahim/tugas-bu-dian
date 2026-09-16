@@ -1,5 +1,3 @@
-import type { MqttClient } from "mqtt";
-
 type SimulatorOptions = {
   sensorCode: string;
   intervalMs: number;
@@ -8,7 +6,7 @@ type SimulatorOptions = {
 };
 
 export function startSimulator(
-  mqttClient: MqttClient,
+  publish: (topic: string, payload: string) => void,
   { sensorCode, intervalMs, tempBase, humidityBase }: SimulatorOptions
 ) {
   console.log(
@@ -18,24 +16,19 @@ export function startSimulator(
   const drift = () => (Math.random() - 0.5) * 2;
 
   setInterval(() => {
-    if (!mqttClient.connected) return;
     const temperature = Math.round((tempBase + drift()) * 10) / 10;
     const humidity = Math.round((humidityBase + drift() * 4) * 10) / 10;
 
-    mqttClient.publish(
+    publish(
       `sensors/${sensorCode}/data`,
-      JSON.stringify({ temperature, humidity }),
-      { qos: 1 }
+      JSON.stringify({ temperature, humidity })
     );
   }, intervalMs);
 
-  // Heartbeat every interval
   setInterval(() => {
-    if (!mqttClient.connected) return;
-    mqttClient.publish(
+    publish(
       `sensors/${sensorCode}/heartbeat`,
-      JSON.stringify({ timestamp: Date.now() }),
-      { qos: 0 }
+      JSON.stringify({ timestamp: Date.now() })
     );
   }, intervalMs);
 }

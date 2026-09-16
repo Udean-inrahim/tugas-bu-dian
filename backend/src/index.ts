@@ -13,7 +13,7 @@ import { readingRoutes } from "./routes/readings.js";
 import { alertRoutes } from "./routes/alerts.js";
 import { settingsRoutes } from "./routes/settings.js";
 import { websocketRoute } from "./routes/websocket.js";
-import { setupMqtt } from "./lib/mqtt.js";
+import { setupMqtt, extractSensorCode } from "./lib/mqtt.js";
 import { readingService } from "./services/reading.service.js";
 import { startSimulator } from "./lib/simulator.js";
 
@@ -43,23 +43,46 @@ app.get("/health", async () => ({
   wsClients: 0,
 }));
 
-const mqttClient = mqtt.connect(config.mqtt.url, {
-  clientId: `stm-backend-${Date.now()}`,
-  reconnectPeriod: 3000,
-  connectTimeout: 10000,
-  username: config.mqtt.username,
-  password: config.mqtt.password,
-});
+const mqttClient = process.env.MQTT_URL
+  ? mqtt.connect(config.mqtt.url, {
+      clientId: `stm-backend-${Date.now()}`,
+      reconnectPeriod: 3000,
+      connectTimeout: 10000,
+      username: config.mqtt.username,
+      password: config.mqtt.password,
+    })
+  : null;
 
-setupMqtt(mqttClient, {
-  dataTopic: config.mqtt.dataTopic,
-  heartbeatTopic: config.mqtt.heartbeatTopic,
-});
+if (mqttClient) {
+  setupMqtt(mqttClient, {
+    dataTopic: config.mqtt.dataTopic,
+    heartbeatTopic: config.mqtt.heartbeatTopic,
+  });
+} else {
+  console.log("🛰️  MQTT_URL tidak diset — berjalan tanpa broker (mode langsung).");
+}
 
 readingService.startOfflineMonitor();
 
 if (process.env.SIMULATE_SENSOR === "true") {
-  startSimulator(mqttClient, {
+  const publish = (topic: string, payload: string) => {
+    if (mqttClient && mqttClient.connected) {
+      mqttClient.publish(topic, payload, { qos: 1 });
+      return;
+    }
+    if (!topic.endsWith("/data")) return;
+    const sensorCode = extractSensorCode(topic);
+    if (!sensorCode) return;
+    try {
+      const data = JSON.parse(payload) as { temperature: number; humidity: number };
+      readingService
+        .ingestFromSensor(sensorCode, Number(data.temperature), Number(data.humidity))
+        .catch((e) => console.error("❌ Simulator ingest error:", e));
+    } catch (e) {
+      console.error("❌ Simulator payload invalid:", e);
+    }
+  };
+  startSimulator(publish, {
     sensorCode: process.env.SIM_SENSOR_CODE ?? "ST-001",
     intervalMs: Number(process.env.SIM_INTERVAL_MS ?? 5000),
     tempBase: Number(process.env.SIM_TEMP_BASE ?? 28.5),
@@ -68,8 +91,12 @@ if (process.env.SIMULATE_SENSOR === "true") {
 }
 
 const backendDir = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
-const frontendDist = path.resolve(backendDir, "..", "frontend", "dist");
-if (existsSync(path.join(frontendDist, "index.html"))) {
+const distCandidates = [
+  path.resolve(backendDir, "..", "frontend", "dist"),
+  path.resolve(backendDir, "frontend", "dist"),
+];
+const frontendDist = distCandidates.find((c) => existsSync(path.join(c, "index.html")));
+if (frontendDist) {
   app.register(fastifyStatic, {
     root: frontendDist,
     prefix: "/",
@@ -83,7 +110,7 @@ if (existsSync(path.join(frontendDist, "index.html"))) {
   });
   console.log(`🌐 Frontend di-serve dari: ${frontendDist}`);
 } else {
-  console.warn("⚠️  frontend/dist belum ada — jalankan build frontend dulu (frontend/dist/index.html tidak ditemukan). API tetap jalan.");
+  console.warn("⚠️  frontend/dist belum ada — jalankan build frontend dulu. API tetap jalan.");
 }
 
 try {
