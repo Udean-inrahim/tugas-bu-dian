@@ -6,7 +6,7 @@ services:
     rootDir: backend
     region: singapore
     healthCheckPath: /health
-    buildCommand: npm ci && npx prisma migrate deploy && npm run build
+    buildCommand: npm ci && npx prisma migrate deploy && npm run build && npm run seed
     startCommand: npm start
     envVars:
       - key: NODE_VERSION
