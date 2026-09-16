@@ -1,0 +1,114 @@
+// Smart Temperature Monitoring - Prisma Schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============ Users ============
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(USER)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+// ============ Sensors ============
+model Sensor {
+  id         Int          @id @default(autoincrement())
+  sensorCode String       @unique @map("sensor_code")
+  name       String
+  location   String
+  status     SensorStatus @default(OFFLINE)
+  isActive   Boolean      @default(true) @map("is_active")
+  createdAt  DateTime     @default(now()) @map("created_at")
+  updatedAt  DateTime     @updatedAt @map("updated_at")
+
+  readings SensorReading[]
+  alerts   Alert[]
+
+  @@map("sensors")
+}
+
+enum SensorStatus {
+  ONLINE
+  OFFLINE
+}
+
+// ============ Sensor Readings ============
+model SensorReading {
+  id          Int      @id @default(autoincrement())
+  sensorId    Int      @map("sensor_id")
+  temperature Float
+  humidity    Float
+  recordedAt  DateTime @default(now()) @map("recorded_at")
+
+  sensor Sensor @relation(fields: [sensorId], references: [id], onDelete: Cascade)
+
+  @@index([sensorId, recordedAt])
+  @@map("sensor_readings")
+}
+
+// ============ Alerts ============
+model Alert {
+  id         Int         @id @default(autoincrement())
+  sensorId   Int         @map("sensor_id")
+  type       AlertType
+  value      Float
+  threshold  Float
+  message    String
+  severity   Severity
+  status     AlertStatus @default(ACTIVE) @map("status")
+  createdAt  DateTime    @default(now()) @map("created_at")
+  resolvedAt DateTime?   @map("resolved_at")
+
+  sensor Sensor @relation(fields: [sensorId], references: [id], onDelete: Cascade)
+
+  @@index([status, createdAt])
+  @@map("alerts")
+}
+
+enum AlertType {
+  HIGH_TEMP
+  LOW_TEMP
+  HIGH_HUMIDITY
+  LOW_HUMIDITY
+  SENSOR_OFFLINE
+}
+
+enum Severity {
+  WARNING
+  CRITICAL
+}
+
+enum AlertStatus {
+  ACTIVE
+  RESOLVED
+}
+
+// ============ Settings ============
+model Setting {
+  id              Int      @id @default(1)
+  minTemperature  Float    @default(18) @map("min_temperature")
+  maxTemperature  Float    @default(30) @map("max_temperature")
+  minHumidity     Float    @default(40) @map("min_humidity")
+  maxHumidity     Float    @default(70) @map("max_humidity")
+  refreshInterval Int      @default(5) @map("refresh_interval")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("settings")
+}
