@@ -1,0 +1,35 @@
+name: Simulate sensor data
+
+on:
+  schedule:
+    - cron: "*/1 * * * *"
+  workflow_dispatch:
+
+env:
+  API_URL: ${{ secrets.API_URL || 'https://tugas-bu-dian.vercel.app' }}
+
+jobs:
+  simulate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send simulated reading (ST-001)
+        shell: bash
+        run: |
+          TEMP=$(awk 'BEGIN{srand(); printf "%.1f", 20+rand()*13}')
+          HUM=$(awk 'BEGIN{srand(); printf "%.1f", 35+rand()*40}')
+          curl -sS -f -o /tmp/reading.json -w "POST /api/readings -> %{http_code}\n" \
+            -X POST "$API_URL/api/readings" \
+            -H "Content-Type: application/json" \
+            -d "{\"sensor_code\":\"ST-001\",\"temperature\":$TEMP,\"humidity\":$HUM}"
+          cat /tmp/reading.json
+          echo
+
+      - name: Run offline detection tick
+        shell: bash
+        run: |
+          curl -sS -f -o /tmp/tick.json -w "POST /api/system/tick -> %{http_code}\n" \
+            -X POST "$API_URL/api/system/tick" \
+            -H "Content-Type: application/json" \
+            -H "x-service-token: ${{ secrets.SERVICE_TOKEN }}"
+          cat /tmp/tick.json
+          echo

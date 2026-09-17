@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSensors } from "@/hooks/useSensors";
 import { useSettings } from "@/hooks/useSettings";
-import { useSocket } from "@/hooks/useSocket";
 import api from "@/lib/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -24,9 +23,8 @@ const RANGE_SINCE: Record<ChartRange, number> = {
 };
 
 export function MonitoringPage() {
-  const { sensors } = useSensors();
+  const { sensors, list: reloadSensors } = useSensors();
   const { settings } = useSettings();
-  const { registerHandler } = useSocket();
 
   const [selectedSensorId, setSelectedSensorId] = useState<string>("all");
   const [range, setRange] = useState<ChartRange>("6h");
@@ -49,8 +47,8 @@ export function MonitoringPage() {
     }
   }, [selectedSensorId]);
 
-  const fetchHistory = useCallback(async (sensorFilter: string, rng: ChartRange) => {
-    setLoading(true);
+  const fetchHistory = useCallback(async (sensorFilter: string, rng: ChartRange, silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const params: Record<string, string | number> = {
         from: new Date(Date.now() - RANGE_SINCE[rng]).toISOString(),
@@ -60,29 +58,31 @@ export function MonitoringPage() {
       const { data } = await api.get<{ data: SensorReading[] }>("/readings", { params });
       setReadings(data.data);
     } catch {
-      setReadings([]);
+      if (!silent) setReadings([]);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, []);
 
   const refresh = useCallback(() => {
     fetchLatest();
-    fetchHistory(selectedSensorId, range);
-  }, [fetchLatest, fetchHistory, selectedSensorId, range]);
+    fetchHistory(selectedSensorId, range, true);
+    reloadSensors(true);
+  }, [fetchLatest, fetchHistory, selectedSensorId, range, reloadSensors]);
 
   useEffect(() => {
     refresh();
   }, [refresh]);
 
+  const refreshMs = Math.min(
+    60_000,
+    Math.max(1000, (settings?.refreshInterval ?? 5) * 1000)
+  );
+
   useEffect(() => {
-    const unsub = registerHandler("reading", () => refresh());
-    const unsubStatus = registerHandler("sensor_status", fetchLatest);
-    return () => {
-      unsub();
-      unsubStatus();
-    };
-  }, [registerHandler, refresh, fetchLatest]);
+    const id = setInterval(refresh, refreshMs);
+    return () => clearInterval(id);
+  }, [refresh, refreshMs]);
 
   const sortedReadings = useMemo(
     () => [...readings].sort((a, b) => new Date(a.recordedAt).getTime() - new Date(b.recordedAt).getTime()),

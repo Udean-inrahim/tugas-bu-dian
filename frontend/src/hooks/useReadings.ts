@@ -27,8 +27,8 @@ export function useReadings(query: ReadingQuery = {}) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const refetch = useCallback(async () => {
-    setLoading(true);
+  const refetch = useCallback(async (silent?: boolean) => {
+    if (!silent) setLoading(true);
     setError(null);
     try {
       const params: Record<string, string | number | undefined> = {
@@ -49,7 +49,7 @@ export function useReadings(query: ReadingQuery = {}) {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Gagal memuat data riwayat");
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [query.sensorId, query.range, query.page, query.limit]);
 

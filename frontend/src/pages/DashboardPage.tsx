@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSensors } from "@/hooks/useSensors";
 import { useSettings } from "@/hooks/useSettings";
 import { useAlerts } from "@/hooks/useAlerts";
-import { useSocket } from "@/hooks/useSocket";
 import { useReadings } from "@/hooks/useReadings";
 import api from "@/lib/api";
 import { TemperatureCard } from "@/components/dashboard/TemperatureCard";
@@ -16,7 +15,6 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Reveal } from "@/components/ui/reveal";
-import { toast } from "sonner";
 import type { ChartRange, SensorReading } from "@/types";
 import { CHART_RANGES } from "@/types";
 
@@ -38,10 +36,8 @@ export function DashboardPage() {
   const [chartReadings, setChartReadings] = useState<SensorReading[]>([]);
   const [chartLoading, setChartLoading] = useState(true);
 
-  const { registerHandler } = useSocket();
-
-  const loadChart = useCallback(async () => {
-    setChartLoading(true);
+  const loadChart = useCallback(async (silent = false) => {
+    if (!silent) setChartLoading(true);
     try {
       const { data } = await api.get<{ data: SensorReading[] }>("/readings", {
         params: {
@@ -51,9 +47,9 @@ export function DashboardPage() {
       });
       setChartReadings(data.data);
     } catch {
-      setChartReadings([]);
+      if (!silent) setChartReadings([]);
     } finally {
-      setChartLoading(false);
+      if (!silent) setChartLoading(false);
     }
   }, [range]);
 
@@ -69,37 +65,21 @@ export function DashboardPage() {
   }, [readings]);
 
   const refreshAll = useCallback(() => {
-    reloadReadings();
-    reloadAlerts();
-    reloadSensors();
-    loadChart();
+    reloadReadings(true);
+    reloadAlerts(undefined, true);
+    reloadSensors(true);
+    loadChart(true);
   }, [reloadReadings, reloadAlerts, reloadSensors, loadChart]);
 
-  const handleReading = useCallback(() => {
-    refreshAll();
-  }, [refreshAll]);
-
-  const handleAlert = useCallback(() => {
-    reloadAlerts();
-    toast.warning("Alert baru terdeteksi", { description: "Periksa halaman Alerts" });
-  }, [reloadAlerts]);
-
-  const handleStatus = useCallback(() => {
-    reloadSensors();
-  }, [reloadSensors]);
+  const refreshMs = Math.min(
+    60_000,
+    Math.max(1000, (settings?.refreshInterval ?? 5) * 1000)
+  );
 
   useEffect(() => {
-    const unsubReading = registerHandler("reading", handleReading);
-    const unsubAlert = registerHandler("alert", handleAlert);
-    const unsubAlertResolved = registerHandler("alert_resolved", () => reloadAlerts());
-    const unsubStatus = registerHandler("sensor_status", handleStatus);
-    return () => {
-      unsubReading();
-      unsubAlert();
-      unsubAlertResolved();
-      unsubStatus();
-    };
-  }, [registerHandler, handleReading, handleAlert, handleStatus, reloadAlerts]);
+    const id = setInterval(refreshAll, refreshMs);
+    return () => clearInterval(id);
+  }, [refreshAll, refreshMs]);
 
   return (
     <div className="space-y-6">

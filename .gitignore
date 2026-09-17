@@ -26,3 +26,7 @@ Thumbs.db
 
 # Temp
 *.tmp
+
+# Local scratch scripts
+diag.cmd
+test-task.cmd

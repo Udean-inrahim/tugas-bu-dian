@@ -26,8 +26,8 @@ export function useAlerts(query: AlertQuery = {}) {
     }
   }, []);
 
-  const list = useCallback(async (targetPage?: number) => {
-    setPending(true);
+  const list = useCallback(async (targetPage?: number, silent?: boolean) => {
+    if (!silent) setPending(true);
     setError(null);
     const p = targetPage ?? page;
     try {
@@ -44,7 +44,7 @@ export function useAlerts(query: AlertQuery = {}) {
     } catch (err) {
       setError(err instanceof Error ? err.message : "Gagal memuat alert");
     } finally {
-      setPending(false);
+      if (!silent) setPending(false);
     }
   }, [query.status, query.sensorId, query.limit, page]);
 
@@ -55,10 +55,15 @@ export function useAlerts(query: AlertQuery = {}) {
     return data;
   }, [fetchSummary]);
 
+  const refresh = useCallback(() => {
+    list(undefined, true);
+    fetchSummary();
+  }, [list, fetchSummary]);
+
   useEffect(() => {
     list();
     fetchSummary();
   }, [list, fetchSummary]);
 
-  return { alerts, summary, list, resolve, pending, error, meta, page, setPage };
+  return { alerts, summary, list, refresh, resolve, pending, error, meta, page, setPage };
 }

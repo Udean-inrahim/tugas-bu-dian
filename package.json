@@ -1,0 +1,24 @@
+{
+  "name": "smart-temperature-monitoring",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "allowScripts": {
+    "prisma": true,
+    "@prisma/client": true,
+    "@prisma/engines": true,
+    "esbuild": true
+  },
+  "scripts": {
+    "build": "npm run build --workspace=backend && npm run build --workspace=frontend",
+    "build:backend": "npm run build --workspace=backend",
+    "build:frontend": "npm run build --workspace=frontend",
+    "dev:backend": "npm run dev --workspace=backend",
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "vercel-build": "npm run prisma:generate --workspace=backend && npm run build --workspace=backend && npm run build --workspace=frontend",
+    "vercel-install": "npm install"
+  }
+}

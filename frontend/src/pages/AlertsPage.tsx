@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { CheckCircle2, BellRing } from "lucide-react";
 import { useAlerts } from "@/hooks/useAlerts";
-import { useSocket } from "@/hooks/useSocket";
+import { useSettings } from "@/hooks/useSettings";
 import { useAuthStore } from "@/stores/authStore";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -41,19 +41,20 @@ const typeBadgeClass: Record<AlertType, string> = {
 
 export function AlertsPage() {
   const [filter, setFilter] = useState<"ACTIVE" | "RESOLVED" | "ALL">("ACTIVE");
-  const { alerts, summary, resolve, pending, list } = useAlerts({ status: filter, limit: 50 });
+  const { alerts, summary, refresh, resolve, pending, list } = useAlerts({ status: filter, limit: 50 });
   const user = useAuthStore((s) => s.user);
   const isAdmin = user?.role === "ADMIN";
-  const { registerHandler } = useSocket();
+  const { settings } = useSettings();
+
+  const refreshMs = Math.min(
+    60_000,
+    Math.max(1000, (settings?.refreshInterval ?? 5) * 1000)
+  );
 
   useEffect(() => {
-    const unsub1 = registerHandler("alert", () => list());
-    const unsub2 = registerHandler("alert_resolved", () => list());
-    return () => {
-      unsub1();
-      unsub2();
-    };
-  }, [registerHandler, list]);
+    const id = setInterval(() => refresh(), refreshMs);
+    return () => clearInterval(id);
+  }, [refresh, refreshMs]);
 
   const handleResolve = async (id: number) => {
     try {

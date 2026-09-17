@@ -13,8 +13,8 @@ export function useSensors() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const list = useCallback(async () => {
-    setLoading(true);
+  const list = useCallback(async (silent?: boolean) => {
+    if (!silent) setLoading(true);
     setError(null);
     try {
       const { data } = await api.get<{ data: Sensor[] }>("/sensors");
@@ -24,7 +24,7 @@ export function useSensors() {
       setError(err instanceof Error ? err.message : "Gagal memuat data sensor");
       throw err;
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, []);
 
