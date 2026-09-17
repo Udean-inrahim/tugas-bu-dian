@@ -14,6 +14,9 @@
     "hono": "^4.6.0",
     "zod": "^3.23.8"
   },
+  "devDependencies": {
+    "prisma": "^5.22.0"
+  },
   "allowScripts": {
     "prisma": true,
     "@prisma/client": true,
@@ -26,7 +29,8 @@
     "build:frontend": "npm run build --workspace=frontend",
     "dev:backend": "npm run dev --workspace=backend",
     "dev:frontend": "npm run dev --workspace=frontend",
-    "vercel-build": "npm run prisma:generate --workspace=backend && npm run build --workspace=backend && npm run build --workspace=frontend",
+    "prisma:generate": "prisma generate --schema backend/prisma/schema.prisma",
+    "vercel-build": "npm run prisma:generate && npm run build --workspace=backend && npm run build --workspace=frontend",
     "vercel-install": "npm install"
   }
 }
