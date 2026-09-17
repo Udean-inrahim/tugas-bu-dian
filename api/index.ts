@@ -1,13 +1,49 @@
-import { handle } from "hono/vercel";
-import { app } from "../backend/dist/serverless/app.js";
+type AppModule = typeof import("../backend/dist/serverless/app.js");
 
-const appHandler = handle(app);
+let appModule: AppModule["app"] | null = null;
+let appPromise: Promise<AppModule["app"]> | null = null;
+
+function loadApp(): Promise<AppModule["app"]> {
+  if (appModule) return Promise.resolve(appModule);
+  if (!appPromise) {
+    appPromise = import("../backend/dist/serverless/app.js")
+      .then((m) => {
+        appModule = m.app;
+        return appModule;
+      })
+      .catch((e) => {
+        appPromise = null;
+        throw e;
+      });
+  }
+  return appPromise;
+}
+
+type NodeReq = {
+  method?: string;
+  url?: string;
+  headers?: Record<string, string | string[] | undefined>;
+  on?: (event: string, cb: (chunk: Buffer) => void) => void;
+  read?: () => Buffer | null;
+};
+type NodeRes = {
+  statusCode?: number;
+  setHeader?: (k: string, v: string) => void;
+  end?: (body?: string) => void;
+};
 
 function json(data: unknown, status: number) {
   return new Response(JSON.stringify(data), {
     status,
     headers: { "content-type": "application/json" },
   });
+}
+
+function errorJson(data: unknown, status = 500) {
+  return json(
+    { error: "FUNCTION_ERROR", message: String((data as { stack?: string })?.stack ?? data) },
+    status
+  );
 }
 
 function isFetchRequest(v: unknown): v is Request {
@@ -21,79 +57,71 @@ function isFetchRequest(v: unknown): v is Request {
 
 async function runFetch(request: Request): Promise<Response> {
   try {
+    const app = await loadApp();
     return await app.fetch(request);
   } catch (e) {
-    return json({ error: "REQUEST_ERROR", message: String((e as { stack?: string })?.stack ?? e) }, 500);
+    return errorJson(e);
   }
 }
 
-async function readNodeBody(req: { on?: (event: string, cb: (chunk: Buffer) => void) => void; read?: () => Buffer | null }): Promise<Buffer | undefined> {
+async function readNodeBody(req: NodeReq): Promise<Buffer | undefined> {
   if (req.on) {
-    return await new Promise<Buffer | undefined>((resolve) => {
+    return new Promise<Buffer | undefined>((resolve) => {
       const chunks: Buffer[] = [];
       req.on?.("data", (c) => chunks.push(c));
       req.on?.("end", () => resolve(Buffer.concat(chunks)));
     });
   }
-  if (req.read) {
-    const first = req.read();
-    return first ?? undefined;
-  }
-  return undefined;
+  return req.read ? (req.read() ?? undefined) : undefined;
 }
 
-async function runNode(req: unknown, res: unknown): Promise<void> {
-  const r = req as {
-    method?: string;
-    url?: string;
-    headers?: Record<string, string | string[] | undefined>;
-    on?: (event: string, cb: (chunk: Buffer) => void) => void;
-    read?: () => Buffer | null;
-  };
-  const w = res as {
-    statusCode?: number;
-    setHeader?: (k: string, v: string) => void;
-    end?: (body?: string) => void;
-  };
+async function runNode(req: NodeReq, res: NodeRes): Promise<void> {
   try {
     const headers = new Headers();
-    if (r.headers) {
-      for (const [k, v] of Object.entries(r.headers)) {
+    if (req.headers) {
+      for (const [k, v] of Object.entries(req.headers)) {
         if (v !== undefined && k.toLowerCase() !== "host") headers.set(k, Array.isArray(v) ? v.join(",") : v);
       }
     }
-    const host = (r.headers as Record<string, string | string[] | undefined> | undefined)?.host;
-    const method = (r.method ?? "GET").toUpperCase();
-    const body =
-      method === "GET" || method === "HEAD" ? undefined : await readNodeBody(r);
-    const request = new Request(`https://${host ?? "tugas-bu-dian.vercel.app"}${r.url ?? "/"}`, {
+    const host = req.headers?.host;
+    const method = (req.method ?? "GET").toUpperCase();
+    const body = method === "GET" || method === "HEAD" ? undefined : await readNodeBody(req);
+    const request = new Request(`https://${host ?? "tugas-bu-dian.vercel.app"}${req.url ?? "/"}`, {
       method,
       headers,
       body,
     });
+    const app = await loadApp();
     const response = await app.fetch(request);
-    if (w.statusCode !== undefined) w.statusCode = response.status;
-    if (w.setHeader) {
-      for (const [k, v] of response.headers) w.setHeader(k, v);
+    if (res.statusCode !== undefined) res.statusCode = response.status;
+    if (res.setHeader) {
+      for (const [k, v] of response.headers) res.setHeader(k, v);
     }
-    if (w.end) w.end(await response.text());
+    if (res.end) res.end(await response.text());
   } catch (e) {
-    if (w.statusCode !== undefined) w.statusCode = 500;
-    if (w.setHeader) w.setHeader("content-type", "application/json");
-    if (w.end) w.end(JSON.stringify({ error: "REQUEST_ERROR", message: String((e as { stack?: string })?.stack ?? e) }));
+    if (res.statusCode !== undefined) res.statusCode = 500;
+    if (res.setHeader) res.setHeader("content-type", "application/json");
+    if (res.end) {
+      res.end(
+        JSON.stringify({ error: "FUNCTION_ERROR", message: String((e as { stack?: string })?.stack ?? e) })
+      );
+    }
   }
 }
 
-function dispatch(v1: unknown, v2: unknown): Response | Promise<Response> | Promise<void> {
+function handler(
+  v1: Request | NodeReq,
+  v2?: NodeRes
+): Response | Promise<Response> | Promise<void> {
   if (v2 === undefined && isFetchRequest(v1)) {
-    return runFetch(v1 as Request);
+    return runFetch(v1);
   }
-  return runNode(v1, v2);
+  return runNode(v1 as NodeReq, v2 as NodeRes);
 }
 
-export const GET = dispatch;
-export const POST = dispatch;
-export const PUT = dispatch;
-export const DELETE = dispatch;
-export const PATCH = dispatch;
-export const OPTIONS = dispatch;
+export const GET = handler;
+export const POST = handler;
+export const PUT = handler;
+export const DELETE = handler;
+export const PATCH = handler;
+export const OPTIONS = handler;
