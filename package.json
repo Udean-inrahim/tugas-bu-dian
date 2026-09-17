@@ -17,6 +17,9 @@
   "devDependencies": {
     "prisma": "^5.22.0"
   },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "4.63.3"
+  },
   "allowScripts": {
     "prisma": true,
     "@prisma/client": true,
