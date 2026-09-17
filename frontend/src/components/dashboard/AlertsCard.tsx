@@ -22,13 +22,13 @@ export function AlertsCard({ summary }: Props) {
   const warning = useCountUp(summary.warning);
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="micro-label flex items-center gap-2 text-black-light">
-          <Bell className="h-4 w-4 text-primary" />
-          Active Alerts
+      <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2 space-y-0 pb-2">
+        <CardTitle className="micro-label flex min-w-0 items-center gap-2 text-black-light">
+          <Bell className="h-4 w-4 shrink-0 text-primary" />
+          <span className="truncate">Active Alerts</span>
         </CardTitle>
         <Badge
-          className={cn(summary.active > 0 ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700")}
+          className={cn(summary.active > 0 ? "shrink-0 bg-red-100 text-red-700" : "shrink-0 bg-green-100 text-green-700")}
         >
           {summary.active} Active
         </Badge>

@@ -24,17 +24,17 @@ export function HumidityCard({ humidity, sensorName, lastUpdate, settings }: Pro
   const animated = useCountUp(humidity);
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="micro-label flex items-center gap-2 text-black-light">
-          <Droplets className="h-4 w-4 text-primary" />
-          Humidity
+      <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2 space-y-0 pb-2">
+        <CardTitle className="micro-label flex min-w-0 items-center gap-2 text-black-light">
+          <Droplets className="h-4 w-4 shrink-0 text-primary" />
+          <span className="truncate">Humidity</span>
         </CardTitle>
-        <ConditionBadge condition={condition} />
+        <ConditionBadge condition={condition} className="shrink-0" />
       </CardHeader>
       <CardContent>
         <div
           className={cn(
-            "text-4xl font-semibold tabular-nums lg:text-5xl",
+            "whitespace-nowrap text-4xl font-semibold tabular-nums lg:text-5xl",
             humidity === null && "text-black-light"
           )}
         >

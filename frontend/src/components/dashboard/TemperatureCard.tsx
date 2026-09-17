@@ -24,17 +24,17 @@ export function TemperatureCard({ temperature, sensorName, lastUpdate, settings 
   const animated = useCountUp(temperature);
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="micro-label flex items-center gap-2 text-black-light">
-          <Thermometer className="h-4 w-4 text-primary" />
-          Temperature
+      <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2 space-y-0 pb-2">
+        <CardTitle className="micro-label flex min-w-0 items-center gap-2 text-black-light">
+          <Thermometer className="h-4 w-4 shrink-0 text-primary" />
+          <span className="truncate">Temperature</span>
         </CardTitle>
-        <ConditionBadge condition={condition} />
+        <ConditionBadge condition={condition} className="shrink-0" />
       </CardHeader>
       <CardContent>
         <div
           className={cn(
-            "text-4xl font-semibold tabular-nums lg:text-5xl",
+            "whitespace-nowrap text-4xl font-semibold tabular-nums lg:text-5xl",
             temperature === null && "text-black-light"
           )}
         >
