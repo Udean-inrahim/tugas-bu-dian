@@ -225,5 +225,100 @@
     position: relative;
     border: 1px solid hsl(var(--border));
     background-color: hsl(var(--card));
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .tech-frame:hover {
+    border-color: hsl(var(--ink));
+    transform: translateY(-4px);
+    box-shadow: 8px 8px 0 0 hsl(var(--ink));
+  }
+
+  /* ===== Scroll reveal (driven by <Reveal/> + IntersectionObserver) ===== */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+  }
+  .reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ===== Press state on pill buttons ===== */
+  .btn-ink:active,
+  .btn-primary-blue:active,
+  .btn-ink-solid:active,
+  .btn-outline-line:active {
+    transform: scale(0.97);
+  }
+  .btn-ink,
+  .btn-primary-blue,
+  .btn-ink-solid,
+  .btn-outline-line {
+    transform: translateZ(0);
+    transition: color 0.45s cubic-bezier(0.66, 0, 0.35, 1),
+      border-color 0.45s cubic-bezier(0.66, 0, 0.35, 1),
+      background-color 0.45s cubic-bezier(0.66, 0, 0.35, 1),
+      transform 0.15s ease;
+  }
+
+  /* ===== Live pulse dot (online status) ===== */
+  .pulse-dot {
+    position: relative;
+  }
+  .pulse-dot::after {
+    content: "";
+    position: absolute;
+    inset: -4px;
+    border-radius: 9999px;
+    border: 1px solid currentColor;
+    opacity: 0;
+    animation: pulse-ring 2.2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  }
+  @keyframes pulse-ring {
+    0% {
+      opacity: 0.6;
+      transform: scale(0.6);
+    }
+    70%,
+    100% {
+      opacity: 0;
+      transform: scale(1.7);
+    }
+  }
+
+  /* ===== Arrow nudge on links ===== */
+  .link-arrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .link-arrow svg {
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .link-arrow:hover svg {
+    transform: translateX(4px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+    .tech-frame {
+      transition: none;
+    }
+    .tech-frame:hover {
+      transform: none;
+      box-shadow: none;
+    }
+    .pulse-dot::after {
+      animation: none;
+    }
   }
 }

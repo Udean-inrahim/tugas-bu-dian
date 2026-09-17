@@ -15,6 +15,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { Reveal } from "@/components/ui/reveal";
 import { toast } from "sonner";
 import type { ChartRange, SensorReading } from "@/types";
 import { CHART_RANGES } from "@/types";
@@ -108,30 +109,39 @@ export function DashboardPage() {
       />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <TemperatureCard
-          temperature={latest?.temperature ?? null}
-          sensorName={latest?.sensor?.name}
-          lastUpdate={latest?.recordedAt}
-          settings={settings}
-        />
-        <HumidityCard
-          humidity={latest?.humidity ?? null}
-          sensorName={latest?.sensor?.name}
-          lastUpdate={latest?.recordedAt}
-          settings={settings}
-        />
-        <SensorStatusCard sensors={sensors} />
-        <AlertsCard summary={summary} />
+        <Reveal delay={0}>
+          <TemperatureCard
+            temperature={latest?.temperature ?? null}
+            sensorName={latest?.sensor?.name}
+            lastUpdate={latest?.recordedAt}
+            settings={settings}
+          />
+        </Reveal>
+        <Reveal delay={80}>
+          <HumidityCard
+            humidity={latest?.humidity ?? null}
+            sensorName={latest?.sensor?.name}
+            lastUpdate={latest?.recordedAt}
+            settings={settings}
+          />
+        </Reveal>
+        <Reveal delay={160}>
+          <SensorStatusCard sensors={sensors} />
+        </Reveal>
+        <Reveal delay={240}>
+          <AlertsCard summary={summary} />
+        </Reveal>
       </div>
 
-      <Card>
-        <CardHeader className="flex flex-col gap-2 space-y-0 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <CardTitle className="text-base">Temperature Chart</CardTitle>
-            <CardDescription>Perubahan suhu dalam beberapa jam terakhir</CardDescription>
-          </div>
-          <RangeTabs value={range} onChange={setRange} />
-        </CardHeader>
+      <Reveal>
+        <Card>
+          <CardHeader className="flex flex-col gap-2 space-y-0 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <CardTitle className="text-base">Temperature Chart</CardTitle>
+              <CardDescription>Perubahan suhu dalam beberapa jam terakhir</CardDescription>
+            </div>
+            <RangeTabs value={range} onChange={setRange} />
+          </CardHeader>
         <CardContent>
           {chartLoading ? (
             <Skeleton className="h-[280px] w-full" />
@@ -143,33 +153,38 @@ export function DashboardPage() {
           )}
         </CardContent>
       </Card>
+      </Reveal>
 
-      <Card>
-        <CardHeader className="flex flex-col gap-2 space-y-0 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <CardTitle className="text-base">Humidity Chart</CardTitle>
-            <CardDescription>Perubahan kelembapan dalam beberapa jam terakhir</CardDescription>
-          </div>
-          <RangeTabs value={range} onChange={setRange} />
-        </CardHeader>
-        <CardContent>
-          {chartLoading ? (
-            <Skeleton className="h-[280px] w-full" />
-          ) : (
-            <MetricChart data={sortReadings(chartReadings)} type="humidity" />
-          )}
-        </CardContent>
-      </Card>
+      <Reveal>
+        <Card>
+          <CardHeader className="flex flex-col gap-2 space-y-0 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <CardTitle className="text-base">Humidity Chart</CardTitle>
+              <CardDescription>Perubahan kelembapan dalam beberapa jam terakhir</CardDescription>
+            </div>
+            <RangeTabs value={range} onChange={setRange} />
+          </CardHeader>
+          <CardContent>
+            {chartLoading ? (
+              <Skeleton className="h-[280px] w-full" />
+            ) : (
+              <MetricChart data={sortReadings(chartReadings)} type="humidity" />
+            )}
+          </CardContent>
+        </Card>
+      </Reveal>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Recent Measurements</CardTitle>
-          <CardDescription>Pengukuran suhu dan kelembapan terbaru</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <RecentMeasurements readings={readings.slice(0, 10)} settings={settings} />
-        </CardContent>
-      </Card>
+      <Reveal>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Recent Measurements</CardTitle>
+            <CardDescription>Pengukuran suhu dan kelembapan terbaru</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <RecentMeasurements readings={readings.slice(0, 10)} settings={settings} />
+          </CardContent>
+        </Card>
+      </Reveal>
     </div>
   );
 }

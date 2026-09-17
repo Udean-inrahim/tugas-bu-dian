@@ -34,6 +34,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { SensorForm } from "@/components/sensors/SensorForm";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { Reveal } from "@/components/ui/reveal";
 import { formatTime } from "@/lib/threshold";
 import { cn } from "@/lib/utils";
 import type { Sensor } from "@/types";
@@ -97,11 +98,12 @@ export function SensorsPage() {
         }
       />
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Sensor List</CardTitle>
-          <CardDescription>{sensors.filter((s) => s.isActive).length} sensor terdaftar</CardDescription>
-        </CardHeader>
+      <Reveal>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Sensor List</CardTitle>
+            <CardDescription>{sensors.filter((s) => s.isActive).length} sensor terdaftar</CardDescription>
+          </CardHeader>
         <CardContent>
           {loading && sensors.length === 0 ? (
             <div className="space-y-2">
@@ -209,6 +211,7 @@ export function SensorsPage() {
           )}
         </CardContent>
       </Card>
+      </Reveal>
 
       <Dialog open={formOpen} onOpenChange={setFormOpen}>
         <DialogContent>

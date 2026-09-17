@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { Reveal } from "@/components/ui/reveal";
 import { formatDateTime, classifyTemperature, classifyHumidity, statusBg } from "@/lib/threshold";
 import type { Paginated, SensorReading } from "@/types";
 
@@ -94,11 +95,12 @@ export function HistoryPage() {
         description="Riwayat pengukuran suhu dan kelembapan."
       />
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Filter</CardTitle>
-          <CardDescription>Filter riwayat berdasarkan tanggal dan sensor</CardDescription>
-        </CardHeader>
+      <Reveal>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Filter</CardTitle>
+            <CardDescription>Filter riwayat berdasarkan tanggal dan sensor</CardDescription>
+          </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <div className="space-y-2">
@@ -256,6 +258,7 @@ export function HistoryPage() {
           )}
         </CardContent>
       </Card>
+      </Reveal>
     </div>
   );
 }

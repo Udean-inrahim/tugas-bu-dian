@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { Reveal } from "@/components/ui/reveal";
 
 interface PageHeaderProps {
   title: string;
@@ -11,7 +12,7 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, description, eyebrow, action, className }: PageHeaderProps) {
   return (
-    <div
+    <Reveal
       className={cn(
         "flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between",
         className
@@ -26,6 +27,6 @@ export function PageHeader({ title, description, eyebrow, action, className }: P
         {description && <p className="mt-1 text-sm text-black-light">{description}</p>}
       </div>
       {action && <div className="shrink-0">{action}</div>}
-    </div>
+    </Reveal>
   );
 }

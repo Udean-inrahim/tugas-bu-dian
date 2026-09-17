@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { Reveal } from "@/components/ui/reveal";
 import { formatDateTime } from "@/lib/threshold";
 import { cn } from "@/lib/utils";
 import type { AlertType } from "@/types";
@@ -86,12 +87,13 @@ export function AlertsPage() {
         }
       />
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <BellRing className="h-4 w-4" />
-            Daftar Alert
-          </CardTitle>
+      <Reveal>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <BellRing className="h-4 w-4" />
+              Daftar Alert
+            </CardTitle>
           <CardDescription>
             {summary.critical} critical · {summary.warning} warning aktif
           </CardDescription>
@@ -175,6 +177,7 @@ export function AlertsPage() {
           )}
         </CardContent>
       </Card>
+      </Reveal>
     </div>
   );
 }

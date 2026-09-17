@@ -11,6 +11,7 @@ import { MetricChart } from "@/components/dashboard/MetricChart";
 import { TemperatureCard } from "@/components/dashboard/TemperatureCard";
 import { HumidityCard } from "@/components/dashboard/HumidityCard";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { Reveal } from "@/components/ui/reveal";
 import type { ChartRange, SensorReading } from "@/types";
 import { CHART_RANGES } from "@/types";
 
@@ -122,51 +123,59 @@ export function MonitoringPage() {
       />
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <TemperatureCard
-          temperature={latest?.temperature ?? null}
-          sensorName={selectedSensor?.name ?? "Semua sensor"}
-          lastUpdate={latest?.recordedAt}
-          settings={settings}
-        />
-        <HumidityCard
-          humidity={latest?.humidity ?? null}
-          sensorName={selectedSensor?.name ?? "Semua sensor"}
-          lastUpdate={latest?.recordedAt}
-          settings={settings}
-        />
+        <Reveal delay={0}>
+          <TemperatureCard
+            temperature={latest?.temperature ?? null}
+            sensorName={selectedSensor?.name ?? "Semua sensor"}
+            lastUpdate={latest?.recordedAt}
+            settings={settings}
+          />
+        </Reveal>
+        <Reveal delay={100}>
+          <HumidityCard
+            humidity={latest?.humidity ?? null}
+            sensorName={selectedSensor?.name ?? "Semua sensor"}
+            lastUpdate={latest?.recordedAt}
+            settings={settings}
+          />
+        </Reveal>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Temperature — Suhu (°C)</CardTitle>
-          <CardDescription>
-            Grafik suhu {selectedSensor?.name ?? "semua sensor"} ({range})
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <Skeleton className="h-[300px] w-full" />
-          ) : (
-            <MetricChart data={sortedReadings} type="temperature" height={300} />
-          )}
-        </CardContent>
-      </Card>
+      <Reveal>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Temperature — Suhu (°C)</CardTitle>
+            <CardDescription>
+              Grafik suhu {selectedSensor?.name ?? "semua sensor"} ({range})
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <Skeleton className="h-[300px] w-full" />
+            ) : (
+              <MetricChart data={sortedReadings} type="temperature" height={300} />
+            )}
+          </CardContent>
+        </Card>
+      </Reveal>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Humidity — Kelembapan (%)</CardTitle>
-          <CardDescription>
-            Grafik kelembapan {selectedSensor?.name ?? "semua sensor"} ({range})
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <Skeleton className="h-[300px] w-full" />
-          ) : (
-            <MetricChart data={sortedReadings} type="humidity" height={300} />
-          )}
-        </CardContent>
-      </Card>
+      <Reveal>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Humidity — Kelembapan (%)</CardTitle>
+            <CardDescription>
+              Grafik kelembapan {selectedSensor?.name ?? "semua sensor"} ({range})
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <Skeleton className="h-[300px] w-full" />
+            ) : (
+              <MetricChart data={sortedReadings} type="humidity" height={300} />
+            )}
+          </CardContent>
+        </Card>
+      </Reveal>
     </div>
   );
 }

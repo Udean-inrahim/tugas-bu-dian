@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/card";
 import type { Settings } from "@/types";
 import { classifyHumidity, formatTime } from "@/lib/threshold";
+import { useCountUp } from "@/lib/useCountUp";
 import { ConditionBadge } from "./ConditionBadge";
 import { cn } from "@/lib/utils";
 
@@ -20,6 +21,7 @@ interface Props {
 
 export function HumidityCard({ humidity, sensorName, lastUpdate, settings }: Props) {
   const condition = classifyHumidity(humidity, settings);
+  const animated = useCountUp(humidity);
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -36,7 +38,7 @@ export function HumidityCard({ humidity, sensorName, lastUpdate, settings }: Pro
             humidity === null && "text-black-light"
           )}
         >
-          {humidity !== null ? humidity.toFixed(1) : "--"}
+          {humidity !== null ? animated.toFixed(1) : "--"}
           <span className="ml-1 text-lg font-normal text-black-light">%</span>
         </div>
         <CardDescription className="mt-2 line-clamp-1">

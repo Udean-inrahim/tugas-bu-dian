@@ -9,6 +9,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { AlertSummary } from "@/types";
+import { useCountUp } from "@/lib/useCountUp";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -17,6 +18,8 @@ interface Props {
 
 export function AlertsCard({ summary }: Props) {
   const navigate = useNavigate();
+  const critical = useCountUp(summary.critical);
+  const warning = useCountUp(summary.warning);
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -33,18 +36,18 @@ export function AlertsCard({ summary }: Props) {
       <CardContent className="space-y-3">
         <div className="grid grid-cols-2 gap-2">
           <div className="border border-border p-3 text-center">
-            <p className="text-2xl font-semibold text-red-600 tabular-nums">{summary.critical}</p>
+            <p className="text-2xl font-semibold text-red-600 tabular-nums">{critical.toFixed(0)}</p>
             <p className="micro-label text-black-light">Critical</p>
           </div>
           <div className="border border-border p-3 text-center">
-            <p className="text-2xl font-semibold text-yellow-600 tabular-nums">{summary.warning}</p>
+            <p className="text-2xl font-semibold text-yellow-600 tabular-nums">{warning.toFixed(0)}</p>
             <p className="micro-label text-black-light">Warning</p>
           </div>
         </div>
         <Button
           variant="outline"
           size="sm"
-          className="w-full"
+          className="link-arrow w-full"
           onClick={() => navigate("/alerts")}
         >
           Lihat semua alert

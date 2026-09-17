@@ -4,6 +4,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Reveal } from "@/components/ui/reveal";
 import { toast } from "sonner";
 
 export function LoginPage() {
@@ -36,12 +37,9 @@ export function LoginPage() {
           <p className="text-sm font-semibold uppercase tracking-[0.18em]">Smart Temp Monitor</p>
         </div>
 
-        <div className="my-12 space-y-6 lg:my-0">
+        <Reveal className="my-12 space-y-6 lg:my-0">
           <p className="micro-label flex items-center gap-3 text-white-light">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-chip opacity-75" />
-              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-chip" />
-            </span>
+            <span className="pulse-dot inline-block h-2 w-2 rounded-full bg-chip text-chip" />
             Pantauan real-time
           </p>
           <h1 className="heading-page max-w-md uppercase leading-[0.95]">
@@ -50,14 +48,14 @@ export function LoginPage() {
           <p className="max-w-md text-white-light">
             Pantau suhu dan kelembapan sensor secara langsung, tanpa lelah.
           </p>
-        </div>
+        </Reveal>
 
         <p className="micro-label text-white-light">© 2026 — Smart Temp Monitor</p>
       </div>
 
       {/* Right — login form */}
       <div className="flex flex-1 items-center justify-center bg-background p-6 lg:p-16">
-        <div className="w-full max-w-sm">
+        <Reveal delay={150} className="w-full max-w-sm">
           <div className="mb-8">
             <p className="micro-label mb-2 flex items-center gap-2 text-primary">
               <span className="inline-block h-2 w-2 rounded-full bg-primary" />
@@ -121,7 +119,7 @@ export function LoginPage() {
               Demo: admin@example.com / admin123
             </p>
           </form>
-        </div>
+        </Reveal>
       </div>
     </div>
   );

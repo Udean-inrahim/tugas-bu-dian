@@ -54,7 +54,9 @@ export function SensorStatusCard({ sensors }: Props) {
               <span
                 className={cn(
                   "h-2 w-2 rounded-full",
-                  s.status === "ONLINE" ? "bg-green-500" : "bg-red-500"
+                  s.status === "ONLINE"
+                    ? "pulse-dot bg-green-500 text-green-500"
+                    : "bg-red-500"
                 )}
               />
               {s.status === "ONLINE" ? "Online" : "Offline"}

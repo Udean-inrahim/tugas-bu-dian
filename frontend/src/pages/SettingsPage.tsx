@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { Reveal } from "@/components/ui/reveal";
 import { cn } from "@/lib/utils";
 
 export function SettingsPage() {
@@ -92,23 +93,29 @@ export function SettingsPage() {
     return (
       <div className="space-y-6">
         <PageHeader title="Settings" description="Pengaturan sistem dan threshold." />
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center gap-3 py-12 text-center">
-            <Lock className="h-8 w-8 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">
-              Hanya Admin yang dapat mengubah pengaturan sistem.
-            </p>
-          </CardContent>
-        </Card>
+        <Reveal>
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+              <Lock className="h-8 w-8 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">
+                Hanya Admin yang dapat mengubah pengaturan sistem.
+              </p>
+            </CardContent>
+          </Card>
+        </Reveal>
         <div className="grid gap-4 md:grid-cols-2">
-          <ReadonlyCard title="Temperature Threshold" items={[
-            { label: "Minimum Temperature", value: `${settings?.minTemperature} °C` },
-            { label: "Maximum Temperature", value: `${settings?.maxTemperature} °C` },
-          ]} />
-          <ReadonlyCard title="Humidity Threshold" items={[
-            { label: "Minimum Humidity", value: `${settings?.minHumidity} %` },
-            { label: "Maximum Humidity", value: `${settings?.maxHumidity} %` },
-          ]} />
+          <Reveal delay={0}>
+            <ReadonlyCard title="Temperature Threshold" items={[
+              { label: "Minimum Temperature", value: `${settings?.minTemperature} °C` },
+              { label: "Maximum Temperature", value: `${settings?.maxTemperature} °C` },
+            ]} />
+          </Reveal>
+          <Reveal delay={100}>
+            <ReadonlyCard title="Humidity Threshold" items={[
+              { label: "Minimum Humidity", value: `${settings?.minHumidity} %` },
+              { label: "Maximum Humidity", value: `${settings?.maxHumidity} %` },
+            ]} />
+          </Reveal>
         </div>
       </div>
     );
@@ -119,13 +126,14 @@ export function SettingsPage() {
       <PageHeader title="Settings" description="Atur threshold suhu, kelembapan, dan interval monitoring." />
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <span className="text-orange-500">🌡️</span> Temperature
-            </CardTitle>
-            <CardDescription>Batas suhu (°C) untuk status normal</CardDescription>
-          </CardHeader>
+        <Reveal>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <span className="text-orange-500">🌡️</span> Temperature
+              </CardTitle>
+              <CardDescription>Batas suhu (°C) untuk status normal</CardDescription>
+            </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="minTemp">Minimum Temperature</Label>
@@ -164,14 +172,16 @@ export function SettingsPage() {
             </p>
           </CardContent>
         </Card>
+        </Reveal>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <span className="text-blue-500">💧</span> Humidity
-            </CardTitle>
-            <CardDescription>Batas kelembapan (%) untuk status normal</CardDescription>
-          </CardHeader>
+        <Reveal delay={80}>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <span className="text-blue-500">💧</span> Humidity
+              </CardTitle>
+              <CardDescription>Batas kelembapan (%) untuk status normal</CardDescription>
+            </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="minHum">Minimum Humidity</Label>
@@ -210,13 +220,15 @@ export function SettingsPage() {
             </p>
           </CardContent>
         </Card>
+        </Reveal>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Monitoring</CardTitle>
-          <CardDescription>Interval pembaruan data pada dashboard</CardDescription>
-        </CardHeader>
+      <Reveal>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Monitoring</CardTitle>
+            <CardDescription>Interval pembaruan data pada dashboard</CardDescription>
+          </CardHeader>
         <CardContent className="grid gap-4 sm:max-w-xs">
           <div className="space-y-2">
             <Label htmlFor="refresh">Refresh Interval</Label>
@@ -235,6 +247,7 @@ export function SettingsPage() {
           </div>
         </CardContent>
       </Card>
+      </Reveal>
 
       <div className="flex justify-end">
         <Button onClick={handleSave} disabled={saving} className={cn(saving && "opacity-70")}>
