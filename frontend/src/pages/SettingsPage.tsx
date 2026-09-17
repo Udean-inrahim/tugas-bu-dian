@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { cn } from "@/lib/utils";
 
 export function SettingsPage() {
@@ -90,12 +91,7 @@ export function SettingsPage() {
   if (!isAdmin) {
     return (
       <div className="space-y-6">
-        <div>
-          <h2 className="text-2xl font-semibold tracking-tight">Settings</h2>
-          <p className="text-sm text-muted-foreground">
-            Pengaturan sistem dan threshold.
-          </p>
-        </div>
+        <PageHeader title="Settings" description="Pengaturan sistem dan threshold." />
         <Card>
           <CardContent className="flex flex-col items-center justify-center gap-3 py-12 text-center">
             <Lock className="h-8 w-8 text-muted-foreground" />
@@ -120,12 +116,7 @@ export function SettingsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-semibold tracking-tight">Settings</h2>
-        <p className="text-sm text-muted-foreground">
-          Atur threshold suhu, kelembapan, dan interval monitoring.
-        </p>
-      </div>
+      <PageHeader title="Settings" description="Atur threshold suhu, kelembapan, dan interval monitoring." />
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>

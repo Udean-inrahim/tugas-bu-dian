@@ -14,6 +14,7 @@ import { RecentMeasurements } from "@/components/dashboard/RecentMeasurements";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { toast } from "sonner";
 import type { ChartRange, SensorReading } from "@/types";
 import { CHART_RANGES } from "@/types";
@@ -101,12 +102,10 @@ export function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-semibold tracking-tight">Dashboard</h2>
-        <p className="text-sm text-muted-foreground">
-          Pantauan suhu dan kelembapan secara real-time.
-        </p>
-      </div>
+      <PageHeader
+        title="Dashboard"
+        description="Pantauan suhu dan kelembapan secara real-time."
+      />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <TemperatureCard

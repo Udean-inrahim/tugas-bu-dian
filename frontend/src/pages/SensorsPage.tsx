@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SensorForm } from "@/components/sensors/SensorForm";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { formatTime } from "@/lib/threshold";
 import { cn } from "@/lib/utils";
 import type { Sensor } from "@/types";
@@ -83,20 +84,18 @@ export function SensorsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-2xl font-semibold tracking-tight">Sensors</h2>
-          <p className="text-sm text-muted-foreground">
-            Kelola sensor dan pantau status koneksi.
-          </p>
-        </div>
-        {isAdmin && (
-          <Button onClick={openCreate}>
-            <Plus className="mr-2 h-4 w-4" />
-            Tambah Sensor
-          </Button>
-        )}
-      </div>
+      <PageHeader
+        title="Sensors"
+        description="Kelola sensor dan pantau status koneksi."
+        action={
+          isAdmin && (
+            <Button onClick={openCreate}>
+              <Plus className="mr-2 h-4 w-4" />
+              Tambah Sensor
+            </Button>
+          )
+        }
+      />
 
       <Card>
         <CardHeader>

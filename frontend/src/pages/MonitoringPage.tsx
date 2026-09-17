@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { MetricChart } from "@/components/dashboard/MetricChart";
 import { TemperatureCard } from "@/components/dashboard/TemperatureCard";
 import { HumidityCard } from "@/components/dashboard/HumidityCard";
+import { PageHeader } from "@/components/layout/PageHeader";
 import type { ChartRange, SensorReading } from "@/types";
 import { CHART_RANGES } from "@/types";
 
@@ -89,38 +90,36 @@ export function MonitoringPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-2xl font-semibold tracking-tight">Monitoring</h2>
-          <p className="text-sm text-muted-foreground">
-            Pantauan suhu dan kelembapan secara detail.
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Select value={selectedSensorId} onValueChange={setSelectedSensorId}>
-            <SelectTrigger className="w-[220px]">
-              <SelectValue placeholder="Pilih sensor" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Semua Sensor</SelectItem>
-              {sensors.map((s) => (
-                <SelectItem key={s.id} value={String(s.id)}>
-                  {s.name} ({s.sensorCode})
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Tabs value={range} onValueChange={(v) => setRange(v as ChartRange)}>
-            <TabsList className="flex-wrap">
-              {CHART_RANGES.map((r) => (
-                <TabsTrigger key={r.value} value={r.value} className="px-2.5 text-xs">
-                  {r.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
-        </div>
-      </div>
+      <PageHeader
+        title="Monitoring"
+        description="Pantauan suhu dan kelembapan secara detail."
+        action={
+          <div className="flex flex-wrap items-center gap-2">
+            <Select value={selectedSensorId} onValueChange={setSelectedSensorId}>
+              <SelectTrigger className="w-[220px]">
+                <SelectValue placeholder="Pilih sensor" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Semua Sensor</SelectItem>
+                {sensors.map((s) => (
+                  <SelectItem key={s.id} value={String(s.id)}>
+                    {s.name} ({s.sensorCode})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Tabs value={range} onValueChange={(v) => setRange(v as ChartRange)}>
+              <TabsList className="flex-wrap">
+                {CHART_RANGES.map((r) => (
+                  <TabsTrigger key={r.value} value={r.value} className="px-2.5 text-xs">
+                    {r.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </Tabs>
+          </div>
+        }
+      />
 
       <div className="grid gap-4 sm:grid-cols-2">
         <TemperatureCard

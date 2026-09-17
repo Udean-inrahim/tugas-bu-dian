@@ -28,32 +28,39 @@ export function Header({ onMenuToggle }: HeaderProps) {
   }, []);
 
   return (
-    <header className="flex h-14 items-center gap-4 border-b bg-card px-4 lg:px-6">
-      <Button variant="ghost" size="icon" className="lg:hidden" onClick={onMenuToggle}>
+    <header className="flex h-16 items-center gap-4 border-b border-ink px-4 lg:px-6">
+      <Button
+        variant="ghost"
+        size="icon"
+        className="rounded-full lg:hidden"
+        onClick={onMenuToggle}
+      >
         <Menu className="h-5 w-5" />
       </Button>
 
-      <h1 className="text-base font-semibold lg:text-lg">Smart Temperature Monitoring</h1>
+      <h1 className="heading-section !text-base lg:!text-lg">Smart Temp Monitor</h1>
 
-      <div className="ml-auto flex items-center gap-3">
-        <div className="hidden items-center gap-2 text-sm text-muted-foreground md:flex">
+      <div className="ml-auto flex items-center gap-4">
+        <div className="hidden items-center gap-2 text-sm text-black-light md:flex">
           <RefreshCw className="h-3.5 w-3.5" />
-          <span>Last update: {lastUpdate}</span>
+          <span className="micro-label">Last update: {lastUpdate}</span>
         </div>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="gap-2">
-              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
+            <Button variant="ghost" size="sm" className="gap-2 rounded-full border border-ink/20">
+              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[10px] font-semibold text-primary-foreground">
                 {user?.name?.charAt(0).toUpperCase() ?? "U"}
               </div>
-              <span className="hidden sm:inline">{user?.name ?? "User"}</span>
+              <span className="hidden uppercase tracking-wide sm:inline">
+                {user?.name ?? "User"}
+              </span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>
-              <p className="font-medium">{user?.name ?? "User"}</p>
-              <p className="text-xs font-normal text-muted-foreground">{user?.email ?? ""}</p>
+              <p className="font-semibold uppercase tracking-wide">{user?.name ?? "User"}</p>
+              <p className="text-xs font-normal text-black-light">{user?.email ?? ""}</p>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="flex items-center gap-2">

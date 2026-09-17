@@ -24,6 +24,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { formatDateTime, classifyTemperature, classifyHumidity, statusBg } from "@/lib/threshold";
 import type { Paginated, SensorReading } from "@/types";
 
@@ -88,12 +89,10 @@ export function HistoryPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-semibold tracking-tight">History</h2>
-        <p className="text-sm text-muted-foreground">
-          Riwayat pengukuran suhu dan kelembapan.
-        </p>
-      </div>
+      <PageHeader
+        title="History"
+        description="Riwayat pengukuran suhu dan kelembapan."
+      />
 
       <Card>
         <CardHeader>

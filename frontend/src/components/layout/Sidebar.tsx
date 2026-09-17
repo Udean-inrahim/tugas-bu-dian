@@ -10,7 +10,6 @@ import {
 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -30,13 +29,20 @@ export function Sidebar({ onClose }: SidebarProps) {
   const { user, logout } = useAuthStore();
 
   return (
-    <div className="flex h-full w-[240px] flex-col border-r bg-card">
-      <div className="flex h-14 items-center gap-2 border-b px-4">
-        <span className="text-lg">🌡️</span>
-        <span className="font-semibold text-sm">Smart Temperature Monitoring</span>
+    <div className="flex h-full w-[260px] flex-col bg-ink text-white">
+      <div className="flex h-16 items-center gap-3 border-b border-white/15 px-6">
+        <span className="flex h-9 w-9 items-center justify-center border border-white/40 text-lg">
+          🌡️
+        </span>
+        <div className="min-w-0">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white">
+            Smart Temp
+          </p>
+          <p className="micro-label text-white-light">Monitoring</p>
+        </div>
       </div>
 
-      <nav className="flex-1 space-y-1 p-2">
+      <nav className="flex-1 space-y-1 px-4 py-6">
         {navItems.map((item) => (
           <NavLink
             key={item.to}
@@ -45,10 +51,8 @@ export function Sidebar({ onClose }: SidebarProps) {
             onClick={onClose}
             className={({ isActive }) =>
               cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                isActive
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                "link link_white flex items-center gap-3 px-2 py-2 text-sm font-medium uppercase tracking-[0.08em] transition-colors",
+                isActive ? "active text-white" : "text-white-light hover:text-white"
               )
             }
           >
@@ -58,22 +62,23 @@ export function Sidebar({ onClose }: SidebarProps) {
         ))}
       </nav>
 
-      <div className="border-t p-4">
-        <div className="flex items-center justify-between">
+      <div className="border-t border-white/15 p-4">
+        <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/40 text-xs font-semibold uppercase">
               {user?.name?.charAt(0).toUpperCase() ?? "U"}
             </div>
             <div className="min-w-0">
-              <p className="truncate text-sm font-medium">{user?.name ?? "User"}</p>
-              <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
-                role: {user?.role ?? "Admin"}
-              </Badge>
+              <p className="truncate text-sm font-semibold uppercase tracking-wide">
+                {user?.name ?? "User"}
+              </p>
+              <p className="micro-label text-white-light">Role: {user?.role ?? "Admin"}</p>
             </div>
           </div>
           <Button
             variant="ghost"
             size="icon"
+            className="text-white hover:bg-white/10 hover:text-white"
             onClick={() => {
               logout();
               onClose?.();

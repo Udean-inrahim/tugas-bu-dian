@@ -23,8 +23,8 @@ export function HumidityCard({ humidity, sensorName, lastUpdate, settings }: Pro
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-          <Droplets className="h-4 w-4 text-blue-500" />
+        <CardTitle className="micro-label flex items-center gap-2 text-black-light">
+          <Droplets className="h-4 w-4 text-primary" />
           Humidity
         </CardTitle>
         <ConditionBadge condition={condition} />
@@ -32,12 +32,12 @@ export function HumidityCard({ humidity, sensorName, lastUpdate, settings }: Pro
       <CardContent>
         <div
           className={cn(
-            "text-3xl font-bold tabular-nums lg:text-4xl",
-            humidity === null && "text-muted-foreground"
+            "text-4xl font-semibold tabular-nums lg:text-5xl",
+            humidity === null && "text-black-light"
           )}
         >
           {humidity !== null ? humidity.toFixed(1) : "--"}
-          <span className="ml-1 text-lg font-normal text-muted-foreground">%</span>
+          <span className="ml-1 text-lg font-normal text-black-light">%</span>
         </div>
         <CardDescription className="mt-2 line-clamp-1">
           {sensorName ?? "Semua sensor"} {lastUpdate ? `• ${formatTime(lastUpdate)}` : ""}

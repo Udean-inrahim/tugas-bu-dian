@@ -18,17 +18,17 @@ export function AppLayout() {
 
   return (
     <div className="relative flex h-screen overflow-hidden bg-background">
-      <div className="hidden lg:flex lg:w-[240px] lg:shrink-0">
+      <div className="hidden lg:flex lg:w-[260px] lg:shrink-0">
         <Sidebar />
       </div>
 
       {sidebarOpen && (
         <div className="fixed inset-0 z-40 lg:hidden">
           <div
-            className="fixed inset-0 bg-black/40"
+            className="fixed inset-0 bg-black/50"
             onClick={() => setSidebarOpen(false)}
           />
-          <div className="fixed inset-y-0 left-0 z-50 w-[240px] bg-background">
+          <div className="fixed inset-y-0 left-0 z-50 w-[260px] bg-background">
             <Sidebar onClose={() => setSidebarOpen(false)} />
           </div>
         </div>

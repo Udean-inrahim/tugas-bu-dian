@@ -20,8 +20,8 @@ export function AlertsCard({ summary }: Props) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-          <Bell className="h-4 w-4 text-red-500" />
+        <CardTitle className="micro-label flex items-center gap-2 text-black-light">
+          <Bell className="h-4 w-4 text-primary" />
           Active Alerts
         </CardTitle>
         <Badge
@@ -32,13 +32,13 @@ export function AlertsCard({ summary }: Props) {
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="grid grid-cols-2 gap-2">
-          <div className="rounded-lg bg-red-50 p-3 text-center">
-            <p className="text-2xl font-bold text-red-600 tabular-nums">{summary.critical}</p>
-            <p className="text-xs text-muted-foreground">Critical</p>
+          <div className="border border-border p-3 text-center">
+            <p className="text-2xl font-semibold text-red-600 tabular-nums">{summary.critical}</p>
+            <p className="micro-label text-black-light">Critical</p>
           </div>
-          <div className="rounded-lg bg-yellow-50 p-3 text-center">
-            <p className="text-2xl font-bold text-yellow-600 tabular-nums">{summary.warning}</p>
-            <p className="text-xs text-muted-foreground">Warning</p>
+          <div className="border border-border p-3 text-center">
+            <p className="text-2xl font-semibold text-yellow-600 tabular-nums">{summary.warning}</p>
+            <p className="micro-label text-black-light">Warning</p>
           </div>
         </div>
         <Button

@@ -17,6 +17,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { formatDateTime } from "@/lib/threshold";
 import { cn } from "@/lib/utils";
 import type { AlertType } from "@/types";
@@ -64,31 +65,26 @@ export function AlertsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-2xl font-semibold tracking-tight">Alerts</h2>
-          <p className="text-sm text-muted-foreground">
-            Notifikasi kondisi abnormal dan sensor offline.
-          </p>
-        </div>
-        <Tabs
-          value={filter}
-          onValueChange={(v) => setFilter(v as typeof filter)}
-        >
-          <TabsList>
-            <TabsTrigger value="ACTIVE">
-              Aktif
-              {summary.active > 0 && (
-                <span className="ml-1.5 rounded-full bg-red-600 px-1.5 text-[10px] font-bold text-white">
-                  {summary.active}
-                </span>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="RESOLVED">Selesai</TabsTrigger>
-            <TabsTrigger value="ALL">Semua</TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </div>
+      <PageHeader
+        title="Alerts"
+        description="Notifikasi kondisi abnormal dan sensor offline."
+        action={
+          <Tabs value={filter} onValueChange={(v) => setFilter(v as typeof filter)}>
+            <TabsList>
+              <TabsTrigger value="ACTIVE">
+                Aktif
+                {summary.active > 0 && (
+                  <span className="ml-1.5 rounded-full bg-red-600 px-1.5 text-[10px] font-bold text-white">
+                    {summary.active}
+                  </span>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="RESOLVED">Selesai</TabsTrigger>
+              <TabsTrigger value="ALL">Semua</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        }
+      />
 
       <Card>
         <CardHeader>

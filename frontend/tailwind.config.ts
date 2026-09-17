@@ -43,6 +43,16 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        ink: "hsl(var(--ink))",
+        "black-light": "#585858",
+        "white-light": "#a3a3a3",
+        chip: "#22C55E",
+      },
+      fontFamily: {
+        clash: ['"Clash Display"', '"Inter"', "system-ui", "sans-serif"],
+      },
+      maxWidth: {
+        page: "1730px",
       },
       borderRadius: {
         lg: "var(--radius)",

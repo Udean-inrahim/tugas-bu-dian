@@ -1,3 +1,4 @@
+@import url("https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
 
 @tailwind base;
@@ -6,25 +7,26 @@
 
 @layer base {
   :root {
-    --background: 210 20% 98%;
-    --foreground: 222 47% 11%;
+    --background: 0 0% 100%;
+    --foreground: 0 0% 7%;
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 0 0% 7%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    --primary: 221 83% 53%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222 47% 11%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
-    --accent: 210 40% 96%;
-    --accent-foreground: 222 47% 11%;
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 221 83% 53%;
+    --popover-foreground: 0 0% 7%;
+    --primary: 227 100% 46%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 7%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 35%;
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 7%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 91%;
+    --input: 0 0% 91%;
+    --ring: 227 100% 46%;
+    --ink: 0 0% 7%;
     --radius: 0.5rem;
   }
 
@@ -48,6 +50,7 @@
     --border: 217 33% 20%;
     --input: 217 33% 20%;
     --ring: 224 76% 48%;
+    --ink: 0 0% 100%;
   }
 }
 
@@ -55,8 +58,172 @@
   * {
     @apply border-border;
   }
+  ::selection {
+    background: hsl(var(--primary));
+    color: #ffffff;
+  }
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-family: "Clash Display", "Inter", system-ui, -apple-system, sans-serif;
+    font-size: 16px;
+    overflow-x: hidden;
+  }
+  html {
+    scrollbar-width: thin;
+  }
+}
+
+@layer components {
+  /* ===== Animated underline links (reference: .link / .link_white) ===== */
+  .link {
+    position: relative;
+    cursor: pointer;
+    display: inline-block;
+    text-decoration: none;
+  }
+  .link:after {
+    content: "";
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 2px;
+    background-color: hsl(var(--ink));
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.35s cubic-bezier(0.84, 0, 0.16, 1);
+  }
+  .link:hover:after,
+  .link.active:after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+  .link_white {
+    color: #ffffff;
+  }
+  .link_white:after {
+    background-color: #ffffff;
+  }
+  .link_primary {
+    color: hsl(var(--primary));
+  }
+  .link_primary:after {
+    background-color: hsl(var(--primary));
+  }
+
+  /* ===== Micro label (uppercase tiny, tracking-wide) ===== */
+  .micro-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-weight: 600;
+  }
+
+  /* ===== Page heading ===== */
+  .heading-page {
+    font-size: clamp(1.5rem, 3.5vw, 2.75rem);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    line-height: 1.05;
+  }
+  .heading-section {
+    font-size: clamp(1.1rem, 1.8vw, 1.5rem);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+  }
+
+  /* ===== Signature "ink pill" button (reference: wrapper-button + circle-button) =====
+     Text sits above; an expanding ink circle floods in from the center on hover. */
+  .btn-ink {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    border: 1px solid hsl(var(--ink));
+    background-color: hsl(var(--card));
+    color: hsl(var(--ink));
+    text-transform: uppercase;
+    transition: color 0.45s cubic-bezier(0.66, 0, 0.35, 1),
+      border-color 0.45s cubic-bezier(0.66, 0, 0.35, 1);
+  }
+  .btn-ink::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: -1;
+    width: 210%;
+    aspect-ratio: 1 / 1;
+    border-radius: 9999px;
+    background-color: hsl(var(--ink));
+    transform: translate(-50%, -50%) scale(0);
+    transition: transform 0.5s cubic-bezier(0.66, 0, 0.35, 1);
+  }
+  .btn-ink:hover {
+    color: #ffffff;
+    border-color: hsl(var(--ink));
+  }
+  .btn-ink:hover::before {
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  .btn-primary-blue {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    border: 1px solid hsl(var(--primary));
+    background-color: hsl(var(--primary));
+    color: #ffffff;
+    text-transform: uppercase;
+    transition: color 0.45s cubic-bezier(0.66, 0, 0.35, 1);
+  }
+  .btn-primary-blue::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: -1;
+    width: 210%;
+    aspect-ratio: 1 / 1;
+    border-radius: 9999px;
+    background-color: hsl(var(--foreground));
+    transform: translate(-50%, -50%) scale(0);
+    transition: transform 0.5s cubic-bezier(0.66, 0, 0.35, 1);
+  }
+  .btn-primary-blue:hover::before {
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  .btn-ink-solid {
+    border: 1px solid hsl(var(--ink));
+    background-color: hsl(var(--ink));
+    color: #ffffff;
+    text-transform: uppercase;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  .btn-ink-solid:hover {
+    background-color: transparent;
+    color: hsl(var(--ink));
+  }
+
+  .btn-outline-line {
+    border: 1px solid hsl(var(--ink));
+    background-color: transparent;
+    color: hsl(var(--ink));
+    text-transform: uppercase;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  .btn-outline-line:hover {
+    background-color: hsl(var(--ink));
+    color: #ffffff;
+  }
+
+  /* ===== Technical flat card (reference: project card blueprint frame) ===== */
+  .tech-frame {
+    position: relative;
+    border: 1px solid hsl(var(--border));
+    background-color: hsl(var(--card));
   }
 }

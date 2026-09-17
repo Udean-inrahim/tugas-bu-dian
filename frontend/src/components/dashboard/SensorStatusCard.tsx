@@ -22,7 +22,7 @@ export function SensorStatusCard({ sensors }: Props) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+        <CardTitle className="micro-label flex items-center gap-2 text-black-light">
           <Radio className="h-4 w-4 text-primary" />
           Sensor Status
         </CardTitle>
@@ -32,18 +32,18 @@ export function SensorStatusCard({ sensors }: Props) {
       </CardHeader>
       <CardContent className="space-y-2">
         {activeSensors.length === 0 && (
-          <p className="text-sm text-muted-foreground">Belum ada sensor terdaftar.</p>
+          <p className="text-sm text-black-light">Belum ada sensor terdaftar.</p>
         )}
         {activeSensors.map((s) => (
           <div
             key={s.id}
-            className="flex items-center justify-between rounded-md border px-3 py-2"
+            className="flex items-center justify-between border border-border px-3 py-2"
           >
             <div className="min-w-0">
               <p className="truncate text-sm font-medium">
-                {s.name} <span className="text-muted-foreground">({s.sensorCode})</span>
+                {s.name} <span className="text-black-light">({s.sensorCode})</span>
               </p>
-              <p className="truncate text-xs text-muted-foreground">{s.location}</p>
+              <p className="truncate text-xs text-black-light">{s.location}</p>
             </div>
             <span
               className={cn(

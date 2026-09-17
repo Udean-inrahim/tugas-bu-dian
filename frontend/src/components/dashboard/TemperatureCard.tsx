@@ -23,8 +23,8 @@ export function TemperatureCard({ temperature, sensorName, lastUpdate, settings 
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-          <Thermometer className="h-4 w-4 text-orange-500" />
+        <CardTitle className="micro-label flex items-center gap-2 text-black-light">
+          <Thermometer className="h-4 w-4 text-primary" />
           Temperature
         </CardTitle>
         <ConditionBadge condition={condition} />
@@ -32,12 +32,12 @@ export function TemperatureCard({ temperature, sensorName, lastUpdate, settings 
       <CardContent>
         <div
           className={cn(
-            "text-3xl font-bold tabular-nums lg:text-4xl",
-            temperature === null && "text-muted-foreground"
+            "text-4xl font-semibold tabular-nums lg:text-5xl",
+            temperature === null && "text-black-light"
           )}
         >
           {temperature !== null ? temperature.toFixed(1) : "--"}
-          <span className="ml-1 text-lg font-normal text-muted-foreground">°C</span>
+          <span className="ml-1 text-lg font-normal text-black-light">°C</span>
         </div>
         <CardDescription className="mt-2 line-clamp-1">
           {sensorName ?? "Semua sensor"} {lastUpdate ? `• ${formatTime(lastUpdate)}` : ""}
