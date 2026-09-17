@@ -11,7 +11,7 @@ import {
   resolveOfflineAlerts,
   createOfflineAlert,
 } from "./alerts.js";
-import type { AlertType, SensorStatus, Severity } from "@prisma/client";
+import type { AlertType, SensorStatus, Severity } from "../generated/client/index.js";
 
 type Vars = {
   jwtPayload: { sub: string; email: string; role: string };
