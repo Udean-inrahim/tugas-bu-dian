@@ -6,6 +6,14 @@
     "backend",
     "frontend"
   ],
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.0",
+    "@prisma/adapter-neon": "^5.19.1",
+    "@prisma/client": "^5.19.1",
+    "bcryptjs": "^2.4.3",
+    "hono": "^4.6.0",
+    "zod": "^3.23.8"
+  },
   "allowScripts": {
     "prisma": true,
     "@prisma/client": true,
