@@ -6,6 +6,7 @@ interface AuthState {
   user: User | null;
   token: string | null;
   loading: boolean;
+  hydrated: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   loadFromStorage: () => void;
@@ -19,6 +20,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   token: null,
   loading: false,
+  hydrated: false,
 
   get isAuthenticated(): boolean {
     return Boolean(get().token);
@@ -59,12 +61,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (token && rawUser) {
       try {
         const user = JSON.parse(rawUser) as User;
-        set({ user, token });
+        set({ user, token, hydrated: true });
       } catch {
         localStorage.removeItem(TOKEN_KEY);
         localStorage.removeItem(USER_KEY);
-        set({ user: null, token: null });
+        set({ user: null, token: null, hydrated: true });
       }
+    } else {
+      set({ user: null, token: null, hydrated: true });
     }
   },
 }));

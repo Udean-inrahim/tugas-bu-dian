@@ -12,6 +12,11 @@ import { SettingsPage } from "@/pages/SettingsPage";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const token = useAuthStore((s) => s.token);
+  const hydrated = useAuthStore((s) => s.hydrated);
+
+  if (!hydrated) {
+    return null;
+  }
 
   if (!token) {
     return <Navigate to="/login" replace />;
