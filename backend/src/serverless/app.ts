@@ -147,6 +147,14 @@ function pagination(q: URLSearchParams) {
 
 const app = new Hono<{ Variables: Vars }>();
 
+app.onError((err, c) => {
+  console.error(err);
+  return c.json(
+    { error: "INTERNAL", message: err instanceof Error ? err.message : String(err) },
+    500
+  );
+});
+
 app.get("/health", (c) => c.json({ status: "ok", timestamp: new Date().toISOString() }));
 
 app.use("/api/*", cors());
