@@ -33,7 +33,9 @@
     "dev:backend": "npm run dev --workspace=backend",
     "dev:frontend": "npm run dev --workspace=frontend",
     "prisma:generate": "prisma generate --schema backend/prisma/schema.prisma",
-    "vercel-build": "npm run prisma:generate && npm run build --workspace=backend && npm run build --workspace=frontend",
+    "db:deploy": "prisma migrate deploy --schema backend/prisma/schema.prisma",
+    "db:seed": "tsx backend/prisma/seed.ts",
+    "vercel-build": "npm run prisma:generate && npm run db:deploy && npm run build:backend && npm run db:seed && npm run build:frontend",
     "vercel-install": "npm install"
   }
 }
