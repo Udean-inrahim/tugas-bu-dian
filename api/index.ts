@@ -57,6 +57,9 @@ function isFetchRequest(v: unknown): v is Request {
 
 async function runFetch(request: Request): Promise<Response> {
   try {
+    if (new URL(request.url).pathname === "/api/__probe") {
+      return json({ mode: "fetch", ok: "CONNECTS", method: request.method }, 200);
+    }
     const app = await loadApp();
     return await app.fetch(request);
   } catch (e) {
@@ -77,6 +80,13 @@ async function readNodeBody(req: NodeReq): Promise<Buffer | undefined> {
 
 async function runNode(req: NodeReq, res: NodeRes): Promise<void> {
   try {
+    const pathname = (req.url ?? "/").split("?")[0];
+    if (pathname === "/api/__probe") {
+      if (res.statusCode !== undefined) res.statusCode = 200;
+      if (res.setHeader) res.setHeader("content-type", "application/json");
+      if (res.end) res.end(JSON.stringify({ mode: "node", ok: "CONNECTS", method: req.method ?? "?" }));
+      return;
+    }
     const headers = new Headers();
     if (req.headers) {
       for (const [k, v] of Object.entries(req.headers)) {
