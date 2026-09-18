@@ -4,11 +4,14 @@ import { useSettings } from "@/hooks/useSettings";
 import { useAlerts } from "@/hooks/useAlerts";
 import { useReadings } from "@/hooks/useReadings";
 import api from "@/lib/api";
+import { classifyTemperature } from "@/lib/threshold";
 import { TemperatureCard } from "@/components/dashboard/TemperatureCard";
 import { HumidityCard } from "@/components/dashboard/HumidityCard";
 import { SensorStatusCard } from "@/components/dashboard/SensorStatusCard";
 import { AlertsCard } from "@/components/dashboard/AlertsCard";
 import { MetricChart } from "@/components/dashboard/MetricChart";
+import { GradientRail } from "@/components/dashboard/GradientRail";
+import { MoodBar } from "@/components/dashboard/FunMascot";
 import { RecentMeasurements } from "@/components/dashboard/RecentMeasurements";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -36,22 +39,25 @@ export function DashboardPage() {
   const [chartReadings, setChartReadings] = useState<SensorReading[]>([]);
   const [chartLoading, setChartLoading] = useState(true);
 
-  const loadChart = useCallback(async (silent = false) => {
-    if (!silent) setChartLoading(true);
-    try {
-      const { data } = await api.get<{ data: SensorReading[] }>("/readings", {
-        params: {
-          from: new Date(Date.now() - RANGE_SINCE[range]).toISOString(),
-          limit: 500,
-        },
-      });
-      setChartReadings(data.data);
-    } catch {
-      if (!silent) setChartReadings([]);
-    } finally {
-      if (!silent) setChartLoading(false);
-    }
-  }, [range]);
+  const loadChart = useCallback(
+    async (silent = false) => {
+      if (!silent) setChartLoading(true);
+      try {
+        const { data } = await api.get<{ data: SensorReading[] }>("/readings", {
+          params: {
+            from: new Date(Date.now() - RANGE_SINCE[range]).toISOString(),
+            limit: 500,
+          },
+        });
+        setChartReadings(data.data);
+      } catch {
+        if (!silent) setChartReadings([]);
+      } finally {
+        if (!silent) setChartLoading(false);
+      }
+    },
+    [range]
+  );
 
   useEffect(() => {
     loadChart();
@@ -71,10 +77,7 @@ export function DashboardPage() {
     loadChart(true);
   }, [reloadReadings, reloadAlerts, reloadSensors, loadChart]);
 
-  const refreshMs = Math.min(
-    60_000,
-    Math.max(1000, (settings?.refreshInterval ?? 5) * 1000)
-  );
+  const refreshMs = Math.min(60_000, Math.max(1000, (settings?.refreshInterval ?? 5) * 1000));
 
   useEffect(() => {
     const id = setInterval(refreshAll, refreshMs);
@@ -82,95 +85,85 @@ export function DashboardPage() {
   }, [refreshAll, refreshMs]);
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Dashboard"
-        description="Pantauan suhu dan kelembapan secara real-time."
-      />
+    <div className="flex flex-col gap-6 xl:flex-row">
+      <div className="min-w-0 flex-1 space-y-6">
+        <PageHeader
+          title="Dashboard"
+          description="Pantauan suhu dan kelembapan secara real-time."
+        />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Reveal delay={0}>
-          <TemperatureCard
-            temperature={latest?.temperature ?? null}
-            sensorName={latest?.sensor?.name}
-            lastUpdate={latest?.recordedAt}
-            settings={settings}
-          />
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <Reveal delay={0}>
+            <TemperatureCard
+              temperature={latest?.temperature ?? null}
+              sensorName={latest?.sensor?.name}
+              lastUpdate={latest?.recordedAt}
+              settings={settings}
+            />
+          </Reveal>
+          <Reveal delay={80}>
+            <HumidityCard
+              humidity={latest?.humidity ?? null}
+              sensorName={latest?.sensor?.name}
+              lastUpdate={latest?.recordedAt}
+              settings={settings}
+            />
+          </Reveal>
+          <Reveal delay={160}>
+            <SensorStatusCard sensors={sensors} />
+          </Reveal>
+          <Reveal delay={240}>
+            <AlertsCard summary={summary} />
+          </Reveal>
+        </div>
+
+        <Reveal>
+          <MoodBar temperature={latest?.temperature ?? null} condition={classifyTemperature(latest?.temperature ?? null, settings)} />
         </Reveal>
-        <Reveal delay={80}>
-          <HumidityCard
-            humidity={latest?.humidity ?? null}
-            sensorName={latest?.sensor?.name}
-            lastUpdate={latest?.recordedAt}
-            settings={settings}
-          />
+
+        <Reveal>
+          <Card>
+            <CardHeader className="flex flex-col gap-2 space-y-0 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <CardTitle className="heading-section">Suhu & Kelembapan</CardTitle>
+                <CardDescription>Perubahan suhu dalam beberapa jam terakhir</CardDescription>
+              </div>
+              <RangeTabs value={range} onChange={setRange} />
+            </CardHeader>
+            <CardContent>
+              {chartLoading ? (
+                <Skeleton className="h-[280px] w-full" />
+              ) : (
+                <MetricChart data={sortReadings(chartReadings)} type="temperature" height={280} />
+              )}
+            </CardContent>
+          </Card>
         </Reveal>
-        <Reveal delay={160}>
-          <SensorStatusCard sensors={sensors} />
-        </Reveal>
-        <Reveal delay={240}>
-          <AlertsCard summary={summary} />
+
+        <Reveal>
+          <Card>
+            <CardHeader>
+              <CardTitle className="heading-section">Pengukuran Terbaru</CardTitle>
+              <CardDescription>Pengukuran suhu dan kelembapan terbaru</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <RecentMeasurements readings={readings.slice(0, 10)} settings={settings} />
+            </CardContent>
+          </Card>
         </Reveal>
       </div>
 
-      <Reveal>
-        <Card>
-          <CardHeader className="flex flex-col gap-2 space-y-0 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <CardTitle className="text-base">Temperature Chart</CardTitle>
-              <CardDescription>Perubahan suhu dalam beberapa jam terakhir</CardDescription>
-            </div>
-            <RangeTabs value={range} onChange={setRange} />
-          </CardHeader>
-        <CardContent>
-          {chartLoading ? (
-            <Skeleton className="h-[280px] w-full" />
-          ) : (
-            <MetricChart
-              data={sortReadings(chartReadings)}
-              type="temperature"
-            />
-          )}
-        </CardContent>
-      </Card>
-      </Reveal>
-
-      <Reveal>
-        <Card>
-          <CardHeader className="flex flex-col gap-2 space-y-0 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <CardTitle className="text-base">Humidity Chart</CardTitle>
-              <CardDescription>Perubahan kelembapan dalam beberapa jam terakhir</CardDescription>
-            </div>
-            <RangeTabs value={range} onChange={setRange} />
-          </CardHeader>
-          <CardContent>
-            {chartLoading ? (
-              <Skeleton className="h-[280px] w-full" />
-            ) : (
-              <MetricChart data={sortReadings(chartReadings)} type="humidity" />
-            )}
-          </CardContent>
-        </Card>
-      </Reveal>
-
-      <Reveal>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Recent Measurements</CardTitle>
-            <CardDescription>Pengukuran suhu dan kelembapan terbaru</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <RecentMeasurements readings={readings.slice(0, 10)} settings={settings} />
-          </CardContent>
-        </Card>
-      </Reveal>
+      <aside className="w-full shrink-0 xl:w-[320px]">
+        <GradientRail sensors={sensors} reading={latest} settings={settings} />
+      </aside>
     </div>
   );
 }
 
 function sortReadings(data: SensorReading[]) {
-  return [...data].sort((a, b) => new Date(a.recordedAt).getTime() - new Date(b.recordedAt).getTime());
+  return [...data].sort(
+    (a, b) => new Date(a.recordedAt).getTime() - new Date(b.recordedAt).getTime()
+  );
 }
 
 function RangeTabs({ value, onChange }: { value: ChartRange; onChange: (v: ChartRange) => void }) {

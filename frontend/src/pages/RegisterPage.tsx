@@ -5,7 +5,6 @@ import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Reveal } from "@/components/ui/reveal";
 import { toast } from "sonner";
 
 type Step = "form" | "verify";
@@ -13,6 +12,15 @@ type Step = "form" | "verify";
 function errorMessage(err: unknown, fallback: string) {
   return (
     (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? fallback
+  );
+}
+
+function PulseDot({ className }: { className?: string }) {
+  return (
+    <span className={`relative flex h-2 w-2 ${className}`}>
+      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-current opacity-60" />
+      <span className="relative inline-flex h-2 w-2 rounded-full bg-current" />
+    </span>
   );
 }
 
@@ -91,171 +99,224 @@ export function RegisterPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-background lg:flex-row">
-      <div className="relative flex flex-col justify-between bg-ink p-10 text-white lg:w-1/2 lg:p-16">
-        <div className="flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center border border-white/40 text-xl">
-            🌡️
-          </span>
-          <p className="text-sm font-semibold uppercase tracking-[0.18em]">Smart Temp Monitor</p>
+    <div className="relative min-h-screen overflow-hidden bg-ink">
+      {/* Latar gradien indigo + grid hero */}
+      <div className="pointer-events-none absolute inset-0 panel-gradient" />
+      <div className="hero-grid pointer-events-none absolute inset-0 [mask-image:radial-gradient(ellipse_at_top,rgba(0,0,0,1),rgba(0,0,0,0.55))]" />
+      <div className="pointer-events-none absolute -left-24 bottom-8 h-80 w-80 rounded-full bg-[#AEB2E6]/40 blur-3xl" />
+      <div className="pointer-events-none absolute -right-24 top-0 h-96 w-96 rounded-full bg-emerald-400/20 blur-3xl" />
+
+      <div className="relative z-10 mx-auto grid min-h-screen w-full max-w-6xl items-center gap-12 px-6 py-10 lg:grid-cols-2 lg:px-10">
+        {/* Kiri — pesan hero */}
+        <div className="text-white">
+          <div className="flex items-center gap-3">
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-white/15 text-sm font-extrabold ring-1 ring-white/30 backdrop-blur">
+              ST
+            </span>
+            <span className="micro-label text-white/80">Smart Temp Monitor</span>
+          </div>
+
+          <div className="mt-14 space-y-6">
+            <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-white/85 ring-1 ring-white/15 backdrop-blur">
+              <PulseDot className="text-emerald-300" />
+              Buat akun baru
+            </p>
+            <h1 className="heading-page max-w-lg text-white">
+              Mulai Memantau dalam{" "}
+              <span className="text-[#A7F3D0]">Hitungan Menit.</span>
+            </h1>
+            <p className="max-w-md text-[15px] leading-relaxed text-white/70">
+              Daftar dengan email aktif, verifikasi lewat kode 6 digit, lalu langsung masuk ke
+              dashboard monitoring Anda.
+            </p>
+          </div>
+
+          {/* Kartu mini "gauge" dekoratif */}
+          <div className="mt-12 hidden max-w-sm lg:block">
+            <div className="rounded-2xl border border-white/15 bg-white/10 p-5 backdrop-blur">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/60">
+                  Sensor Zona
+                </span>
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-400/20 px-2 py-0.5 text-[10px] font-bold text-emerald-200">
+                  <PulseDot className="text-emerald-300" />
+                  2 ONLINE
+                </span>
+              </div>
+              <div className="flex items-center gap-5">
+                <svg width="72" height="72" viewBox="0 0 100 100" aria-hidden>
+                  <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,.14)" strokeWidth="9" />
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="42"
+                    fill="none"
+                    stroke="#6EE7B7"
+                    strokeWidth="9"
+                    strokeLinecap="round"
+                    strokeDasharray="198 264"
+                    transform="rotate(-90 50 50)"
+                  />
+                  <text x="50" y="50" textAnchor="middle" dominantBaseline="middle" className="fill-white" style={{ fontSize: 22, fontWeight: 800 }}>
+                    58
+                  </text>
+                  <text x="50" y="66" textAnchor="middle" className="fill-white/60" style={{ fontSize: 8 }}>
+                    % RH
+                  </text>
+                </svg>
+                <p className="text-sm leading-relaxed text-white/70">
+                  Kelembapan stabil di zona aman. Notifikasi hanya saat melewati ambang batas.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <Reveal className="my-12 space-y-6 lg:my-0">
-          <p className="micro-label flex items-center gap-3 text-white-light">
-            <span className="pulse-dot inline-block h-2 w-2 rounded-full bg-chip text-chip" />
-            Buat akun baru
-          </p>
-          <h1 className="heading-page max-w-md uppercase leading-[0.95]">
-            Mulai <span className="text-primary">Pantau</span> Sekarang
-          </h1>
-          <p className="max-w-md text-white-light">
-            Daftar dengan email asli, verifikasi lewat kode 6 digit, lalu masuk ke dashboard.
-          </p>
-        </Reveal>
+        {/* Kanan — form kartu */}
+        <div className="mx-auto w-full max-w-md">
+          <div className={`auth-swap ${swapClass}`}>
+            <div className="rounded-3xl border border-white/40 bg-white p-8 shadow-2xl shadow-indigo-950/40 backdrop-blur">
+              {step === "form" ? (
+                <>
+                  <div className="mb-8">
+                    <p className="micro-label mb-3 inline-flex items-center gap-2 rounded-full bg-indigo-50 px-3 py-1 text-primary">
+                      <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary" />
+                      Pendaftaran
+                    </p>
+                    <h2 className="heading-page text-ink">Daftar</h2>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      Email asli atau email apa pun yang aktif
+                    </p>
+                  </div>
 
-        <p className="micro-label text-white-light">© 2026 — Smart Temp Monitor</p>
-      </div>
+                  <form onSubmit={handleRegister} className="space-y-5">
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Nama</Label>
+                      <Input
+                        id="name"
+                        placeholder="Nama lengkap"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="regEmail">Email</Label>
+                      <Input
+                        id="regEmail"
+                        type="email"
+                        placeholder="nama@gmail.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        autoComplete="email"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="regPassword">Password</Label>
+                      <Input
+                        id="regPassword"
+                        type="password"
+                        placeholder="••••••"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        autoComplete="new-password"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="regConfirm">Konfirmasi Password</Label>
+                      <Input
+                        id="regConfirm"
+                        type="password"
+                        placeholder="••••••"
+                        value={confirm}
+                        onChange={(e) => setConfirm(e.target.value)}
+                        required
+                        autoComplete="new-password"
+                      />
+                    </div>
+                    <Button type="submit" variant="default" className="w-full" disabled={loading}>
+                      {loading ? "Mengirim..." : "Kirim Kode"}
+                    </Button>
+                    <p className="text-center text-xs text-muted-foreground">
+                      Kode verifikasi akan dikirim ke emailmu setelah menekan tombol di atas.
+                    </p>
+                  </form>
 
-      <div className="flex flex-1 items-center justify-center bg-background p-6 lg:p-16">
-        <div className={`auth-swap ${swapClass} w-full max-w-sm`}>
-          {step === "form" ? (
-            <>
-              <div className="mb-8">
-                <p className="micro-label mb-2 flex items-center gap-2 text-primary">
-                  <span className="inline-block h-2 w-2 rounded-full bg-primary" />
-                  Pendaftaran
-                </p>
-                <h2 className="heading-page uppercase">Daftar</h2>
-                <p className="mt-2 text-sm text-black-light">
-                  Email asli atau email apa pun yang aktif
-                </p>
-              </div>
-
-              <form onSubmit={handleRegister} className="space-y-5">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Nama</Label>
-                  <Input
-                    id="name"
-                    placeholder="Nama lengkap"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="regEmail">Email</Label>
-                  <Input
-                    id="regEmail"
-                    type="email"
-                    placeholder="nama@gmail.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    autoComplete="email"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="regPassword">Password</Label>
-                  <Input
-                    id="regPassword"
-                    type="password"
-                    placeholder="••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    autoComplete="new-password"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="regConfirm">Konfirmasi Password</Label>
-                  <Input
-                    id="regConfirm"
-                    type="password"
-                    placeholder="••••••"
-                    value={confirm}
-                    onChange={(e) => setConfirm(e.target.value)}
-                    required
-                    autoComplete="new-password"
-                  />
-                </div>
-                <Button type="submit" variant="default" className="w-full" disabled={loading}>
-                  {loading ? "Mengirim..." : "Kirim Kode"}
-                </Button>
-                <p className="text-center text-xs text-black-light">
-                  Kode verifikasi akan dikirim ke emailmu setelah menekan tombol di atas.
-                </p>
-              </form>
-
-              <p className="mt-6 text-center text-sm text-black-light">
-                Sudah punya akun?{" "}
-                <Link
-                  to="/login"
-                  state={{ dir: "to-login" }}
-                  className="font-medium text-primary hover:underline"
-                >
-                  Login
-                </Link>
-              </p>
-            </>
-          ) : (
-            <>
-              <div className="mb-8">
-                <p className="micro-label mb-2 flex items-center gap-2 text-primary">
-                  <span className="inline-block h-2 w-2 rounded-full bg-primary" />
-                  Verifikasi
-                </p>
-                <h2 className="heading-page uppercase">Cek Email</h2>
-                <p className="mt-2 text-sm text-black-light">
-                  Masukkan kode 6 digit yang dikirim ke <strong>{email}</strong>
-                </p>
-              </div>
-
-              {demoCode && (
-                <div className="mb-5 border border-primary/40 bg-primary/5 p-3 text-sm">
-                  <p className="font-medium text-primary">Mode demo (email belum dikonfigurasi)</p>
-                  <p className="mt-1 text-black-light">
-                    Kode verifikasi kamu: <span className="font-mono text-base font-bold">{demoCode}</span>
+                  <p className="mt-6 text-center text-sm text-muted-foreground">
+                    Sudah punya akun?{" "}
+                    <Link
+                      to="/login"
+                      state={{ dir: "to-login" }}
+                      className="font-medium text-primary hover:underline"
+                    >
+                      Login
+                    </Link>
                   </p>
-                </div>
+                </>
+              ) : (
+                <>
+                  <div className="mb-8">
+                    <p className="micro-label mb-3 inline-flex items-center gap-2 rounded-full bg-indigo-50 px-3 py-1 text-primary">
+                      <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary" />
+                      Verifikasi
+                    </p>
+                    <h2 className="heading-page text-ink">Cek Email</h2>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      Masukkan kode 6 digit yang dikirim ke <strong>{email}</strong>
+                    </p>
+                  </div>
+
+                  {demoCode && (
+                    <div className="mb-5 border border-primary/40 bg-primary/5 p-3 text-sm">
+                      <p className="font-medium text-primary">Mode demo (email belum dikonfigurasi)</p>
+                      <p className="mt-1 text-black-light">
+                        Kode verifikasi kamu:{" "}
+                        <span className="font-mono text-base font-bold">{demoCode}</span>
+                      </p>
+                    </div>
+                  )}
+
+                  <form onSubmit={handleVerify} className="space-y-5">
+                    <div className="space-y-2">
+                      <Label htmlFor="verifyCode">Kode Verifikasi</Label>
+                      <Input
+                        id="verifyCode"
+                        inputMode="numeric"
+                        placeholder="123456"
+                        value={code}
+                        onChange={(e) => setCode(e.target.value)}
+                        required
+                        maxLength={6}
+                        className="text-center text-lg tracking-[0.4em]"
+                      />
+                    </div>
+                    <Button type="submit" variant="default" className="w-full" disabled={loading}>
+                      {loading ? "Memverifikasi..." : "Verifikasi & Masuk"}
+                    </Button>
+                  </form>
+
+                  <div className="mt-4 flex items-center justify-between text-sm">
+                    <button
+                      type="button"
+                      onClick={handleResend}
+                      className="font-medium text-primary hover:underline"
+                    >
+                      Kirim ulang kode
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setStep("form")}
+                      className="text-muted-foreground hover:underline"
+                    >
+                      Ganti email
+                    </button>
+                  </div>
+                </>
               )}
-
-              <form onSubmit={handleVerify} className="space-y-5">
-                <div className="space-y-2">
-                  <Label htmlFor="verifyCode">Kode Verifikasi</Label>
-                  <Input
-                    id="verifyCode"
-                    inputMode="numeric"
-                    placeholder="123456"
-                    value={code}
-                    onChange={(e) => setCode(e.target.value)}
-                    required
-                    maxLength={6}
-                    className="text-center text-lg tracking-[0.4em]"
-                  />
-                </div>
-                <Button type="submit" variant="default" className="w-full" disabled={loading}>
-                  {loading ? "Memverifikasi..." : "Verifikasi & Masuk"}
-                </Button>
-              </form>
-
-              <div className="mt-4 flex items-center justify-between text-sm">
-                <button
-                  type="button"
-                  onClick={handleResend}
-                  className="font-medium text-primary hover:underline"
-                >
-                  Kirim ulang kode
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setStep("form")}
-                  className="text-black-light hover:underline"
-                >
-                  Ganti email
-                </button>
-              </div>
-            </>
-          )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -1,14 +1,6 @@
 import { Radio } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 import type { Sensor } from "@/types";
-import { cn } from "@/lib/utils";
 
 interface Props {
   sensors: Sensor[];
@@ -20,50 +12,23 @@ export function SensorStatusCard({ sensors }: Props) {
   const offline = activeSensors.filter((s) => s.status === "OFFLINE").length;
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2 space-y-0 pb-2">
-        <CardTitle className="micro-label flex min-w-0 items-center gap-2 text-black-light">
-          <Radio className="h-4 w-4 shrink-0 text-primary" />
-          <span className="truncate">Sensor Status</span>
-        </CardTitle>
-        <Badge variant="secondary" className="shrink-0">
-          {online} online · {offline} offline
-        </Badge>
-      </CardHeader>
-      <CardContent className="space-y-2">
-        {activeSensors.length === 0 && (
-          <p className="text-sm text-black-light">Belum ada sensor terdaftar.</p>
-        )}
-        {activeSensors.map((s) => (
-          <div
-            key={s.id}
-            className="flex items-center justify-between border border-border px-3 py-2"
-          >
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium">
-                {s.name} <span className="text-black-light">({s.sensorCode})</span>
-              </p>
-              <p className="truncate text-xs text-black-light">{s.location}</p>
-            </div>
-            <span
-              className={cn(
-                "ml-2 flex shrink-0 items-center gap-1.5 text-xs font-medium",
-                s.status === "ONLINE" ? "text-green-600" : "text-red-600"
-              )}
-            >
-              <span
-                className={cn(
-                  "h-2 w-2 rounded-full",
-                  s.status === "ONLINE"
-                    ? "pulse-dot bg-green-500 text-green-500"
-                    : "bg-red-500"
-                )}
-              />
-              {s.status === "ONLINE" ? "Online" : "Offline"}
-            </span>
-          </div>
-        ))}
-      </CardContent>
+    <Card className="p-5">
+      <div className="flex items-start justify-between">
+        <span className="chip-icon bg-green-50 text-green-500">
+          <Radio className="h-6 w-6" />
+        </span>
+        <span className="rounded-full bg-green-50 px-2 py-0.5 text-[11px] font-bold text-green-700">
+          {offline === 0 ? "Semua aktif" : `${offline} offline`}
+        </span>
+      </div>
+      <p className="mt-4 text-[13px] font-semibold text-muted-foreground">Sensor Online</p>
+      <p className="mt-1 whitespace-nowrap text-4xl font-extrabold tabular-nums tracking-tight">
+        {online}
+        <span className="ml-0.5 text-xl font-semibold text-muted-foreground">/ {activeSensors.length}</span>
+      </p>
+      <p className="mt-2 text-xs text-muted-foreground">
+        {online} online · {offline} offline dari {activeSensors.length} sensor aktif
+      </p>
     </Card>
   );
 }

@@ -7,27 +7,27 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 7%;
+    --background: 220 22% 97%;
+    --foreground: 220 40% 12%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 7%;
+    --card-foreground: 220 40% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 7%;
-    --primary: 227 100% 46%;
+    --popover-foreground: 220 40% 12%;
+    --primary: 238 70% 53%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 7%;
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 35%;
-    --accent: 0 0% 96%;
-    --accent-foreground: 0 0% 7%;
+    --secondary: 220 25% 95%;
+    --secondary-foreground: 220 40% 12%;
+    --muted: 220 25% 95%;
+    --muted-foreground: 220 10% 44%;
+    --accent: 220 25% 95%;
+    --accent-foreground: 220 40% 12%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 91%;
-    --input: 0 0% 91%;
-    --ring: 227 100% 46%;
-    --ink: 0 0% 7%;
-    --radius: 0.5rem;
+    --border: 220 18% 91%;
+    --input: 220 18% 91%;
+    --ring: 238 70% 53%;
+    --ink: 220 40% 12%;
+    --radius: 1rem;
   }
 
   .dark {
@@ -122,117 +122,100 @@
 
   /* ===== Page heading ===== */
   .heading-page {
-    font-size: clamp(1.5rem, 3.5vw, 2.75rem);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: -0.01em;
-    line-height: 1.05;
+    font-size: clamp(1.5rem, 3.5vw, 2.5rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.08;
+    color: currentColor;
   }
   .heading-section {
-    font-size: clamp(1.1rem, 1.8vw, 1.5rem);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: -0.01em;
+    font-size: clamp(1rem, 1.5vw, 1.15rem);
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    color: currentColor;
   }
 
-  /* ===== Signature "ink pill" button (reference: wrapper-button + circle-button) =====
-     Text sits above; an expanding ink circle floods in from the center on hover. */
+  /* ===== Signature button: solid indigo pill ===== */
   .btn-ink {
-    position: relative;
-    overflow: hidden;
-    isolation: isolate;
-    border: 1px solid hsl(var(--ink));
-    background-color: hsl(var(--card));
-    color: hsl(var(--ink));
-    text-transform: uppercase;
-    transition: color 0.45s cubic-bezier(0.66, 0, 0.35, 1),
-      border-color 0.45s cubic-bezier(0.66, 0, 0.35, 1);
-  }
-  .btn-ink::before {
-    content: "";
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    z-index: -1;
-    width: 210%;
-    aspect-ratio: 1 / 1;
-    border-radius: 9999px;
-    background-color: hsl(var(--ink));
-    transform: translate(-50%, -50%) scale(0);
-    transition: transform 0.5s cubic-bezier(0.66, 0, 0.35, 1);
+    background-color: hsl(238 70% 53%);
+    color: #ffffff;
+    border: none;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08), 0 4px 12px rgba(67, 56, 202, 0.22);
+    transition: background-color 0.25s ease, transform 0.15s ease, box-shadow 0.25s ease;
   }
   .btn-ink:hover {
-    color: #ffffff;
-    border-color: hsl(var(--ink));
-  }
-  .btn-ink:hover::before {
-    transform: translate(-50%, -50%) scale(1);
+    background-color: hsl(240 69% 47%);
   }
 
   .btn-primary-blue {
-    position: relative;
-    overflow: hidden;
-    isolation: isolate;
-    border: 1px solid hsl(var(--primary));
-    background-color: hsl(var(--primary));
+    background-image: linear-gradient(135deg, hsl(238 80% 55%), hsl(258 80% 58%) 55%, hsl(292 80% 58%));
     color: #ffffff;
-    text-transform: uppercase;
-    transition: color 0.45s cubic-bezier(0.66, 0, 0.35, 1);
+    border: none;
+    box-shadow: 0 4px 14px rgba(76, 63, 221, 0.32);
+    transition: filter 0.25s ease, transform 0.15s ease;
   }
-  .btn-primary-blue::before {
-    content: "";
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    z-index: -1;
-    width: 210%;
-    aspect-ratio: 1 / 1;
-    border-radius: 9999px;
-    background-color: hsl(var(--foreground));
-    transform: translate(-50%, -50%) scale(0);
-    transition: transform 0.5s cubic-bezier(0.66, 0, 0.35, 1);
-  }
-  .btn-primary-blue:hover::before {
-    transform: translate(-50%, -50%) scale(1);
+  .btn-primary-blue:hover {
+    filter: brightness(1.06);
   }
 
   .btn-ink-solid {
-    border: 1px solid hsl(var(--ink));
-    background-color: hsl(var(--ink));
-    color: #ffffff;
-    text-transform: uppercase;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    background-color: hsl(var(--secondary));
+    color: hsl(220 40% 12%);
+    border: 1px solid hsl(var(--border));
+    transition: background-color 0.25s ease, color 0.25s ease;
   }
   .btn-ink-solid:hover {
-    background-color: transparent;
-    color: hsl(var(--ink));
+    background-color: hsl(var(--accent));
+    color: hsl(220 40% 12%);
   }
 
   .btn-outline-line {
-    border: 1px solid hsl(var(--ink));
-    background-color: transparent;
-    color: hsl(var(--ink));
-    text-transform: uppercase;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    border: 1px solid hsl(220 18% 88%);
+    background-color: hsl(var(--card));
+    color: hsl(220 40% 12%);
+    transition: background-color 0.25s ease, border-color 0.25s ease;
   }
   .btn-outline-line:hover {
-    background-color: hsl(var(--ink));
-    color: #ffffff;
+    background-color: hsl(var(--accent));
+    border-color: hsl(220 18% 82%);
   }
 
-  /* ===== Technical flat card (reference: project card blueprint frame) ===== */
+  /* ===== Gradien & chip (identitas visual) ===== */
+  .brand-gradient {
+    background-image: linear-gradient(135deg, hsl(238 80% 55%), hsl(258 80% 58%) 55%, hsl(292 80% 58%));
+  }
+  .panel-gradient {
+    background-image: linear-gradient(180deg, hsl(238 80% 55%), hsl(255 82% 58%) 55%, hsl(292 80% 58%));
+  }
+  .chip-icon {
+    display: inline-grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    font-size: 20px;
+    flex: none;
+  }
+  .hero-grid {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+    background-size: 44px 44px;
+  }
+
+  /* ===== Kartu lembut (soft card) ===== */
   .tech-frame {
     position: relative;
     border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
     background-color: hsl(var(--card));
-    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-      border-color 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-      box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
   }
   .tech-frame:hover {
-    border-color: hsl(var(--ink));
-    transform: translateY(-4px);
-    box-shadow: 8px 8px 0 0 hsl(var(--ink));
+    transform: translateY(-2px);
+    border-color: hsl(220 18% 84%);
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
   }
 
   /* ===== Scroll reveal (driven by <Reveal/> + IntersectionObserver) ===== */
@@ -351,6 +334,113 @@
     }
   }
 
+  /* ===== Maskot lucu (FunMascot) ===== */
+  @keyframes mascot-bob {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-6px);
+    }
+  }
+  .mascot-bob {
+    animation: mascot-bob 2.6s ease-in-out infinite;
+  }
+  @keyframes mascot-shiver {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    25% {
+      transform: translateX(-2px);
+    }
+    75% {
+      transform: translateX(2px);
+    }
+  }
+  .mascot-shiver {
+    animation: mascot-shiver 0.16s linear infinite;
+  }
+  @keyframes mascot-wiggle {
+    0%,
+    100% {
+      transform: rotate(0);
+    }
+    20% {
+      transform: rotate(7deg);
+    }
+    40% {
+      transform: rotate(-7deg);
+    }
+    60% {
+      transform: rotate(5deg);
+    }
+    80% {
+      transform: rotate(-4deg);
+    }
+  }
+  .mascot-wiggle {
+    animation: mascot-wiggle 0.55s ease;
+  }
+  @keyframes mascot-drop {
+    0% {
+      opacity: 0;
+      transform: translateY(0) scale(0.6);
+    }
+    15% {
+      opacity: 0.9;
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(26px) scale(1);
+    }
+  }
+  .mascot-drop {
+    animation: mascot-drop 1.1s ease-in infinite;
+  }
+  @keyframes mascot-spin {
+    from {
+      transform: rotate(0);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  .mascot-spin {
+    animation: mascot-spin 5s linear infinite;
+  }
+  @keyframes mascot-pop {
+    0% {
+      opacity: 0;
+      transform: scale(0.2);
+    }
+    60% {
+      opacity: 1;
+      transform: scale(1.15);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(1);
+    }
+  }
+  .mascot-pop {
+    animation: mascot-pop 0.9s ease forwards;
+  }
+  @keyframes mascot-blink {
+    0%,
+    92%,
+    100% {
+      transform: scaleY(1);
+    }
+    96% {
+      transform: scaleY(0.1);
+    }
+  }
+  .mascot-blink {
+    animation: mascot-blink 4.5s ease-in-out infinite;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .auth-swap {
       animation: none;
@@ -368,6 +458,15 @@
       box-shadow: none;
     }
     .pulse-dot::after {
+      animation: none;
+    }
+    .mascot-bob,
+    .mascot-shiver,
+    .mascot-wiggle,
+    .mascot-drop,
+    .mascot-spin,
+    .mascot-pop,
+    .mascot-blink {
       animation: none;
     }
   }

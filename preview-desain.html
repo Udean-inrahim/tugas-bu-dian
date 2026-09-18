@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Preview Desain — Smart Temp Monitor (konsep)</title>
+<style>
+  :root {
+    --bg: #f2f5fb;
+    --card: #ffffff;
+    --border: #edf0f6;
+    --ink: #0f172a;
+    --muted: #667085;
+    --blue: #3b82f6;
+    --violet: #8b5cf6;
+    --fuchsia: #d946ef;
+    --orange: #f59e0b;
+    --teal: #14b8a6;
+    --red: #ef4444;
+    --green: #22c55e;
+    --r: 16px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    padding: 24px;
+  }
+  .notice {
+    max-width: 1400px;
+    margin: 0 auto 16px;
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    color: #9a3412;
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 13px;
+  }
+  .app {
+    max-width: 1400px;
+    margin: 0 auto;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(16, 24, 40, .08);
+  }
+  /* Header */
+  header {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .logo {
+    width: 34px; height: 34px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--blue), var(--violet), var(--fuchsia));
+    display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 15px;
+  }
+  .brand b { font-size: 14px; letter-spacing: -.01em; }
+  .brand span { display: block; font-size: 11px; color: var(--muted); font-weight: 500; }
+  nav { display: flex; gap: 4px; margin-left: 8px; flex-wrap: wrap; }
+  nav a {
+    text-decoration: none; color: var(--muted); font-size: 13px; font-weight: 600;
+    padding: 7px 14px; border-radius: 999px;
+  }
+  nav a.active { background: #eef2ff; color: #4338ca; }
+  .spacer { flex: 1; }
+  .avatar {
+    width: 34px; height: 34px; border-radius: 999px;
+    background: linear-gradient(135deg, #22c55e, #14b8a6);
+    display: grid; place-items: center; color: #fff; font-size: 12px; font-weight: 700;
+  }
+  .row { display: flex; gap: 20px; padding: 20px 24px 24px; align-items: flex-start; }
+  /* Kiri: konten utama */
+  main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
+  .head h1 { font-size: 24px; font-weight: 800; letter-spacing: -.02em; }
+  .head p { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  /* Kartu statistik */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .stat {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--r);
+    padding: 16px; box-shadow: 0 1px 2px rgba(16,24,40,.04);
+  }
+  .stat .lab { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; }
+  .stat .num { font-size: 30px; font-weight: 800; margin-top: 6px; letter-spacing: -.02em; }
+  .stat .unit { font-size: 13px; font-weight: 600; color: var(--muted); }
+  .stat .foot { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 12px; color: var(--muted); }
+  .pill { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+  .pill.good { background: #f0fdf4; color: #15803d; }
+  .chip { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; font-size: 17px; margin-bottom: 10px; }
+  .c-orange { background: #fff7ed; } .c-blue { background: #eff6ff; }
+  .c-green { background: #ecfdf5; } .c-red { background: #fef2f2; }
+  /* Kartu grafik */
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 18px; box-shadow: 0 1px 2px rgba(16,24,40,.04); }
+  .card .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
+  .card h3 { font-size: 14px; font-weight: 700; }
+  .card .sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .tabs { display: flex; gap: 4px; background: var(--bg); padding: 3px; border-radius: 999px; }
+  .tabs span { font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 999px; color: var(--muted); cursor: pointer; }
+  .tabs span.on { background: #fff; color: var(--ink); box-shadow: 0 1px 2px rgba(16,24,40,.08); }
+  .legend { display: flex; gap: 14px; font-size: 12px; color: var(--muted); }
+  .legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; margin-right: 6px; }
+  /* Tabel */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); padding: 8px 10px; border-bottom: 1px solid var(--border); }
+  td { padding: 10px; border-bottom: 1px solid var(--border); }
+  tr:last-child td { border-bottom: none; }
+  .sdot { width: 8px; height: 8px; border-radius: 999px; display: inline-block; margin-right: 6px; }
+  .ok { color: #15803d; font-weight: 600; }
+  /* Kanan: rel gradien */
+  aside {
+    width: 310px; flex: none; border-radius: var(--r); position: relative; overflow: hidden;
+    background: linear-gradient(180deg, #6366f1 0%, #8b5cf6 55%, #d946ef 100%);
+    color: #fff; padding: 24px 20px; box-shadow: 0 20px 40px rgba(124,58,237,.35);
+  }
+  aside .mini { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; opacity: .85; font-weight: 600; }
+  aside .big { font-size: 54px; font-weight: 800; letter-spacing: -.03em; margin-top: 4px; }
+  aside .big small { font-size: 18px; font-weight: 700; opacity: .9; }
+  .live {
+    display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600;
+    background: rgba(255,255,255,.16); padding: 4px 10px; border-radius: 999px; margin-top: 10px;
+  }
+  .dot { width: 7px; height: 7px; border-radius: 999px; background: #22d3ee; position: relative; }
+  .dot::after { content: ""; position: absolute; inset: -4px; border-radius: 999px; border: 1px solid #22d3ee; opacity: 0; animation: pulse 2.2s infinite; }
+  @keyframes pulse { 0% { opacity: .8; transform: scale(.5); } 100% { opacity: 0; transform: scale(1.8); } }
+  .gauge { margin: 16px 0; }
+  .glass {
+    background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.25);
+    border-radius: 13px; padding: 14px; backdrop-filter: blur(6px);
+  }
+  .glass + .glass { margin-top: 12px; }
+  .grow { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 600; }
+  .grow small { font-weight: 500; opacity: .85; }
+  .anim { animation: rise .6s cubic-bezier(.16,1,.3,1) both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+  @media (max-width: 980px) {
+    .row { flex-direction: column; }
+    aside { width: 100%; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+  <div class="notice">Preview desain (konsep) — style diadaptasi dari &ldquo;Online Course Management System&rdquo;. Aplikasi asli belum diubah.</div>
+
+  <div class="app">
+    <header>
+      <div class="brand">
+        <div class="logo">⛒</div>
+        <div><b>Smart Temp Monitor</b><span>tugas-bu-dian.vercel.app</span></div>
+      </div>
+      <nav>
+        <a class="active" href="#">Dashboard</a>
+        <a href="#">Sensor</a>
+        <a href="#">Riwayat</a>
+        <a href="#">Alert</a>
+        <a href="#">Pengaturan</a>
+      </nav>
+      <div class="spacer"></div>
+      <div class="avatar">JR</div>
+    </header>
+
+    <div class="row">
+      <main>
+        <div class="head anim">
+          <h1>Dashboard</h1>
+          <p>Pantauan suhu &amp; kelembapan server secara real-time.</p>
+        </div>
+
+        <div class="stats anim" style="animation-delay:.05s">
+          <div class="stat">
+            <div class="chip c-orange">🌡</div>
+            <div class="lab">Suhu Server Room</div>
+            <div class="num">26.4<span class="unit">&nbsp;°C</span></div>
+            <div class="foot"><span class="pill good">Normal</span> 2 menit lalu</div>
+          </div>
+          <div class="stat">
+            <div class="chip c-blue">💧</div>
+            <div class="lab">Kelembapan</div>
+            <div class="num">58<span class="unit">&nbsp;%</span></div>
+            <div class="foot"><span class="pill good">Normal</span> Rentang 30–80%</div>
+          </div>
+          <div class="stat">
+            <div class="chip c-green">📡</div>
+            <div class="lab">Sensor Online</div>
+            <div class="num">2<span class="unit">&nbsp;/ 2</span></div>
+            <div class="foot"><span class="pill good">Semua aktif</span></div>
+          </div>
+          <div class="stat">
+            <div class="chip c-red">🔔</div>
+            <div class="lab">Alert Aktif</div>
+            <div class="num">0</div>
+            <div class="foot"><span class="pill good">Aman</span></div>
+          </div>
+        </div>
+
+        <div class="card anim" style="animation-delay:.1s">
+          <div class="top">
+            <div>
+              <h3>Grafik Suhu</h3>
+              <div class="sub">Perubahan suhu 24 jam terakhir</div>
+            </div>
+            <div class="tabs"><span>1j</span><span>6j</span><span class="on">24j</span><span>7h</span></div>
+          </div>
+          <svg viewBox="0 0 640 210" preserveAspectRatio="none" style="width:100%;height:210px;display:block">
+            <defs>
+              <linearGradient id="gT" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#3b82f6" stop-opacity=".35"/>
+                <stop offset="1" stop-color="#3b82f6" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <g stroke="#e6eaf2" stroke-width="1">
+              <line x1="0" y1="20" x2="640" y2="20"/>
+              <line x1="0" y1="65" x2="640" y2="65"/>
+              <line x1="0" y1="110" x2="640" y2="110"/>
+              <line x1="0" y1="155" x2="640" y2="155"/>
+              <line x1="0" y1="200" x2="640" y2="200"/>
+            </g>
+            <path d="M0 120 L28 114 L55 122 L82 108 L110 116 L137 104 L165 112 L192 98 L220 106 L247 95 L275 104 L302 88 L330 96 L357 84 L385 92 L412 78 L440 88 L467 74 L495 82 L522 66 L550 76 L577 58 L605 68 L640 52 L640 210 L0 210 Z" fill="url(#gT)"/>
+            <polyline points="0,120 28,114 55,122 82,108 110,116 137,104 165,112 192,98 220,106 247,95 275,104 302,88 330,96 357,84 385,92 412,78 440,88 467,74 495,82 522,66 550,76 577,58 605,68 640,52" fill="none" stroke="#3b82f6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="640" cy="52" r="5" fill="#fff" stroke="#3b82f6" stroke-width="3"/>
+          </svg>
+          <div class="legend"><span><i style="background:var(--blue)"></i>Suhu (°C)</span><span><i style="background:var(--teal)"></i>Rata-rata 25.8°C</span></div>
+        </div>
+
+        <div class="card anim" style="animation-delay:.15s">
+          <div class="top">
+            <div>
+              <h3>Pengukuran Terbaru</h3>
+              <div class="sub">Data sensor masuk otomatis tiap 5 menit</div>
+            </div>
+            <span class="pill good">Real-time</span>
+          </div>
+          <table>
+            <thead><tr><th>Waktu</th><th>Sensor</th><th>Suhu</th><th>Kelembapan</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>21:05</td><td><span class="sdot" style="background:var(--green)"></span>Server Room (ST-001)</td><td>26.4 °C</td><td>58%</td><td class="ok">Normal</td></tr>
+              <tr><td>21:00</td><td><span class="sdot" style="background:var(--green)"></span>Server Room (ST-001)</td><td>26.2 °C</td><td>58%</td><td class="ok">Normal</td></tr>
+              <tr><td>20:55</td><td><span class="sdot" style="background:var(--teal)"></span>Laptop (LAPTOP-01)</td><td>52.1 °C</td><td>—</td><td class="ok">Normal</td></tr>
+              <tr><td>20:50</td><td><span class="sdot" style="background:var(--green)"></span>Server Room (ST-001)</td><td>26.0 °C</td><td>59%</td><td class="ok">Normal</td></tr>
+              <tr><td>20:47</td><td><span class="sdot" style="background:var(--teal)"></span>Laptop (LAPTOP-01)</td><td>51.8 °C</td><td>—</td><td class="ok">Normal</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </main>
+
+      <aside class="anim" style="animation-delay:.2s">
+        <div class="mini">Server Room · ST-001</div>
+        <div class="big">26.4<small>&nbsp;°C</small></div>
+        <div class="live"><span class="dot"></span> LIVE · data masuk</div>
+        <div class="gauge" style="width:120px;height:120px;margin-left:auto">
+          <svg viewBox="0 0 120 120" style="width:100%">
+            <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="10"/>
+            <circle cx="60" cy="60" r="50" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round"
+              stroke-dasharray="314" stroke-dashoffset="94" transform="rotate(-90 60 60)"/>
+            <text x="60" y="66" text-anchor="middle" fill="#fff" font-size="22" font-weight="700" font-family="inherit">58%</text>
+          </svg>
+        </div>
+        <div class="glass">
+          <div class="grow"><span>Kelembapan</span><small>58% (normal)</small></div>
+          <div style="height:6px;border-radius:999px;background:rgba(255,255,255,.25);margin-top:8px">
+            <div style="width:58%;height:100%;border-radius:999px;background:#fff"></div>
+          </div>
+        </div>
+        <div class="glass">
+          <div class="grow"><span><span class="sdot" style="background:#22d3ee"></span>ST-001 Server Room</span><small>Online</small></div>
+          <div style="height:1px;background:rgba(255,255,255,.2);margin:8px 0"></div>
+          <div class="grow"><span><span class="sdot" style="background:#22d3ee"></span>LAPTOP-01 Laptop</span><small>Online</small></div>
+        </div>
+        <div style="margin-top:14px;font-size:12px;opacity:.85;text-align:center">Akses cepat: https://tugas-bu-dian.vercel.app</div>
+      </aside>
+    </div>
+  </div>
+</body>
+</html>

@@ -28,33 +28,35 @@ export function Header({ onMenuToggle }: HeaderProps) {
   }, []);
 
   return (
-    <header className="flex h-16 items-center gap-4 border-b border-ink px-4 lg:px-6">
+    <header className="flex h-16 items-center gap-4 border-b border-border bg-card px-4 lg:px-6">
       <Button
         variant="ghost"
         size="icon"
-        className="rounded-full lg:hidden"
+        className="rounded-xl lg:hidden"
         onClick={onMenuToggle}
       >
         <Menu className="h-5 w-5" />
       </Button>
 
-      <h1 className="heading-section !text-base lg:!text-lg">Smart Temp Monitor</h1>
+      <h1 className="heading-section whitespace-nowrap">Smart Temp Monitor</h1>
 
       <div className="ml-auto flex items-center gap-4">
-        <div className="hidden items-center gap-2 text-sm text-black-light md:flex">
-          <RefreshCw className="h-3.5 w-3.5" />
-          <span className="micro-label">Last update: {lastUpdate}</span>
+        <div className="hidden items-center gap-2 rounded-full bg-accent px-3 py-1 text-[11px] font-semibold text-muted-foreground md:flex">
+          <RefreshCw className="h-3 w-3" />
+          Update {lastUpdate}
         </div>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="gap-2 rounded-full border border-ink/20">
-              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-[10px] font-semibold text-primary-foreground">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="gap-2 rounded-full border border-border px-2"
+            >
+              <div className="brand-gradient flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-bold text-white">
                 {user?.name?.charAt(0).toUpperCase() ?? "U"}
               </div>
-              <span className="hidden uppercase tracking-wide sm:inline">
-                {user?.name ?? "User"}
-              </span>
+              <span className="hidden text-sm font-semibold sm:inline">{user?.name ?? "User"}</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
