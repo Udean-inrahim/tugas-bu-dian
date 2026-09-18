@@ -33,6 +33,7 @@ export function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [remember, setRemember] = useState(true);
 
   const [resetOpen, setResetOpen] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
@@ -57,7 +58,7 @@ export function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await login(email, password);
+      await login(email.trim(), password, remember);
       navigate("/", { replace: true });
       toast.success("Login berhasil");
     } catch (err) {
@@ -189,8 +190,9 @@ export function LoginPage() {
               <label className="flex cursor-pointer items-center gap-[9px] font-medium text-[#6b7694]">
                 <input
                   type="checkbox"
-                  className="h-4 w-4 accent-[#2563f0]"
+                  checked={remember}
                   onChange={(e) => {
+                    setRemember(e.target.checked);
                     try {
                       if (e.target.checked) localStorage.setItem("stm:email", email.trim());
                       else localStorage.removeItem("stm:email");
@@ -198,6 +200,7 @@ export function LoginPage() {
                       /* abaikan */
                     }
                   }}
+                  className="h-4 w-4 accent-[#2563f0]"
                 />
                 Ingat saya
               </label>
@@ -223,6 +226,8 @@ export function LoginPage() {
           </form>
 
           <p className="mt-[22px] text-sm font-light text-[#6b7694]">
+            {remember ? "Kamu akan tetap masuk sampai menekan Keluar." : "Sesi berakhir saat browser ditutup."}
+            <br />
             Belum punya akun?{" "}
             <Link
               to="/register"

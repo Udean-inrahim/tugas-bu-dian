@@ -127,7 +127,7 @@ export function SettingsPage() {
   if (!isAdmin) {
     return (
       <div className="space-y-6">
-        <PageHeader title="Settings" description="Pengaturan sistem dan threshold." />
+        <PageHeader title="Pengaturan" description="Pengaturan sistem dan ambang batas." />
         <Reveal>
           <Card>
             <CardContent className="flex flex-col items-center justify-center gap-3 py-12 text-center">
@@ -158,13 +158,13 @@ export function SettingsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Settings" description="Atur threshold suhu, kelembapan, dan interval monitoring." />
+      <PageHeader title="Pengaturan" description="Atur ambang suhu, kelembapan, dan interval monitoring." />
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Reveal>
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
+              <CardTitle className="flex items-center gap-2 text-[15px] font-bold text-ink">
                 <span className="text-orange-500">🌡️</span> Temperature
               </CardTitle>
               <CardDescription>Batas suhu (°C) untuk status normal</CardDescription>
@@ -212,8 +212,8 @@ export function SettingsPage() {
         <Reveal delay={80}>
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <span className="text-blue-500">💧</span> Humidity
+<CardTitle className="flex items-center gap-2 text-[15px] font-bold text-ink">
+                <span className="text-cyan-500">💧</span> Humidity
               </CardTitle>
               <CardDescription>Batas kelembapan (%) untuk status normal</CardDescription>
             </CardHeader>
@@ -261,7 +261,7 @@ export function SettingsPage() {
       <Reveal>
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Monitoring</CardTitle>
+            <CardTitle className="text-[15px] font-bold text-ink">Monitoring</CardTitle>
             <CardDescription>Interval pembaruan data pada dashboard</CardDescription>
           </CardHeader>
         <CardContent className="grid gap-4 sm:max-w-xs">
@@ -287,7 +287,7 @@ export function SettingsPage() {
       <Reveal>
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
+            <CardTitle className="flex items-center gap-2 text-[15px] font-bold text-ink">
               <KeyRound className="h-4 w-4 text-primary" /> Reset Password Pengguna
             </CardTitle>
             <CardDescription>
@@ -362,15 +362,20 @@ function ReadonlyCard({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">{title}</CardTitle>
+        <CardTitle className="text-[15px] font-bold text-ink">{title}</CardTitle>
+        <CardDescription>Nilai ambang saat ini</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-3">
-        {items.map((it) => (
-          <div key={it.label} className="flex items-center justify-between rounded-md border px-3 py-2">
-            <span className="text-sm text-muted-foreground">{it.label}</span>
-            <span className="text-sm font-semibold tabular-nums">{it.value}</span>
-          </div>
-        ))}
+      <CardContent>
+        <div className="grid gap-2 sm:grid-cols-2">
+          {items.map((it) => (
+            <div key={it.label} className="rounded-xl bg-[#edf1ff] px-3 py-2.5 dark:bg-white/5">
+              <p className="text-[9px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+                {it.label}
+              </p>
+              <p className="mt-0.5 text-[16px] font-bold text-ink">{it.value}</p>
+            </div>
+          ))}
+        </div>
       </CardContent>
     </Card>
   );

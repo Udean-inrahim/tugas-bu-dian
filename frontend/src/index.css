@@ -7,50 +7,59 @@
 
 @layer base {
   :root {
-    --background: 220 22% 97%;
-    --foreground: 220 40% 12%;
+    --background: 197 76% 92%;
+    --foreground: 240 4% 16%;
     --card: 0 0% 100%;
-    --card-foreground: 220 40% 12%;
+    --card-foreground: 240 4% 16%;
     --popover: 0 0% 100%;
-    --popover-foreground: 220 40% 12%;
-    --primary: 238 70% 53%;
+    --popover-foreground: 240 4% 16%;
+    --primary: 233 76% 62%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 25% 95%;
-    --secondary-foreground: 220 40% 12%;
-    --muted: 220 25% 95%;
-    --muted-foreground: 220 10% 44%;
-    --accent: 220 25% 95%;
-    --accent-foreground: 220 40% 12%;
-    --destructive: 0 84% 60%;
+    --secondary: 225 60% 97%;
+    --secondary-foreground: 240 4% 16%;
+    --muted: 215 30% 96%;
+    --muted-foreground: 230 8% 57%;
+    --accent: 230 90% 97%;
+    --accent-foreground: 233 76% 62%;
+    --destructive: 1 76% 71%;
     --destructive-foreground: 0 0% 100%;
     --border: 220 18% 91%;
     --input: 220 18% 91%;
-    --ring: 238 70% 53%;
-    --ink: 220 40% 12%;
+    --ring: 233 76% 62%;
+    --ink: 240 4% 16%;
     --radius: 1rem;
+
+    --line: 220 18% 93%;
+    --brand-blue: 233 76% 62%;
+    --brand-cyan: 183 57% 51%;
+    --brand-cyan-soft: 178 100% 88%;
+    --brand-green: 165 60% 50%;
+    --brand-danger: 1 76% 71%;
   }
 
   .dark {
-    --background: 222 47% 8%;
-    --foreground: 210 40% 98%;
-    --card: 222 47% 11%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222 47% 11%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217 91% 60%;
-    --primary-foreground: 222 47% 11%;
-    --secondary: 217 33% 18%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217 33% 18%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 217 33% 18%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217 33% 20%;
-    --input: 217 33% 20%;
-    --ring: 224 76% 48%;
-    --ink: 0 0% 100%;
+    --background: 222 40% 7%;
+    --foreground: 210 40% 96%;
+    --card: 222 35% 11%;
+    --card-foreground: 210 40% 96%;
+    --popover: 222 35% 11%;
+    --popover-foreground: 210 40% 96%;
+    --primary: 233 76% 68%;
+    --primary-foreground: 222 40% 9%;
+    --secondary: 218 28% 18%;
+    --secondary-foreground: 210 40% 96%;
+    --muted: 218 28% 17%;
+    --muted-foreground: 214 18% 64%;
+    --accent: 233 45% 20%;
+    --accent-foreground: 210 40% 96%;
+    --destructive: 1 76% 71%;
+    --destructive-foreground: 222 40% 9%;
+    --border: 218 26% 20%;
+    --input: 218 26% 20%;
+    --ring: 233 76% 68%;
+    --ink: 210 40% 96%;
+    --line: 218 26% 18%;
+    --brand-cyan-soft: 178 80% 22%;
   }
 }
 
@@ -64,9 +73,17 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
+    background-image: linear-gradient(135deg, #cfeaf7, #e9f7fb 55%, #d7eff9);
+    background-attachment: fixed;
     font-family: "Clash Display", "Inter", system-ui, -apple-system, sans-serif;
     font-size: 16px;
     overflow-x: hidden;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
+  html.dark body {
+    background-image: linear-gradient(135deg, #0b1120, #13203a 55%, #0d1830);
   }
   html {
     scrollbar-width: thin;
@@ -135,23 +152,23 @@
     color: currentColor;
   }
 
-  /* ===== Signature button: solid indigo pill ===== */
+  /* ===== Signature button: solid blue pill ===== */
   .btn-ink {
-    background-color: hsl(238 70% 53%);
+    background-color: hsl(var(--primary));
     color: #ffffff;
     border: none;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08), 0 4px 12px rgba(67, 56, 202, 0.22);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08), 0 4px 12px rgba(83, 110, 232, 0.22);
     transition: background-color 0.25s ease, transform 0.15s ease, box-shadow 0.25s ease;
   }
   .btn-ink:hover {
-    background-color: hsl(240 69% 47%);
+    background-color: hsl(234 62% 55%);
   }
 
   .btn-primary-blue {
-    background-image: linear-gradient(135deg, hsl(238 80% 55%), hsl(258 80% 58%) 55%, hsl(292 80% 58%));
+    background-image: linear-gradient(135deg, hsl(233 76% 62%), hsl(240 72% 66%) 55%, hsl(183 57% 54%));
     color: #ffffff;
     border: none;
-    box-shadow: 0 4px 14px rgba(76, 63, 221, 0.32);
+    box-shadow: 0 4px 14px rgba(83, 110, 232, 0.32);
     transition: filter 0.25s ease, transform 0.15s ease;
   }
   .btn-primary-blue:hover {
@@ -160,19 +177,19 @@
 
   .btn-ink-solid {
     background-color: hsl(var(--secondary));
-    color: hsl(220 40% 12%);
+    color: hsl(var(--ink));
     border: 1px solid hsl(var(--border));
     transition: background-color 0.25s ease, color 0.25s ease;
   }
   .btn-ink-solid:hover {
     background-color: hsl(var(--accent));
-    color: hsl(220 40% 12%);
+    color: hsl(var(--ink));
   }
 
   .btn-outline-line {
     border: 1px solid hsl(220 18% 88%);
     background-color: hsl(var(--card));
-    color: hsl(220 40% 12%);
+    color: hsl(var(--ink));
     transition: background-color 0.25s ease, border-color 0.25s ease;
   }
   .btn-outline-line:hover {
@@ -182,10 +199,10 @@
 
   /* ===== Gradien & chip (identitas visual) ===== */
   .brand-gradient {
-    background-image: linear-gradient(135deg, hsl(238 80% 55%), hsl(258 80% 58%) 55%, hsl(292 80% 58%));
+    background-image: linear-gradient(135deg, hsl(233 76% 62%), hsl(250 74% 68%) 55%, hsl(183 57% 52%));
   }
   .panel-gradient {
-    background-image: linear-gradient(180deg, hsl(238 80% 55%), hsl(255 82% 58%) 55%, hsl(292 80% 58%));
+    background-image: linear-gradient(180deg, hsl(233 76% 60%), hsl(250 74% 66%) 55%, hsl(183 57% 52%));
   }
   .chip-icon {
     display: inline-grid;
@@ -205,17 +222,21 @@
   /* ===== Kartu lembut (soft card) ===== */
   .tech-frame {
     position: relative;
-    border: 1px solid hsl(var(--border));
-    border-radius: var(--radius);
+    border: 1px solid hsl(var(--line));
+    border-radius: 15px;
     background-color: hsl(var(--card));
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.025);
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
       box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
   }
   .tech-frame:hover {
     transform: translateY(-2px);
-    border-color: hsl(220 18% 84%);
-    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+    border-color: hsl(220 18% 86%);
+    box-shadow: 0 8px 22px rgba(57, 87, 108, 0.1);
+  }
+  .dark .tech-frame:hover {
+    border-color: hsl(233 76% 68% / 0.5);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
   }
 
   /* ===== Scroll reveal (driven by <Reveal/> + IntersectionObserver) ===== */

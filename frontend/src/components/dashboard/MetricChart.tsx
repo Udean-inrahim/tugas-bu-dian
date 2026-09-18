@@ -20,12 +20,12 @@ interface Props {
 
 const THEME: Record<SeriesKey, { stroke: string; gradient: string; label: string }> = {
   temperature: {
-    stroke: "hsl(238 70% 53%)",
+    stroke: "hsl(233 76% 62%)",
     gradient: "url(#stmGradTemp)",
     label: "Suhu (°C)",
   },
   humidity: {
-    stroke: "hsl(175 60% 42%)",
+    stroke: "hsl(183 57% 51%)",
     gradient: "url(#stmGradHum)",
     label: "Kelembapan (%)",
   },
@@ -61,24 +61,24 @@ export function MetricChart({ data, type, height = 260 }: Props) {
       <AreaChart data={chartData} margin={{ top: 5, right: 10, bottom: 0, left: -12 }}>
         <defs>
           <linearGradient id="stmGradTemp" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="hsl(238 80% 55%)" stopOpacity={0.28} />
-            <stop offset="100%" stopColor="hsl(238 80% 55%)" stopOpacity={0} />
+            <stop offset="0%" stopColor="hsl(233 76% 62%)" stopOpacity={0.28} />
+            <stop offset="100%" stopColor="hsl(233 76% 62%)" stopOpacity={0} />
           </linearGradient>
           <linearGradient id="stmGradHum" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="hsl(175 60% 42%)" stopOpacity={0.25} />
-            <stop offset="100%" stopColor="hsl(175 60% 42%)" stopOpacity={0} />
+            <stop offset="0%" stopColor="hsl(183 57% 51%)" stopOpacity={0.25} />
+            <stop offset="100%" stopColor="hsl(183 57% 51%)" stopOpacity={0} />
           </linearGradient>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="hsl(220 18% 91%)" vertical={false} />
+        <CartesianGrid strokeDasharray="3 3" stroke="#eef0f4" vertical={false} />
         <XAxis
           dataKey="time"
-          tick={{ fontSize: 11, fill: "hsl(220 10% 44%)" }}
+          tick={{ fontSize: 11, fill: "#a5a8b0" }}
           tickLine={false}
-          axisLine={{ stroke: "hsl(220 18% 91%)" }}
+          axisLine={{ stroke: "#eef0f4" }}
           minTickGap={24}
         />
         <YAxis
-          tick={{ fontSize: 11, fill: "hsl(220 10% 44%)" }}
+          tick={{ fontSize: 11, fill: "#a5a8b0" }}
           tickLine={false}
           axisLine={false}
           domain={["auto", "auto"]}

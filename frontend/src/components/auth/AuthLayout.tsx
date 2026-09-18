@@ -1,6 +1,50 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { Activity, BellRing, Globe, Clock } from "lucide-react";
+import { Activity, BellRing, Globe, Clock, PlayCircle, Sparkles, Cpu } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
+type InfoKey = "cara" | "fitur" | "perangkat";
+
+const INFO: Record<InfoKey, { title: string; body: ReactNode }> = {
+  cara: {
+    title: "Cara kerja",
+    body: (
+      <ul className="list-decimal space-y-2 pl-5">
+        <li>Pasang sensor suhu & kelembapan di ruangan yang dipantau.</li>
+        <li>Sensor mengirim data ke server secara berkala (tiap beberapa menit).</li>
+        <li>Masuk ke dasbor untuk memantau, dan terima notifikasi email otomatis saat suhu melewati ambang batas.</li>
+      </ul>
+    ),
+  },
+  fitur: {
+    title: "Fitur",
+    body: (
+      <ul className="list-disc space-y-2 pl-5">
+        <li>Dashboard suhu & kelembapan secara real-time.</li>
+        <li>Grafik riwayat & rentang pemantauan (1 jam - 7 hari).</li>
+        <li>Alert email otomatis saat melewati ambang batas.</li>
+        <li>Manajemen sensor dan ambang batas yang mudah.</li>
+        <li>Riwayat letusan alert / perangkat yang offline.</li>
+      </ul>
+    ),
+  },
+  perangkat: {
+    title: "Perangkat",
+    body: (
+      <ul className="list-disc space-y-2 pl-5">
+        <li>Mikrokontroler dengan sensor suhu & kelembapan (misal DHT11/DHT22).</li>
+        <li>Laptop atau komputer sebagai pengirim data sensor (tersedia skrip berjalan).</li>
+        <li>Akses dari desktop, HP, atau aplikasi Android (APK).</li>
+      </ul>
+    ),
+  },
+};
 
 interface AuthLayoutProps {
   title: ReactNode;
@@ -10,6 +54,14 @@ interface AuthLayoutProps {
 }
 
 export function AuthLayout({ title, sub, children, cta }: AuthLayoutProps) {
+  const [info, setInfo] = useState<InfoKey | null>(null);
+  const pill = (key: InfoKey) =>
+    [
+      "flex cursor-pointer items-center gap-2 rounded-full border-0 px-4 py-1.5 text-[12px] font-semibold transition active:scale-95",
+      info === key
+        ? "bg-[#2563f0] text-white shadow-[0_10px_22px_rgba(37,99,240,0.35)] scale-[1.03]"
+        : "bg-transparent text-[#6b7694] hover:bg-[#2563f0] hover:text-white hover:shadow-[0_8px_18px_rgba(37,99,240,0.28)]",
+    ].join(" ");
   return (
     <div
       className="relative min-h-dvh flex items-center justify-center overflow-x-hidden px-4 py-8"
@@ -40,11 +92,32 @@ export function AuthLayout({ title, sub, children, cta }: AuthLayoutProps) {
             </span>
             SMART TEMP
           </div>
-          <div className="hidden min-[760px]:flex gap-[clamp(18px,3vw,38px)] text-sm font-medium text-[#6b7694]">
-            <a href="#" className="hover:text-[#2563f0]">Cara kerja</a>
-            <a href="#" className="hover:text-[#2563f0]">Fitur</a>
-            <a href="#" className="hover:text-[#2563f0]">Perangkat</a>
-          </div>
+<div className="hidden min-[760px]:flex items-center gap-2.5 rounded-full border border-white/70 bg-white/60 p-1.5 shadow-[0_10px_26px_rgba(31,45,90,0.08)] backdrop-blur">
+              <button
+                type="button"
+                onClick={() => setInfo("cara")}
+                className={pill("cara")}
+              >
+                <PlayCircle className="h-4 w-4" />
+                Cara kerja
+              </button>
+              <button
+                type="button"
+                onClick={() => setInfo("fitur")}
+                className={pill("fitur")}
+              >
+                <Sparkles className="h-4 w-4" />
+                Fitur
+              </button>
+              <button
+                type="button"
+                onClick={() => setInfo("perangkat")}
+                className={pill("perangkat")}
+              >
+                <Cpu className="h-4 w-4" />
+                Perangkat
+              </button>
+            </div>
           {cta && (
             <Link
               to={cta.to}
@@ -58,10 +131,10 @@ export function AuthLayout({ title, sub, children, cta }: AuthLayoutProps) {
 
         <div className="grid grid-cols-1 items-center gap-[clamp(26px,4vw,56px)] min-[900px]:grid-cols-[1.02fr_0.98fr]">
           <section>
-            <h1 className="mb-[14px] text-[clamp(34px,5.4vw,58px)] font-extrabold leading-[1.08] tracking-[-0.02em] text-[#14213d]">
+            <h1 className="mb-[14px] text-[clamp(28px,4.2vw,44px)] font-extrabold leading-[1.1] tracking-[-0.02em] text-[#14213d]">
               {title}
             </h1>
-            <p className="mb-[28px] max-w-[40ch] text-[15px] leading-[1.7] text-[#6b7694]">{sub}</p>
+            <p className="mb-[28px] max-w-[40ch] text-[14px] leading-[1.7] text-[#6b7694]">{sub}</p>
             {children}
           </section>
 
@@ -73,7 +146,7 @@ export function AuthLayout({ title, sub, children, cta }: AuthLayoutProps) {
                 </span>
                 Data real-time
               </div>
-              <p className="text-[clamp(26px,3vw,34px)] font-bold leading-[1.1] tracking-[-0.02em]">5 mnt</p>
+              <p className="text-[clamp(22px,2.6vw,28px)] font-bold leading-[1.1] tracking-[-0.02em]">5 mnt</p>
               <p className="mt-1.5 text-[12.5px] text-[#6b7694]">interval pembaruan data</p>
             </div>
 
@@ -84,7 +157,7 @@ export function AuthLayout({ title, sub, children, cta }: AuthLayoutProps) {
                 </span>
                 Notifikasi email
               </div>
-              <p className="text-[clamp(26px,3vw,34px)] font-bold leading-[1.1] tracking-[-0.02em]">24/7</p>
+              <p className="text-[clamp(22px,2.6vw,28px)] font-bold leading-[1.1] tracking-[-0.02em]">24/7</p>
               <p className="mt-1.5 text-[12.5px] text-[#6b7694]">alert otomatis saat melewati ambang</p>
             </div>
 
@@ -95,7 +168,7 @@ export function AuthLayout({ title, sub, children, cta }: AuthLayoutProps) {
                 </span>
                 Akses di mana saja
               </div>
-              <p className="text-[clamp(26px,3vw,34px)] font-bold leading-[1.1] tracking-[-0.02em]">Web + APK</p>
+              <p className="text-[clamp(22px,2.6vw,28px)] font-bold leading-[1.1] tracking-[-0.02em]">Web + APK</p>
               <p className="mt-1.5 text-[12.5px] text-[#6b7694]">desktop, HP, dan Android</p>
             </div>
 
@@ -115,6 +188,19 @@ export function AuthLayout({ title, sub, children, cta }: AuthLayoutProps) {
           </aside>
         </div>
       </main>
+
+      <Dialog open={info !== null} onOpenChange={(open) => !open && setInfo(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{info ? INFO[info].title : ""}</DialogTitle>
+            <DialogDescription asChild>
+              <div className="text-sm leading-relaxed text-[#6b7694]">
+                {info ? INFO[info].body : null}
+              </div>
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

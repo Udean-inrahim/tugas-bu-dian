@@ -47,6 +47,12 @@ const config: Config = {
         "black-light": "#585858",
         "white-light": "#a3a3a3",
         chip: "#22C55E",
+        line: "hsl(var(--line))",
+        "brand-blue": "hsl(var(--brand-blue))",
+        "brand-cyan": "hsl(var(--brand-cyan))",
+        "brand-cyan-soft": "hsl(var(--brand-cyan-soft))",
+        "brand-green": "hsl(var(--brand-green))",
+        "brand-danger": "hsl(var(--brand-danger))",
       },
       fontFamily: {
         clash: ['"Clash Display"', '"Inter"', "system-ui", "sans-serif"],

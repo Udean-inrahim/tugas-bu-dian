@@ -23,6 +23,13 @@ export const statusColor: Record<string, string> = {
   blue: "text-blue-600",
 };
 
+export const dotBg: Record<string, string> = {
+  green: "bg-green-500",
+  yellow: "bg-yellow-500",
+  red: "bg-red-500",
+  blue: "bg-blue-500",
+};
+
 export const statusBg: Record<string, string> = {
   green: "bg-green-100 text-green-700",
   yellow: "bg-yellow-100 text-yellow-700",

@@ -98,8 +98,8 @@ export function HistoryPage() {
       <Reveal>
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Filter</CardTitle>
-            <CardDescription>Filter riwayat berdasarkan tanggal dan sensor</CardDescription>
+            <CardTitle className="text-[15px] font-bold text-ink">Filter</CardTitle>
+            <CardDescription>Filter riwayat berdasarkan tanggal &amp; sensor</CardDescription>
           </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -159,11 +159,16 @@ export function HistoryPage() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Riwayat Pengukuran</CardTitle>
-          <CardDescription>{meta.total} data ditemukan</CardDescription>
-        </CardHeader>
+<Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-[15px] font-bold text-ink">Riwayat Pengukuran</CardTitle>
+              <CardDescription>{meta.total} data ditemukan</CardDescription>
+            </div>
+            <span className="rounded-full bg-[#e9edff] px-2.5 py-1 text-[9px] font-semibold text-brand-blue dark:bg-white/10 dark:text-indigo-200">
+              {meta.page}/{meta.totalPages}
+            </span>
+          </CardHeader>
         <CardContent>
           {loading ? (
             <div className="space-y-2">

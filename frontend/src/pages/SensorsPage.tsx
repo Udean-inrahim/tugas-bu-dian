@@ -86,23 +86,38 @@ export function SensorsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Sensors"
+        title="Sensor"
         description="Kelola sensor dan pantau status koneksi."
-        action={
-          isAdmin && (
-            <Button onClick={openCreate}>
-              <Plus className="mr-2 h-4 w-4" />
-              Tambah Sensor
-            </Button>
-          )
-        }
       />
 
       <Reveal>
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <StatChip label="Total Sensor" value={sensors.length} dot="bg-brand-blue" bg="bg-[#edf1ff] dark:bg-indigo-500/15" />
+          <StatChip label="Online" value={sensors.filter((s) => s.isActive && s.status === "ONLINE").length} dot="bg-brand-green" bg="bg-[#e8f7f4] dark:bg-emerald-500/15" />
+          <StatChip label="Offline" value={sensors.filter((s) => s.isActive && s.status !== "ONLINE").length} dot="bg-brand-danger" bg="bg-[#fde7ec] dark:bg-rose-500/15" />
+          <StatChip label="Nonaktif" value={sensors.filter((s) => !s.isActive).length} dot="bg-[#8b8f9a]" bg="bg-[#eceef0] dark:bg-slate-500/20" />
+        </div>
+      </Reveal>
+
+      <Reveal delay={80}>
         <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Sensor List</CardTitle>
-            <CardDescription>{sensors.filter((s) => s.isActive).length} sensor terdaftar</CardDescription>
+          <CardHeader className="flex flex-row items-start justify-between">
+            <div>
+              <CardTitle className="text-[15px] font-bold text-ink">Daftar Sensor</CardTitle>
+              <CardDescription>
+                {sensors.filter((s) => s.isActive).length} sensor aktif terdaftar
+              </CardDescription>
+            </div>
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={openCreate}
+                className="cursor-pointer rounded-full bg-brand-blue px-4 py-2 text-[12px] font-semibold text-white shadow-[0_8px_18px_rgba(83,110,232,0.3)] transition hover:bg-brand-blue/90"
+              >
+                <Plus className="mr-1 inline h-3.5 w-3.5" />
+                Tambah
+              </button>
+            )}
           </CardHeader>
         <CardContent>
           {loading && sensors.length === 0 ? (
@@ -248,6 +263,20 @@ export function SensorsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+    </div>
+  );
+}
+
+function StatChip({ label, value, dot, bg }: { label: string; value: number; dot: string; bg: string }) {
+  return (
+    <div className={cn("flex items-center justify-between rounded-2xl p-4", bg)}>
+      <div>
+        <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+          {label}
+        </p>
+        <p className="mt-1 text-[20px] font-bold leading-none text-ink">{value}</p>
+      </div>
+      <i className={`h-2.5 w-2.5 rounded-full ${dot}`} />
     </div>
   );
 }

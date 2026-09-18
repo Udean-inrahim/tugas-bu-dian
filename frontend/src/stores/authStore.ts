@@ -7,7 +7,7 @@ interface AuthState {
   token: string | null;
   loading: boolean;
   hydrated: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, remember?: boolean) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<RegisterResult>;
   verifyEmail: (email: string, code: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -26,6 +26,22 @@ export interface RegisterResult {
 const TOKEN_KEY = "stm_token";
 const USER_KEY = "stm_user";
 
+function writeAuth(token: string, user: User, remember: boolean) {
+  const target = remember ? window.localStorage : window.sessionStorage;
+  const other = remember ? window.sessionStorage : window.localStorage;
+  target.setItem(TOKEN_KEY, token);
+  target.setItem(USER_KEY, JSON.stringify(user));
+  other.removeItem(TOKEN_KEY);
+  other.removeItem(USER_KEY);
+}
+
+function clearAuth() {
+  window.localStorage.removeItem(TOKEN_KEY);
+  window.localStorage.removeItem(USER_KEY);
+  window.sessionStorage.removeItem(TOKEN_KEY);
+  window.sessionStorage.removeItem(USER_KEY);
+}
+
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   token: null,
@@ -36,15 +52,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     return Boolean(get().token);
   },
 
-  login: async (email: string, password: string) => {
+  login: async (email: string, password: string, remember = true) => {
     set({ loading: true });
     try {
       const { data } = await api.post<LoginResponse>("/auth/login", {
         email,
         password,
       });
-      localStorage.setItem(TOKEN_KEY, data.token);
-      localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+      writeAuth(data.token, data.user, remember);
       set({ user: data.user, token: data.token, loading: false });
     } catch (error) {
       set({ loading: false });
@@ -70,8 +85,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ loading: true });
     try {
       const { data } = await api.post<LoginResponse>("/auth/verify-email", { email, code });
-      localStorage.setItem(TOKEN_KEY, data.token);
-      localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+      writeAuth(data.token, data.user, true);
       set({ user: data.user, token: data.token, loading: false });
     } catch (error) {
       set({ loading: false });
@@ -86,22 +100,22 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } catch {
       // ignore network errors on logout
     } finally {
-      localStorage.removeItem(TOKEN_KEY);
-      localStorage.removeItem(USER_KEY);
+      clearAuth();
       set({ user: null, token: null, loading: false });
     }
   },
 
   loadFromStorage: () => {
-    const token = localStorage.getItem(TOKEN_KEY);
-    const rawUser = localStorage.getItem(USER_KEY);
+    const token =
+      window.localStorage.getItem(TOKEN_KEY) ?? window.sessionStorage.getItem(TOKEN_KEY);
+    const rawUser =
+      window.localStorage.getItem(USER_KEY) ?? window.sessionStorage.getItem(USER_KEY);
     if (token && rawUser) {
       try {
         const user = JSON.parse(rawUser) as User;
         set({ user, token, hydrated: true });
       } catch {
-        localStorage.removeItem(TOKEN_KEY);
-        localStorage.removeItem(USER_KEY);
+        clearAuth();
         set({ user: null, token: null, hydrated: true });
       }
     } else {

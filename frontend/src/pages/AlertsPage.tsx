@@ -32,11 +32,11 @@ const typeLabel: Record<AlertType, string> = {
 };
 
 const typeBadgeClass: Record<AlertType, string> = {
-  HIGH_TEMP: "bg-red-100 text-red-700",
-  LOW_TEMP: "bg-blue-100 text-blue-700",
-  HIGH_HUMIDITY: "bg-yellow-100 text-yellow-700",
-  LOW_HUMIDITY: "bg-blue-100 text-blue-700",
-  SENSOR_OFFLINE: "bg-gray-100 text-gray-700",
+  HIGH_TEMP: "bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-300",
+  LOW_TEMP: "bg-blue-100 text-blue-700 dark:bg-sky-500/15 dark:text-sky-300",
+  HIGH_HUMIDITY: "bg-yellow-100 text-yellow-700 dark:bg-amber-500/15 dark:text-amber-300",
+  LOW_HUMIDITY: "bg-blue-100 text-blue-700 dark:bg-sky-500/15 dark:text-sky-300",
+  SENSOR_OFFLINE: "bg-gray-100 text-gray-700 dark:bg-slate-500/20 dark:text-slate-300",
 };
 
 export function AlertsPage() {
@@ -90,15 +90,25 @@ export function AlertsPage() {
 
       <Reveal>
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <BellRing className="h-4 w-4" />
-              Daftar Alert
-            </CardTitle>
-          <CardDescription>
-            {summary.critical} critical · {summary.warning} warning aktif
-          </CardDescription>
-        </CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between gap-3">
+            <div>
+              <CardTitle className="flex items-center gap-2 text-[15px] font-bold text-ink">
+                <BellRing className="h-4 w-4 text-brand-blue" />
+                Daftar Alert
+              </CardTitle>
+              <CardDescription>
+                {summary.critical} critical · {summary.warning} warning aktif
+              </CardDescription>
+            </div>
+            <div className="flex shrink-0 items-center gap-1.5">
+              <span className="rounded-full bg-red-100 px-2.5 py-1 text-[9px] font-bold text-red-600 dark:bg-red-500/15 dark:text-red-300">
+                {summary.critical} Critical
+              </span>
+              <span className="rounded-full bg-yellow-100 px-2.5 py-1 text-[9px] font-bold text-yellow-700 dark:bg-amber-500/15 dark:text-amber-300">
+                {summary.warning} Warning
+              </span>
+            </div>
+          </CardHeader>
         <CardContent>
           {pending ? (
             <div className="space-y-2">

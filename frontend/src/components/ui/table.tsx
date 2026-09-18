@@ -54,7 +54,7 @@ const TableHead = React.forwardRef<HTMLTableCellElement, React.ThHTMLAttributes<
     <th
       ref={ref}
       className={cn(
-        "micro-label h-10 px-2 text-left align-middle font-semibold text-black-light [&:has([role=checkbox])]:pr-0",
+        "micro-label h-10 px-2 text-left align-middle font-semibold text-muted-foreground [&:has([role=checkbox])]:pr-0",
         className
       )}
       {...props}

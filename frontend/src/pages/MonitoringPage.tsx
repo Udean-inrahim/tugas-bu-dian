@@ -144,41 +144,43 @@ export function MonitoringPage() {
         </Reveal>
       </div>
 
-      <Reveal>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Temperature — Suhu (°C)</CardTitle>
-            <CardDescription>
-              Grafik suhu {selectedSensor?.name ?? "semua sensor"} ({range})
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <Skeleton className="h-[300px] w-full" />
-            ) : (
-              <MetricChart data={sortedReadings} type="temperature" height={300} />
-            )}
-          </CardContent>
-        </Card>
-      </Reveal>
+      <div className="grid gap-4 xl:grid-cols-2">
+        <Reveal>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-[15px] font-bold text-ink">Suhu (°C)</CardTitle>
+              <CardDescription>
+                Grafik suhu {selectedSensor?.name ?? "semua sensor"}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <Skeleton className="h-[300px] w-full" />
+              ) : (
+                <MetricChart data={sortedReadings} type="temperature" height={300} />
+              )}
+            </CardContent>
+          </Card>
+        </Reveal>
 
-      <Reveal>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Humidity — Kelembapan (%)</CardTitle>
-            <CardDescription>
-              Grafik kelembapan {selectedSensor?.name ?? "semua sensor"} ({range})
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <Skeleton className="h-[300px] w-full" />
-            ) : (
-              <MetricChart data={sortedReadings} type="humidity" height={300} />
-            )}
-          </CardContent>
-        </Card>
-      </Reveal>
+        <Reveal delay={80}>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-[15px] font-bold text-ink">Kelembapan (%)</CardTitle>
+              <CardDescription>
+                Grafik kelembapan {selectedSensor?.name ?? "semua sensor"}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <Skeleton className="h-[300px] w-full" />
+              ) : (
+                <MetricChart data={sortedReadings} type="humidity" height={300} />
+              )}
+            </CardContent>
+          </Card>
+        </Reveal>
+      </div>
     </div>
   );
 }
