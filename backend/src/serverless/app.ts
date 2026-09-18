@@ -10,7 +10,7 @@ import {
   createVerifyCode,
   verifyVerifyCode,
 } from "../lib/resetCode.js";
-import { sendVerificationEmail } from "../lib/email.js";
+import { sendVerificationEmail, sendResetEmail } from "../lib/email.js";
 import { getActiveSettings, updateSettings } from "./settings.js";
 import {
   evaluateThresholds,
@@ -315,6 +315,20 @@ app.post("/api/auth/reset-password", async (c) => {
   const password = await bcrypt.hash(parsed.data.newPassword, 10);
   await prisma.user.update({ where: { id: user.id }, data: { password } });
   return c.json({ success: true });
+});
+
+// Public: request a reset code sent to the user's email
+app.post("/api/auth/request-reset", async (c) => {
+  const schema = z.object({ email: z.string().email("Email tidak valid") });
+  const parsed = schema.safeParse(await c.req.json().catch(() => ({})));
+  if (!parsed.success) return c.json(validationError(parsed.error), 400);
+
+  const user = await prisma.user.findUnique({ where: { email: parsed.data.email } });
+  if (!user) return c.json({ error: "NOT_FOUND", message: "Email tidak terdaftar" }, 404);
+
+  const { code, expiresAt } = createResetCode(user.email);
+  const sent = await sendResetEmail(user.email, code);
+  return c.json({ email: user.email, expiresAt, emailSent: sent, ...(sent ? {} : { code }) });
 });
 
 // Public ingest (ESP32 / GitHub Actions simulator)

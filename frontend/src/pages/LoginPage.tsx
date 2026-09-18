@@ -35,6 +35,8 @@ export function LoginPage() {
   const [resetCode, setResetCode] = useState("");
   const [resetPassword, setResetPassword] = useState("");
   const [resetLoading, setResetLoading] = useState(false);
+  const [resetSendLoading, setResetSendLoading] = useState(false);
+  const [resetDemoCode, setResetDemoCode] = useState<string | null>(null);
 
   useEffect(() => {
     if (hydrated && token) {
@@ -85,6 +87,31 @@ export function LoginPage() {
       toast.error(msg);
     } finally {
       setResetLoading(false);
+    }
+  };
+
+  const handleSendResetCode = async () => {
+    if (!resetEmail) {
+      toast.error("Masukkan email dulu");
+      return;
+    }
+    setResetSendLoading(true);
+    try {
+      const { data } = await api.post<{ emailSent?: boolean; code?: string }>(
+        "/auth/request-reset",
+        { email: resetEmail }
+      );
+      setResetDemoCode(data.code ?? null);
+      toast.success(
+        data.emailSent ? "Kode reset dikirim ke email" : "Kode reset dibuat (mode demo)"
+      );
+    } catch (err) {
+      const msg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+        "Gagal mengirim kode";
+      toast.error(msg);
+    } finally {
+      setResetSendLoading(false);
     }
   };
 
@@ -209,21 +236,42 @@ export function LoginPage() {
               <DialogHeader>
                 <DialogTitle className="uppercase">Reset Password</DialogTitle>
                 <DialogDescription>
-                  Masukkan email dan kode reset 6 digit yang diberikan admin, lalu tentukan password baru.
+                  Masukkan email, klik <strong>Kirim Kode</strong>, lalu masukkan kode 6 digit dari
+                  email dan password baru.
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleReset} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="resetEmail">Email</Label>
-                  <Input
-                    id="resetEmail"
-                    type="email"
-                    placeholder="admin@example.com"
-                    value={resetEmail}
-                    onChange={(e) => setResetEmail(e.target.value)}
-                    required
-                  />
+                  <div className="flex gap-2">
+                    <Input
+                      id="resetEmail"
+                      type="email"
+                      placeholder="nama@gmail.com"
+                      value={resetEmail}
+                      onChange={(e) => setResetEmail(e.target.value)}
+                      required
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleSendResetCode}
+                      disabled={resetSendLoading}
+                      className="shrink-0"
+                    >
+                      {resetSendLoading ? "Mengirim..." : "Kirim Kode"}
+                    </Button>
+                  </div>
                 </div>
+                {resetDemoCode && (
+                  <div className="border border-primary/40 bg-primary/5 p-3 text-sm">
+                    <p className="font-medium text-primary">Mode demo (email belum dikonfigurasi)</p>
+                    <p className="mt-1 text-black-light">
+                      Kode reset:{" "}
+                      <span className="font-mono text-base font-bold">{resetDemoCode}</span>
+                    </p>
+                  </div>
+                )}
                 <div className="space-y-2">
                   <Label htmlFor="resetCode">Kode Reset</Label>
                   <Input

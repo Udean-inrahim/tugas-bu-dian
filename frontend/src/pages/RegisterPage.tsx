@@ -179,8 +179,11 @@ export function RegisterPage() {
                   />
                 </div>
                 <Button type="submit" variant="default" className="w-full" disabled={loading}>
-                  {loading ? "Memproses..." : "Daftar"}
+                  {loading ? "Mengirim..." : "Kirim Kode"}
                 </Button>
+                <p className="text-center text-xs text-black-light">
+                  Kode verifikasi akan dikirim ke emailmu setelah menekan tombol di atas.
+                </p>
               </form>
 
               <p className="mt-6 text-center text-sm text-black-light">

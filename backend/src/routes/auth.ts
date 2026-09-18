@@ -3,7 +3,7 @@ import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { prisma } from "../lib/prisma.js";
 import { createResetCode, verifyResetCode, createVerifyCode, verifyVerifyCode } from "../lib/resetCode.js";
-import { sendVerificationEmail } from "../lib/email.js";
+import { sendVerificationEmail, sendResetEmail } from "../lib/email.js";
 import { config } from "../config/index.js";
 
 const loginSchema = z.object({
@@ -77,6 +77,21 @@ export async function authRoutes(app: FastifyInstance) {
     const password = await bcrypt.hash(parsed.data.newPassword, 10);
     await prisma.user.update({ where: { id: user.id }, data: { password } });
     return { success: true };
+  });
+
+  app.post("/api/auth/request-reset", async (req, reply) => {
+    const schema = z.object({ email: z.string().email("Email tidak valid") });
+    const parsed = schema.safeParse(req.body);
+    if (!parsed.success) {
+      return reply.code(400).send({ error: "VALIDATION_ERROR", message: parsed.error.issues[0]?.message ?? "Input tidak valid" });
+    }
+
+    const user = await prisma.user.findUnique({ where: { email: parsed.data.email } });
+    if (!user) return reply.code(404).send({ error: "NOT_FOUND", message: "Email tidak terdaftar" });
+
+    const { code, expiresAt } = createResetCode(user.email);
+    const sent = await sendResetEmail(user.email, code);
+    return reply.send({ email: user.email, expiresAt, emailSent: sent, ...(sent ? {} : { code }) });
   });
 
   app.post("/api/auth/reset-code", { preHandler: app.requireAdmin }, async (req, reply) => {
