@@ -64,14 +64,17 @@ export function MonitoringPage() {
     }
   }, []);
 
-  const refresh = useCallback(() => {
-    fetchLatest();
-    fetchHistory(selectedSensorId, range, true);
-    reloadSensors(true);
-  }, [fetchLatest, fetchHistory, selectedSensorId, range, reloadSensors]);
+  const refresh = useCallback(
+    (silent = false) => {
+      fetchLatest();
+      fetchHistory(selectedSensorId, range, silent);
+      reloadSensors(true);
+    },
+    [fetchLatest, fetchHistory, selectedSensorId, range, reloadSensors]
+  );
 
   useEffect(() => {
-    refresh();
+    refresh(false);
   }, [refresh]);
 
   const refreshMs = Math.min(
@@ -80,7 +83,7 @@ export function MonitoringPage() {
   );
 
   useEffect(() => {
-    const id = setInterval(refresh, refreshMs);
+    const id = setInterval(() => refresh(true), refreshMs);
     return () => clearInterval(id);
   }, [refresh, refreshMs]);
 
