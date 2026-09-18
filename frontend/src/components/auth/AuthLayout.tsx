@@ -6,7 +6,7 @@ interface AuthLayoutProps {
   title: ReactNode;
   sub: ReactNode;
   children: ReactNode;
-  cta: { to: string; label: string; state?: unknown };
+  cta?: { to: string; label: string; state?: unknown };
 }
 
 export function AuthLayout({ title, sub, children, cta }: AuthLayoutProps) {
@@ -45,13 +45,15 @@ export function AuthLayout({ title, sub, children, cta }: AuthLayoutProps) {
             <a href="#" className="hover:text-[#2563f0]">Fitur</a>
             <a href="#" className="hover:text-[#2563f0]">Perangkat</a>
           </div>
-          <Link
-            to={cta.to}
-            state={cta.state}
-            className="rounded-full bg-[#2563f0] px-7 py-[11px] text-sm font-semibold text-white shadow-[0_10px_22px_rgba(37,99,240,0.32)] transition hover:bg-[#1b4fd6]"
-          >
-            {cta.label}
-          </Link>
+          {cta && (
+            <Link
+              to={cta.to}
+              state={cta.state}
+              className="rounded-full bg-[#2563f0] px-7 py-[11px] text-sm font-semibold text-white shadow-[0_10px_22px_rgba(37,99,240,0.32)] transition hover:bg-[#1b4fd6]"
+            >
+              {cta.label}
+            </Link>
+          )}
         </nav>
 
         <div className="grid grid-cols-1 items-center gap-[clamp(26px,4vw,56px)] min-[900px]:grid-cols-[1.02fr_0.98fr]">

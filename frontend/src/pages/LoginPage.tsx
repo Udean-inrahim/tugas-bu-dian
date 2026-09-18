@@ -138,7 +138,6 @@ export function LoginPage() {
           </>
         }
         sub="Pantau suhu & kelembapan semua sensor dalam satu tempat, kapan saja."
-        cta={{ to: "/register", label: "Daftar", state: { dir: "to-register" } }}
       >
         <div className={`auth-swap ${swapClass}`}>
           <form onSubmit={handleSubmit} className="max-w-[420px]" noValidate>
