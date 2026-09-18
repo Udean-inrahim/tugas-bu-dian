@@ -35,8 +35,7 @@ jobs:
 
       - name: Build web (API -> Vercel)
         working-directory: frontend
-        run: |
-          npm run build --workspace=frontend
+        run: npm run build
         env:
           VITE_API_URL: https://tugas-bu-dian.vercel.app/api
 
