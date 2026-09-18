@@ -25,19 +25,21 @@
     "@fastify/swagger": "^8.15.0",
     "@fastify/swagger-ui": "^4.1.0",
     "@fastify/websocket": "^10.0.1",
+    "@neondatabase/serverless": "^0.10.0",
     "@prisma/adapter-neon": "^5.19.1",
     "@prisma/client": "^5.19.1",
-    "@neondatabase/serverless": "^0.10.0",
     "bcryptjs": "^2.4.3",
-    "hono": "^4.6.0",
     "dotenv": "^16.4.5",
     "fastify": "^4.28.1",
+    "hono": "^4.6.0",
     "mqtt": "^5.10.0",
+    "nodemailer": "^10.0.10",
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^22.5.4",
+    "@types/nodemailer": "^8.0.2",
     "prisma": "^5.19.1",
     "tsx": "^4.19.0",
     "typescript": "^5.5.4"

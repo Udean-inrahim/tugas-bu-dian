@@ -1,3 +1,5 @@
+import nodemailer, { type Transporter } from "nodemailer";
+
 const RESEND_ENDPOINT = "https://api.resend.com/emails";
 const BREVO_ENDPOINT = "https://api.brevo.com/v3/smtp/email";
 
@@ -16,7 +18,46 @@ function parseFrom(fallbackEmail: string): Sender {
 }
 
 export function emailConfigured() {
-  return Boolean(process.env.BREVO_API_KEY || process.env.RESEND_API_KEY);
+  return Boolean(process.env.SMTP_HOST || process.env.BREVO_API_KEY || process.env.RESEND_API_KEY);
+}
+
+let smtpTransporter: Transporter | null = null;
+
+function getSmtpTransporter(): Transporter | null {
+  if (!process.env.SMTP_HOST) return null;
+  if (!smtpTransporter) {
+    smtpTransporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT ?? 465),
+      secure: (process.env.SMTP_SECURE ?? "true") !== "false",
+      auth: process.env.SMTP_USER
+        ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
+        : undefined,
+    });
+  }
+  return smtpTransporter;
+}
+
+async function sendViaSmtp(to: string, subject: string, html: string): Promise<boolean> {
+  const transporter = getSmtpTransporter();
+  if (!transporter) return false;
+  const sender = parseFrom(process.env.EMAIL_SENDER ?? process.env.SMTP_USER ?? "");
+  if (!sender.email) {
+    console.error("SMTP: set EMAIL_FROM (mis. 'Smart Temp Monitor <kamu@gmail.com>')");
+    return false;
+  }
+  try {
+    await transporter.sendMail({
+      from: `${sender.name} <${sender.email}>`,
+      to,
+      subject,
+      html,
+    });
+    return true;
+  } catch (err) {
+    console.error("Gagal mengirim email via SMTP:", err);
+    return false;
+  }
 }
 
 async function sendViaBrevo(to: string, subject: string, html: string): Promise<boolean> {
@@ -74,6 +115,7 @@ async function sendViaResend(to: string, subject: string, html: string): Promise
 }
 
 function sendEmail(to: string, subject: string, html: string): Promise<boolean> {
+  if (process.env.SMTP_HOST) return sendViaSmtp(to, subject, html);
   if (process.env.BREVO_API_KEY) return sendViaBrevo(to, subject, html);
   if (process.env.RESEND_API_KEY) return sendViaResend(to, subject, html);
   return Promise.resolve(false);
