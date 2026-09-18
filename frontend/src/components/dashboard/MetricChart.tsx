@@ -29,11 +29,30 @@ export function MetricChart({ data, type, height = 280, showLegend = true }: Pro
     humidity: r.humidity,
   }));
 
+  if (chartData.length === 0) {
+    return (
+      <div
+        className="flex items-center justify-center text-sm text-muted-foreground"
+        style={{ height }}
+      >
+        Belum ada data pada rentang ini.
+      </div>
+    );
+  }
+
+  const showDots = chartData.length <= 48;
+
   return (
     <ResponsiveContainer width="100%" height={height}>
       <LineChart data={chartData} margin={{ top: 5, right: 10, bottom: 5, left: -10 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-        <XAxis dataKey="time" tick={{ fontSize: 11 }} tickLine={false} axisLine={{ stroke: "#e5e7eb" }} />
+        <XAxis
+          dataKey="time"
+          tick={{ fontSize: 11 }}
+          tickLine={false}
+          axisLine={{ stroke: "#e5e7eb" }}
+          minTickGap={24}
+        />
         <YAxis
           tick={{ fontSize: 11 }}
           tickLine={false}
@@ -55,7 +74,7 @@ export function MetricChart({ data, type, height = 280, showLegend = true }: Pro
             dataKey="temperature"
             stroke="#f97316"
             strokeWidth={2}
-            dot={false}
+            dot={showDots ? { r: 3 } : false}
             name="Temperature (°C)"
             activeDot={{ r: 4 }}
           />
@@ -65,7 +84,7 @@ export function MetricChart({ data, type, height = 280, showLegend = true }: Pro
             dataKey="humidity"
             stroke="#3b82f6"
             strokeWidth={2}
-            dot={false}
+            dot={showDots ? { r: 3 } : false}
             name="Humidity (%)"
             activeDot={{ r: 4 }}
           />

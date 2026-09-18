@@ -27,7 +27,7 @@ export function MonitoringPage() {
   const { settings } = useSettings();
 
   const [selectedSensorId, setSelectedSensorId] = useState<string>("all");
-  const [range, setRange] = useState<ChartRange>("6h");
+  const [range, setRange] = useState<ChartRange>("24h");
   const [latest, setLatest] = useState<SensorReading | null>(null);
   const [readings, setReadings] = useState<SensorReading[]>([]);
   const [loading, setLoading] = useState(true);

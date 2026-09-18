@@ -32,7 +32,7 @@ export function DashboardPage() {
   const { summary, list: reloadAlerts } = useAlerts({ status: "ACTIVE", limit: 5 });
   const { data: readings, refetch: reloadReadings } = useReadings({ limit: 20 });
 
-  const [range, setRange] = useState<ChartRange>("6h");
+  const [range, setRange] = useState<ChartRange>("24h");
   const [chartReadings, setChartReadings] = useState<SensorReading[]>([]);
   const [chartLoading, setChartLoading] = useState(true);
 
