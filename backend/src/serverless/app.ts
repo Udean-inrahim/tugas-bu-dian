@@ -11,6 +11,7 @@ import {
   verifyVerifyCode,
 } from "../lib/resetCode.js";
 import { sendVerificationEmail, sendResetEmail } from "../lib/email.js";
+import { demoReading } from "../lib/demoData.js";
 import { getActiveSettings, updateSettings } from "./settings.js";
 import {
   evaluateThresholds,
@@ -107,13 +108,6 @@ async function recordReading(sensorId: number, temperature: number, humidity: nu
 const DEMO_MODE = (process.env.DEMO_MODE ?? "true") !== "false";
 const DEMO_HEARTBEAT_MS = Number(process.env.DEMO_HEARTBEAT_MS ?? 4 * 60 * 1000);
 let lastHeartbeatCheck = 0;
-
-function demoReading(at: number) {
-  const phase = ((at % (12 * 60 * 60 * 1000)) / (12 * 60 * 60 * 1000)) * Math.PI * 2;
-  const temperature = Number((24 + 4 * Math.sin(phase) + (Math.random() - 0.5) * 0.6).toFixed(2));
-  const humidity = Number((55 + 12 * Math.cos(phase * 0.8) + (Math.random() - 0.5) * 1.5).toFixed(2));
-  return { temperature, humidity };
-}
 
 async function ensureDemoHeartbeat() {
   if (!DEMO_MODE) return;
