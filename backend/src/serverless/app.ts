@@ -4,6 +4,7 @@ import { cors } from "hono/cors";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "./prisma.js";
+import { createResetCode, verifyResetCode } from "../lib/resetCode.js";
 import { getActiveSettings, updateSettings } from "./settings.js";
 import {
   evaluateThresholds,
@@ -207,6 +208,26 @@ app.post("/api/auth/register", async (c) => {
 
 app.post("/api/auth/logout", (c) => c.json({ success: true }));
 
+app.post("/api/auth/reset-password", async (c) => {
+  const schema = z.object({
+    email: z.string().email("Email tidak valid"),
+    code: z.string().min(4, "Kode reset wajib diisi"),
+    newPassword: z.string().min(6, "Password minimal 6 karakter"),
+  });
+  const parsed = schema.safeParse(await c.req.json().catch(() => ({})));
+  if (!parsed.success) return c.json(validationError(parsed.error), 400);
+
+  const user = await prisma.user.findUnique({ where: { email: parsed.data.email } });
+  if (!user) return c.json({ error: "NOT_FOUND", message: "Email tidak terdaftar" }, 404);
+  if (!verifyResetCode(user.email, parsed.data.code)) {
+    return c.json({ error: "INVALID_CODE", message: "Kode reset salah atau kedaluwarsa" }, 400);
+  }
+
+  const password = await bcrypt.hash(parsed.data.newPassword, 10);
+  await prisma.user.update({ where: { id: user.id }, data: { password } });
+  return c.json({ success: true });
+});
+
 // Public ingest (ESP32 / GitHub Actions simulator)
 app.post("/api/readings", async (c) => {
   const body = (await c.req.json().catch(() => ({}))) as Record<string, unknown>;
@@ -274,6 +295,19 @@ app.get("/api/auth/me", async (c) => {
   });
   if (!user) return c.json({ error: "UNAUTHORIZED", message: "User tidak ditemukan" }, 401);
   return c.json(user);
+});
+
+app.post("/api/auth/reset-code", async (c) => {
+  if (!isAdmin(c)) return c.json({ error: "FORBIDDEN", message: "Akses ditolak" }, 403);
+  const schema = z.object({ email: z.string().email("Email tidak valid") });
+  const parsed = schema.safeParse(await c.req.json().catch(() => ({})));
+  if (!parsed.success) return c.json(validationError(parsed.error), 400);
+
+  const user = await prisma.user.findUnique({ where: { email: parsed.data.email } });
+  if (!user) return c.json({ error: "NOT_FOUND", message: "Email tidak terdaftar" }, 404);
+
+  const { code, expiresAt } = createResetCode(user.email);
+  return c.json({ email: user.email, name: user.name, code, expiresAt });
 });
 
 app.get("/api/sensors", async (c) => {

@@ -2,6 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { prisma } from "../lib/prisma.js";
+import { createResetCode, verifyResetCode } from "../lib/resetCode.js";
 import { config } from "../config/index.js";
 
 const loginSchema = z.object({
@@ -44,6 +45,42 @@ export async function authRoutes(app: FastifyInstance) {
   app.post("/api/auth/logout", async () => {
     // JWT is stateless; client discards token.
     return { success: true };
+  });
+
+  app.post("/api/auth/reset-password", async (req, reply) => {
+    const schema = z.object({
+      email: z.string().email("Email tidak valid"),
+      code: z.string().min(4, "Kode reset wajib diisi"),
+      newPassword: z.string().min(6, "Password minimal 6 karakter"),
+    });
+    const parsed = schema.safeParse(req.body);
+    if (!parsed.success) {
+      return reply.code(400).send({ error: "VALIDATION_ERROR", message: parsed.error.issues[0]?.message ?? "Input tidak valid" });
+    }
+
+    const user = await prisma.user.findUnique({ where: { email: parsed.data.email } });
+    if (!user) return reply.code(404).send({ error: "NOT_FOUND", message: "Email tidak terdaftar" });
+    if (!verifyResetCode(user.email, parsed.data.code)) {
+      return reply.code(400).send({ error: "INVALID_CODE", message: "Kode reset salah atau kedaluwarsa" });
+    }
+
+    const password = await bcrypt.hash(parsed.data.newPassword, 10);
+    await prisma.user.update({ where: { id: user.id }, data: { password } });
+    return { success: true };
+  });
+
+  app.post("/api/auth/reset-code", { preHandler: app.requireAdmin }, async (req, reply) => {
+    const schema = z.object({ email: z.string().email("Email tidak valid") });
+    const parsed = schema.safeParse(req.body);
+    if (!parsed.success) {
+      return reply.code(400).send({ error: "VALIDATION_ERROR", message: parsed.error.issues[0]?.message ?? "Input tidak valid" });
+    }
+
+    const user = await prisma.user.findUnique({ where: { email: parsed.data.email } });
+    if (!user) return reply.code(404).send({ error: "NOT_FOUND", message: "Email tidak terdaftar" });
+
+    const { code, expiresAt } = createResetCode(user.email);
+    return { email: user.email, name: user.name, code, expiresAt };
   });
 
   app.get("/api/auth/me", { preHandler: app.authenticate }, async (req) => {

@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Save, Lock } from "lucide-react";
+import { Save, Lock, KeyRound } from "lucide-react";
 import { useSettings } from "@/hooks/useSettings";
 import { useAuthStore } from "@/stores/authStore";
+import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -30,6 +31,40 @@ export function SettingsPage() {
   const [maxHum, setMaxHum] = useState("70");
   const [refresh, setRefresh] = useState("5");
   const [saving, setSaving] = useState(false);
+
+  const [resetTarget, setResetTarget] = useState("");
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetResult, setResetResult] = useState<{
+    email: string;
+    name: string;
+    code: string;
+    expiresAt: string;
+  } | null>(null);
+
+  const handleGenerateReset = async () => {
+    if (!resetTarget.trim()) {
+      toast.error("Masukkan email pengguna");
+      return;
+    }
+    setResetLoading(true);
+    try {
+      const { data } = await api.post<{
+        email: string;
+        name: string;
+        code: string;
+        expiresAt: string;
+      }>("/auth/reset-code", { email: resetTarget.trim() });
+      setResetResult(data);
+      toast.success("Kode reset dibuat");
+    } catch (err) {
+      const msg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+        "Gagal membuat kode reset";
+      toast.error(msg);
+    } finally {
+      setResetLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (settings) {
@@ -247,6 +282,64 @@ export function SettingsPage() {
           </div>
         </CardContent>
       </Card>
+      </Reveal>
+
+      <Reveal>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <KeyRound className="h-4 w-4 text-primary" /> Reset Password Pengguna
+            </CardTitle>
+            <CardDescription>
+              Buat kode reset 6 digit untuk pengguna yang lupa password, lalu berikan kode tersebut
+              kepadanya. Kode berlaku 15 menit.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+              <div className="flex-1 space-y-2">
+                <Label htmlFor="resetTarget">Email Pengguna</Label>
+                <Input
+                  id="resetTarget"
+                  type="email"
+                  placeholder="user@example.com"
+                  value={resetTarget}
+                  onChange={(e) => setResetTarget(e.target.value)}
+                />
+              </div>
+              <Button onClick={handleGenerateReset} disabled={resetLoading}>
+                {resetLoading ? "Membuat..." : "Buat Kode Reset"}
+              </Button>
+            </div>
+
+            {resetResult && (
+              <div className="rounded-md border px-4 py-3">
+                <p className="text-sm text-muted-foreground">
+                  Kode reset untuk <span className="font-medium text-foreground">{resetResult.name}</span>{" "}
+                  ({resetResult.email}):
+                </p>
+                <div className="mt-2 flex items-center gap-3">
+                  <span className="text-2xl font-bold tracking-[0.3em] tabular-nums text-primary">
+                    {resetResult.code}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      navigator.clipboard?.writeText(resetResult.code);
+                      toast.success("Kode disalin");
+                    }}
+                  >
+                    Salin
+                  </Button>
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Berlaku sampai {new Date(resetResult.expiresAt).toLocaleTimeString("id-ID")}.
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </Reveal>
 
       <div className="flex justify-end">

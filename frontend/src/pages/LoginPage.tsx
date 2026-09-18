@@ -1,10 +1,19 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/stores/authStore";
+import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Reveal } from "@/components/ui/reveal";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 
 export function LoginPage() {
@@ -16,6 +25,12 @@ export function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+
+  const [resetOpen, setResetOpen] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetCode, setResetCode] = useState("");
+  const [resetPassword, setResetPassword] = useState("");
+  const [resetLoading, setResetLoading] = useState(false);
 
   useEffect(() => {
     if (hydrated && token) {
@@ -31,6 +46,34 @@ export function LoginPage() {
       toast.success("Login berhasil");
     } catch {
       toast.error("Email atau password salah");
+    }
+  };
+
+  const handleReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (resetPassword.length < 6) {
+      toast.error("Password minimal 6 karakter");
+      return;
+    }
+    setResetLoading(true);
+    try {
+      await api.post("/auth/reset-password", {
+        email: resetEmail,
+        code: resetCode,
+        newPassword: resetPassword,
+      });
+      toast.success("Password berhasil diubah. Silakan login.");
+      setEmail(resetEmail);
+      setResetOpen(false);
+      setResetCode("");
+      setResetPassword("");
+    } catch (err) {
+      const msg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+        "Gagal mereset password";
+      toast.error(msg);
+    } finally {
+      setResetLoading(false);
     }
   };
 
@@ -120,6 +163,18 @@ export function LoginPage() {
                 </button>
               </div>
             </div>
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  setResetEmail(email);
+                  setResetOpen(true);
+                }}
+                className="text-xs font-medium text-primary hover:underline"
+              >
+                Lupa password?
+              </button>
+            </div>
             <Button type="submit" variant="default" className="w-full" disabled={loading}>
               {loading ? "Memproses..." : "Login"}
             </Button>
@@ -127,6 +182,58 @@ export function LoginPage() {
               Demo: admin@example.com / admin123
             </p>
           </form>
+
+          <Dialog open={resetOpen} onOpenChange={setResetOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle className="uppercase">Reset Password</DialogTitle>
+                <DialogDescription>
+                  Masukkan email dan kode reset 6 digit yang diberikan admin, lalu tentukan password baru.
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleReset} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="resetEmail">Email</Label>
+                  <Input
+                    id="resetEmail"
+                    type="email"
+                    placeholder="admin@example.com"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="resetCode">Kode Reset</Label>
+                  <Input
+                    id="resetCode"
+                    inputMode="numeric"
+                    placeholder="123456"
+                    value={resetCode}
+                    onChange={(e) => setResetCode(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="resetPassword">Password Baru</Label>
+                  <Input
+                    id="resetPassword"
+                    type="password"
+                    placeholder="••••••"
+                    value={resetPassword}
+                    onChange={(e) => setResetPassword(e.target.value)}
+                    required
+                    autoComplete="new-password"
+                  />
+                </div>
+                <DialogFooter>
+                  <Button type="submit" className="w-full" disabled={resetLoading}>
+                    {resetLoading ? "Menyimpan..." : "Simpan Password Baru"}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
         </Reveal>
       </div>
     </div>
