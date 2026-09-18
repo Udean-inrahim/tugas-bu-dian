@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/stores/authStore";
 import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -44,8 +44,15 @@ export function LoginPage() {
       await login(email, password);
       navigate("/", { replace: true });
       toast.success("Login berhasil");
-    } catch {
-      toast.error("Email atau password salah");
+    } catch (err) {
+      const data = (err as { response?: { data?: { error?: string; message?: string } } })
+        ?.response?.data;
+      if (data?.error === "EMAIL_NOT_VERIFIED") {
+        toast.error(data.message ?? "Email belum diverifikasi");
+        navigate("/register", { state: { email } });
+      } else {
+        toast.error("Email atau password salah");
+      }
     }
   };
 
@@ -178,6 +185,12 @@ export function LoginPage() {
             <Button type="submit" variant="default" className="w-full" disabled={loading}>
               {loading ? "Memproses..." : "Login"}
             </Button>
+            <p className="text-center text-sm text-black-light">
+              Belum punya akun?{" "}
+              <Link to="/register" className="font-medium text-primary hover:underline">
+                Daftar
+              </Link>
+            </p>
             <p className="text-center text-xs uppercase tracking-wide text-black-light">
               Demo: admin@example.com / admin123
             </p>

@@ -4,7 +4,13 @@ import { cors } from "hono/cors";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "./prisma.js";
-import { createResetCode, verifyResetCode } from "../lib/resetCode.js";
+import {
+  createResetCode,
+  verifyResetCode,
+  createVerifyCode,
+  verifyVerifyCode,
+} from "../lib/resetCode.js";
+import { sendVerificationEmail } from "../lib/email.js";
 import { getActiveSettings, updateSettings } from "./settings.js";
 import {
   evaluateThresholds,
@@ -182,6 +188,16 @@ app.post("/api/auth/login", async (c) => {
   const valid = await bcrypt.compare(parsed.data.password, user.password);
   if (!valid) return c.json({ error: "UNAUTHORIZED", message: "Email atau password salah" }, 401);
 
+  if (!user.emailVerified) {
+    return c.json(
+      {
+        error: "EMAIL_NOT_VERIFIED",
+        message: "Email belum diverifikasi. Cek inbox kamu atau minta kode verifikasi baru.",
+      },
+      403
+    );
+  }
+
   const token = await tokenFor(user);
   return c.json({ token, user: publicUser(user) });
 });
@@ -196,14 +212,87 @@ app.post("/api/auth/register", async (c) => {
   if (!parsed.success) return c.json(validationError(parsed.error), 400);
 
   const exists = await prisma.user.findUnique({ where: { email: parsed.data.email } });
-  if (exists) return c.json({ error: "EMAIL_TAKEN", message: "Email sudah terdaftar" }, 409);
+  if (exists) {
+    if (!exists.emailVerified) {
+      const { code, expiresAt } = createVerifyCode(exists.email);
+      const sent = await sendVerificationEmail(exists.email, code);
+      return c.json(
+        { pendingVerification: true, email: exists.email, expiresAt, emailSent: sent, ...(sent ? {} : { code }) },
+        200
+      );
+    }
+    return c.json({ error: "EMAIL_TAKEN", message: "Email sudah terdaftar" }, 409);
+  }
 
   const password = await bcrypt.hash(parsed.data.password, 10);
   const user = await prisma.user.create({
-    data: { name: parsed.data.name, email: parsed.data.email, password, role: "USER" },
+    data: {
+      name: parsed.data.name,
+      email: parsed.data.email,
+      password,
+      role: "USER",
+      emailVerified: false,
+    },
   });
-  const token = await tokenFor(user);
-  return c.json({ token, user: publicUser(user) }, 201);
+
+  const { code, expiresAt } = createVerifyCode(user.email);
+  const sent = await sendVerificationEmail(user.email, code);
+  return c.json(
+    {
+      pendingVerification: true,
+      email: user.email,
+      expiresAt,
+      emailSent: sent,
+      ...(sent ? {} : { code }),
+    },
+    201
+  );
+});
+
+// Verify email with the 6-digit code, then log the user in
+app.post("/api/auth/verify-email", async (c) => {
+  const schema = z.object({
+    email: z.string().email("Email tidak valid"),
+    code: z.string().min(4, "Kode verifikasi wajib diisi"),
+  });
+  const parsed = schema.safeParse(await c.req.json().catch(() => ({})));
+  if (!parsed.success) return c.json(validationError(parsed.error), 400);
+
+  const user = await prisma.user.findUnique({ where: { email: parsed.data.email } });
+  if (!user) return c.json({ error: "NOT_FOUND", message: "Email tidak terdaftar" }, 404);
+
+  if (user.emailVerified) {
+    const token = await tokenFor(user);
+    return c.json({ token, user: publicUser(user) });
+  }
+
+  if (!verifyVerifyCode(user.email, parsed.data.code)) {
+    return c.json({ error: "INVALID_CODE", message: "Kode verifikasi salah atau kedaluwarsa" }, 400);
+  }
+
+  const updated = await prisma.user.update({
+    where: { id: user.id },
+    data: { emailVerified: true },
+  });
+  const token = await tokenFor(updated);
+  return c.json({ token, user: publicUser(updated) });
+});
+
+// Resend the verification code
+app.post("/api/auth/resend-verification", async (c) => {
+  const schema = z.object({ email: z.string().email("Email tidak valid") });
+  const parsed = schema.safeParse(await c.req.json().catch(() => ({})));
+  if (!parsed.success) return c.json(validationError(parsed.error), 400);
+
+  const user = await prisma.user.findUnique({ where: { email: parsed.data.email } });
+  if (!user) return c.json({ error: "NOT_FOUND", message: "Email tidak terdaftar" }, 404);
+  if (user.emailVerified) {
+    return c.json({ error: "ALREADY_VERIFIED", message: "Email sudah diverifikasi" }, 400);
+  }
+
+  const { code, expiresAt } = createVerifyCode(user.email);
+  const sent = await sendVerificationEmail(user.email, code);
+  return c.json({ email: user.email, expiresAt, emailSent: sent, ...(sent ? {} : { code }) });
 });
 
 app.post("/api/auth/logout", (c) => c.json({ success: true }));

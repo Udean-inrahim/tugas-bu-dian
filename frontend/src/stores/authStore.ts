@@ -8,9 +8,19 @@ interface AuthState {
   loading: boolean;
   hydrated: boolean;
   login: (email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, password: string) => Promise<RegisterResult>;
+  verifyEmail: (email: string, code: string) => Promise<void>;
   logout: () => Promise<void>;
   loadFromStorage: () => void;
   get isAuthenticated(): boolean;
+}
+
+export interface RegisterResult {
+  pendingVerification: boolean;
+  email: string;
+  expiresAt?: string;
+  emailSent?: boolean;
+  code?: string;
 }
 
 const TOKEN_KEY = "stm_token";
@@ -33,6 +43,33 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         email,
         password,
       });
+      localStorage.setItem(TOKEN_KEY, data.token);
+      localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+      set({ user: data.user, token: data.token, loading: false });
+    } catch (error) {
+      set({ loading: false });
+      throw error;
+    }
+  },
+
+  register: async (name: string, email: string, password: string) => {
+    set({ loading: true });
+    try {
+      const { data } = await api.post<RegisterResult>("/auth/register", {
+        name,
+        email,
+        password,
+      });
+      return data;
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  verifyEmail: async (email: string, code: string) => {
+    set({ loading: true });
+    try {
+      const { data } = await api.post<LoginResponse>("/auth/verify-email", { email, code });
       localStorage.setItem(TOKEN_KEY, data.token);
       localStorage.setItem(USER_KEY, JSON.stringify(data.user));
       set({ user: data.user, token: data.token, loading: false });

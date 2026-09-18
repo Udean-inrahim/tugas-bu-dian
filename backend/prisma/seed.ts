@@ -4,16 +4,23 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 async function main() {
+  // Ensure the email_verified column exists (schema is applied via raw DDL because
+  // `prisma migrate` cannot run reliably over Neon's pooled connection).
+  await prisma.$executeRawUnsafe(
+    'ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "email_verified" boolean NOT NULL DEFAULT false'
+  );
+
   // Admin user
   const password = await bcrypt.hash("admin123", 10);
   const admin = await prisma.user.upsert({
     where: { email: "admin@example.com" },
-    update: {},
+    update: { emailVerified: true },
     create: {
       name: "Admin",
       email: "admin@example.com",
       password,
       role: "ADMIN",
+      emailVerified: true,
     },
   });
   console.log(`✅ Admin user created: ${admin.email}`);
