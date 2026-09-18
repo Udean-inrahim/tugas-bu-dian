@@ -100,6 +100,37 @@ async function recordReading(sensorId: number, temperature: number, humidity: nu
   });
 }
 
+// --- Demo heartbeat ---------------------------------------------------------
+// Hardware sensor belum tersedia, jadi saat mode demo aktif server menyuntik
+// data baru ketika pembacaan terakhir sudah lebih lama dari DEMO_HEARTBEAT_MS,
+// agar status sensor ONLINE dan grafik tetap bergerak. DEMO_MODE=false untuk off.
+const DEMO_MODE = (process.env.DEMO_MODE ?? "true") !== "false";
+const DEMO_HEARTBEAT_MS = Number(process.env.DEMO_HEARTBEAT_MS ?? 4 * 60 * 1000);
+let lastHeartbeatCheck = 0;
+
+function demoReading(at: number) {
+  const phase = ((at % (12 * 60 * 60 * 1000)) / (12 * 60 * 60 * 1000)) * Math.PI * 2;
+  const temperature = Number((24 + 4 * Math.sin(phase) + (Math.random() - 0.5) * 0.6).toFixed(2));
+  const humidity = Number((55 + 12 * Math.cos(phase * 0.8) + (Math.random() - 0.5) * 1.5).toFixed(2));
+  return { temperature, humidity };
+}
+
+async function ensureDemoHeartbeat() {
+  if (!DEMO_MODE) return;
+  const now = Date.now();
+  if (now - lastHeartbeatCheck < 30_000) return;
+  lastHeartbeatCheck = now;
+  const sensors = await prisma.sensor.findMany({ where: { isActive: true }, select: { id: true } });
+  if (sensors.length === 0) return;
+  const last = await latestBySensor(sensors.map((s) => s.id));
+  for (const sensor of sensors) {
+    const prev = last.get(sensor.id);
+    if (prev && now - prev.getTime() < DEMO_HEARTBEAT_MS) continue;
+    const { temperature, humidity } = demoReading(now);
+    await recordReading(sensor.id, temperature, humidity);
+  }
+}
+
 const readingInlineSchema = z.object({
   sensor_id: z.number().int().positive(),
   temperature: z.number().min(-40).max(125),
@@ -354,6 +385,19 @@ app.post("/api/readings", async (c) => {
   return c.json(reading, 201);
 });
 
+// Public demo heartbeat (dipanggil cron gratis seperti cron-job.org tiap menit).
+// Menyuntik pembacaan acak untuk semua sensor aktif; aktif hanya saat DEMO_MODE.
+app.on(["GET", "POST"], "/api/demo/heartbeat", async (c) => {
+  if (!DEMO_MODE) return c.json({ error: "DEMO_DISABLED", message: "Mode demo nonaktif" }, 403);
+  const sensors = await prisma.sensor.findMany({ where: { isActive: true }, select: { id: true } });
+  const now = Date.now();
+  for (const sensor of sensors) {
+    const { temperature, humidity } = demoReading(now);
+    await recordReading(sensor.id, temperature, humidity);
+  }
+  return c.json({ ok: true, sensors: sensors.length, timestamp: new Date().toISOString() });
+});
+
 // Periodic offline detection, called by GitHub Actions
 app.post("/api/system/tick", async (c) => {
   if (c.req.header("x-service-token") !== SERVICE_TOKEN) {
@@ -414,6 +458,7 @@ app.post("/api/auth/reset-code", async (c) => {
 });
 
 app.get("/api/sensors", async (c) => {
+  await ensureDemoHeartbeat();
   const sensors = await prisma.sensor.findMany({ orderBy: { createdAt: "asc" } });
   const last = await latestBySensor(sensors.map((s) => s.id));
   const data = sensors.map((s) => ({ ...s, status: isOnline(s, last.get(s.id)) }));
@@ -478,6 +523,7 @@ app.patch("/api/sensors/:id/toggle", async (c) => {
 });
 
 app.get("/api/readings/latest", async (c) => {
+  await ensureDemoHeartbeat();
   const sensorId = c.req.query("sensor_id");
   if (sensorId) {
     const reading = await prisma.sensorReading.findFirst({
@@ -496,6 +542,7 @@ app.get("/api/readings/latest", async (c) => {
 });
 
 app.get("/api/readings", async (c) => {
+  await ensureDemoHeartbeat();
   const q = c.req.queries();
   const { page, limit, skip } = pagination(new URLSearchParams(c.req.url.split("?")[1] ?? ""));
   const where: Record<string, unknown> = {};
