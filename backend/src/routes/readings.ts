@@ -67,7 +67,13 @@ export async function readingRoutes(app: FastifyInstance) {
 
   app.get("/api/readings/latest", async (req, reply) => {
     const { sensor_id } = req.query as { sensor_id?: string };
+    const myIds = (
+      await prisma.sensor.findMany({ where: { userId: req.user.sub }, select: { id: true } })
+    ).map((s) => s.id);
     if (sensor_id) {
+      if (!myIds.includes(Number(sensor_id))) {
+        return reply.code(404).send({ error: "NOT_FOUND", message: "Sensor tidak ditemukan" });
+      }
       const reading = await prisma.sensorReading.findFirst({
         where: { sensorId: Number(sensor_id) },
         orderBy: { recordedAt: "desc" },
@@ -82,6 +88,7 @@ export async function readingRoutes(app: FastifyInstance) {
     }
 
     const readings = await prisma.sensorReading.findMany({
+      where: { sensorId: { in: myIds } },
       orderBy: { recordedAt: "desc" },
       take: 1,
       include: { sensor: true },
@@ -102,8 +109,17 @@ export async function readingRoutes(app: FastifyInstance) {
     const limit = Math.min(200, Math.max(1, Number(q.limit ?? 50) || 50));
     const skip = (page - 1) * limit;
 
+    const myIds = (
+      await prisma.sensor.findMany({ where: { userId: req.user.sub }, select: { id: true } })
+    ).map((s) => s.id);
+
     const where: Record<string, unknown> = {};
-    if (q.sensor_id) where.sensorId = Number(q.sensor_id);
+    if (q.sensor_id) {
+      const sid = Number(q.sensor_id);
+      where.sensorId = { in: myIds.includes(sid) ? [sid] : [] };
+    } else {
+      where.sensorId = { in: myIds };
+    }
     const from = parseDateParam(q.from);
     const to = parseDateParam(q.to);
     if (from) where.recordedAt = { ...((where.recordedAt as object) ?? {}), gte: from };

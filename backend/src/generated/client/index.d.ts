@@ -1255,6 +1255,37 @@ export namespace Prisma {
 
 
   /**
+   * Count Type UserCountOutputType
+   */
+
+  export type UserCountOutputType = {
+    sensors: number
+  }
+
+  export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    sensors?: boolean | UserCountOutputTypeCountSensorsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserCountOutputType
+     */
+    select?: UserCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountSensorsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SensorWhereInput
+  }
+
+
+  /**
    * Count Type SensorCountOutputType
    */
 
@@ -1520,6 +1551,8 @@ export namespace Prisma {
     emailVerified?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    sensors?: boolean | User$sensorsArgs<ExtArgs>
+    _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -1544,10 +1577,17 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
+  export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    sensors?: boolean | User$sensorsArgs<ExtArgs>
+    _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $UserPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "User"
-    objects: {}
+    objects: {
+      sensors: Prisma.$SensorPayload<ExtArgs>[]
+    }
     scalars: $Extensions.GetPayloadResult<{
       id: number
       name: string
@@ -1921,6 +1961,7 @@ export namespace Prisma {
    */
   export interface Prisma__UserClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    sensors<T extends User$sensorsArgs<ExtArgs> = {}>(args?: Subset<T, User$sensorsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SensorPayload<ExtArgs>, T, "findMany"> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1971,6 +2012,10 @@ export namespace Prisma {
      */
     select?: UserSelect<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    /**
      * Filter, which User to fetch.
      */
     where: UserWhereUniqueInput
@@ -1985,6 +2030,10 @@ export namespace Prisma {
      */
     select?: UserSelect<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    /**
      * Filter, which User to fetch.
      */
     where: UserWhereUniqueInput
@@ -1998,6 +2047,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the User
      */
     select?: UserSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
     /**
      * Filter, which User to fetch.
      */
@@ -2043,6 +2096,10 @@ export namespace Prisma {
      */
     select?: UserSelect<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    /**
      * Filter, which User to fetch.
      */
     where?: UserWhereInput
@@ -2087,6 +2144,10 @@ export namespace Prisma {
      */
     select?: UserSelect<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    /**
      * Filter, which Users to fetch.
      */
     where?: UserWhereInput
@@ -2125,6 +2186,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the User
      */
     select?: UserSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
     /**
      * The data needed to create a User.
      */
@@ -2166,6 +2231,10 @@ export namespace Prisma {
      */
     select?: UserSelect<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    /**
      * The data needed to update a User.
      */
     data: XOR<UserUpdateInput, UserUncheckedUpdateInput>
@@ -2198,6 +2267,10 @@ export namespace Prisma {
      */
     select?: UserSelect<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    /**
      * The filter to search for the User to update in case it exists.
      */
     where: UserWhereUniqueInput
@@ -2220,6 +2293,10 @@ export namespace Prisma {
      */
     select?: UserSelect<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    /**
      * Filter which User to delete.
      */
     where: UserWhereUniqueInput
@@ -2236,6 +2313,26 @@ export namespace Prisma {
   }
 
   /**
+   * User.sensors
+   */
+  export type User$sensorsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Sensor
+     */
+    select?: SensorSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SensorInclude<ExtArgs> | null
+    where?: SensorWhereInput
+    orderBy?: SensorOrderByWithRelationInput | SensorOrderByWithRelationInput[]
+    cursor?: SensorWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: SensorScalarFieldEnum | SensorScalarFieldEnum[]
+  }
+
+  /**
    * User without action
    */
   export type UserDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -2243,6 +2340,10 @@ export namespace Prisma {
      * Select specific fields to fetch from the User
      */
     select?: UserSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
   }
 
 
@@ -2260,10 +2361,12 @@ export namespace Prisma {
 
   export type SensorAvgAggregateOutputType = {
     id: number | null
+    userId: number | null
   }
 
   export type SensorSumAggregateOutputType = {
     id: number | null
+    userId: number | null
   }
 
   export type SensorMinAggregateOutputType = {
@@ -2273,6 +2376,7 @@ export namespace Prisma {
     location: string | null
     status: $Enums.SensorStatus | null
     isActive: boolean | null
+    userId: number | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -2284,6 +2388,7 @@ export namespace Prisma {
     location: string | null
     status: $Enums.SensorStatus | null
     isActive: boolean | null
+    userId: number | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -2295,6 +2400,7 @@ export namespace Prisma {
     location: number
     status: number
     isActive: number
+    userId: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -2303,10 +2409,12 @@ export namespace Prisma {
 
   export type SensorAvgAggregateInputType = {
     id?: true
+    userId?: true
   }
 
   export type SensorSumAggregateInputType = {
     id?: true
+    userId?: true
   }
 
   export type SensorMinAggregateInputType = {
@@ -2316,6 +2424,7 @@ export namespace Prisma {
     location?: true
     status?: true
     isActive?: true
+    userId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -2327,6 +2436,7 @@ export namespace Prisma {
     location?: true
     status?: true
     isActive?: true
+    userId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -2338,6 +2448,7 @@ export namespace Prisma {
     location?: true
     status?: true
     isActive?: true
+    userId?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -2436,6 +2547,7 @@ export namespace Prisma {
     location: string
     status: $Enums.SensorStatus
     isActive: boolean
+    userId: number
     createdAt: Date
     updatedAt: Date
     _count: SensorCountAggregateOutputType | null
@@ -2466,8 +2578,10 @@ export namespace Prisma {
     location?: boolean
     status?: boolean
     isActive?: boolean
+    userId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
     readings?: boolean | Sensor$readingsArgs<ExtArgs>
     alerts?: boolean | Sensor$alertsArgs<ExtArgs>
     _count?: boolean | SensorCountOutputTypeDefaultArgs<ExtArgs>
@@ -2480,8 +2594,10 @@ export namespace Prisma {
     location?: boolean
     status?: boolean
     isActive?: boolean
+    userId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["sensor"]>
 
   export type SensorSelectScalar = {
@@ -2491,20 +2607,25 @@ export namespace Prisma {
     location?: boolean
     status?: boolean
     isActive?: boolean
+    userId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
   export type SensorInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
     readings?: boolean | Sensor$readingsArgs<ExtArgs>
     alerts?: boolean | Sensor$alertsArgs<ExtArgs>
     _count?: boolean | SensorCountOutputTypeDefaultArgs<ExtArgs>
   }
-  export type SensorIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type SensorIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
 
   export type $SensorPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Sensor"
     objects: {
+      user: Prisma.$UserPayload<ExtArgs>
       readings: Prisma.$SensorReadingPayload<ExtArgs>[]
       alerts: Prisma.$AlertPayload<ExtArgs>[]
     }
@@ -2515,6 +2636,7 @@ export namespace Prisma {
       location: string
       status: $Enums.SensorStatus
       isActive: boolean
+      userId: number
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["sensor"]>
@@ -2881,6 +3003,7 @@ export namespace Prisma {
    */
   export interface Prisma__SensorClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
     readings<T extends Sensor$readingsArgs<ExtArgs> = {}>(args?: Subset<T, Sensor$readingsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SensorReadingPayload<ExtArgs>, T, "findMany"> | Null>
     alerts<T extends Sensor$alertsArgs<ExtArgs> = {}>(args?: Subset<T, Sensor$alertsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AlertPayload<ExtArgs>, T, "findMany"> | Null>
     /**
@@ -2918,6 +3041,7 @@ export namespace Prisma {
     readonly location: FieldRef<"Sensor", 'String'>
     readonly status: FieldRef<"Sensor", 'SensorStatus'>
     readonly isActive: FieldRef<"Sensor", 'Boolean'>
+    readonly userId: FieldRef<"Sensor", 'Int'>
     readonly createdAt: FieldRef<"Sensor", 'DateTime'>
     readonly updatedAt: FieldRef<"Sensor", 'DateTime'>
   }
@@ -3141,6 +3265,10 @@ export namespace Prisma {
      */
     data: SensorCreateManyInput | SensorCreateManyInput[]
     skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SensorIncludeCreateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -6297,6 +6425,7 @@ export namespace Prisma {
     location: 'location',
     status: 'status',
     isActive: 'isActive',
+    userId: 'userId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -6521,6 +6650,7 @@ export namespace Prisma {
     emailVerified?: BoolFilter<"User"> | boolean
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
+    sensors?: SensorListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -6532,6 +6662,7 @@ export namespace Prisma {
     emailVerified?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    sensors?: SensorOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -6546,6 +6677,7 @@ export namespace Prisma {
     emailVerified?: BoolFilter<"User"> | boolean
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
+    sensors?: SensorListRelationFilter
   }, "id" | "email">
 
   export type UserOrderByWithAggregationInput = {
@@ -6588,8 +6720,10 @@ export namespace Prisma {
     location?: StringFilter<"Sensor"> | string
     status?: EnumSensorStatusFilter<"Sensor"> | $Enums.SensorStatus
     isActive?: BoolFilter<"Sensor"> | boolean
+    userId?: IntFilter<"Sensor"> | number
     createdAt?: DateTimeFilter<"Sensor"> | Date | string
     updatedAt?: DateTimeFilter<"Sensor"> | Date | string
+    user?: XOR<UserRelationFilter, UserWhereInput>
     readings?: SensorReadingListRelationFilter
     alerts?: AlertListRelationFilter
   }
@@ -6601,8 +6735,10 @@ export namespace Prisma {
     location?: SortOrder
     status?: SortOrder
     isActive?: SortOrder
+    userId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    user?: UserOrderByWithRelationInput
     readings?: SensorReadingOrderByRelationAggregateInput
     alerts?: AlertOrderByRelationAggregateInput
   }
@@ -6617,8 +6753,10 @@ export namespace Prisma {
     location?: StringFilter<"Sensor"> | string
     status?: EnumSensorStatusFilter<"Sensor"> | $Enums.SensorStatus
     isActive?: BoolFilter<"Sensor"> | boolean
+    userId?: IntFilter<"Sensor"> | number
     createdAt?: DateTimeFilter<"Sensor"> | Date | string
     updatedAt?: DateTimeFilter<"Sensor"> | Date | string
+    user?: XOR<UserRelationFilter, UserWhereInput>
     readings?: SensorReadingListRelationFilter
     alerts?: AlertListRelationFilter
   }, "id" | "sensorCode">
@@ -6630,6 +6768,7 @@ export namespace Prisma {
     location?: SortOrder
     status?: SortOrder
     isActive?: SortOrder
+    userId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: SensorCountOrderByAggregateInput
@@ -6649,6 +6788,7 @@ export namespace Prisma {
     location?: StringWithAggregatesFilter<"Sensor"> | string
     status?: EnumSensorStatusWithAggregatesFilter<"Sensor"> | $Enums.SensorStatus
     isActive?: BoolWithAggregatesFilter<"Sensor"> | boolean
+    userId?: IntWithAggregatesFilter<"Sensor"> | number
     createdAt?: DateTimeWithAggregatesFilter<"Sensor"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Sensor"> | Date | string
   }
@@ -6864,6 +7004,7 @@ export namespace Prisma {
     emailVerified?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    sensors?: SensorCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -6875,6 +7016,7 @@ export namespace Prisma {
     emailVerified?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    sensors?: SensorUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserUpdateInput = {
@@ -6885,6 +7027,7 @@ export namespace Prisma {
     emailVerified?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sensors?: SensorUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -6896,6 +7039,7 @@ export namespace Prisma {
     emailVerified?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    sensors?: SensorUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -6938,6 +7082,7 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutSensorsInput
     readings?: SensorReadingCreateNestedManyWithoutSensorInput
     alerts?: AlertCreateNestedManyWithoutSensorInput
   }
@@ -6949,6 +7094,7 @@ export namespace Prisma {
     location: string
     status?: $Enums.SensorStatus
     isActive?: boolean
+    userId: number
     createdAt?: Date | string
     updatedAt?: Date | string
     readings?: SensorReadingUncheckedCreateNestedManyWithoutSensorInput
@@ -6963,6 +7109,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutSensorsNestedInput
     readings?: SensorReadingUpdateManyWithoutSensorNestedInput
     alerts?: AlertUpdateManyWithoutSensorNestedInput
   }
@@ -6974,6 +7121,7 @@ export namespace Prisma {
     location?: StringFieldUpdateOperationsInput | string
     status?: EnumSensorStatusFieldUpdateOperationsInput | $Enums.SensorStatus
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    userId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     readings?: SensorReadingUncheckedUpdateManyWithoutSensorNestedInput
@@ -6987,6 +7135,7 @@ export namespace Prisma {
     location: string
     status?: $Enums.SensorStatus
     isActive?: boolean
+    userId: number
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -7008,6 +7157,7 @@ export namespace Prisma {
     location?: StringFieldUpdateOperationsInput | string
     status?: EnumSensorStatusFieldUpdateOperationsInput | $Enums.SensorStatus
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    userId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -7270,6 +7420,16 @@ export namespace Prisma {
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
+  export type SensorListRelationFilter = {
+    every?: SensorWhereInput
+    some?: SensorWhereInput
+    none?: SensorWhereInput
+  }
+
+  export type SensorOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type UserCountOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
@@ -7384,6 +7544,11 @@ export namespace Prisma {
     not?: NestedEnumSensorStatusFilter<$PrismaModel> | $Enums.SensorStatus
   }
 
+  export type UserRelationFilter = {
+    is?: UserWhereInput
+    isNot?: UserWhereInput
+  }
+
   export type SensorReadingListRelationFilter = {
     every?: SensorReadingWhereInput
     some?: SensorReadingWhereInput
@@ -7411,12 +7576,14 @@ export namespace Prisma {
     location?: SortOrder
     status?: SortOrder
     isActive?: SortOrder
+    userId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
   export type SensorAvgOrderByAggregateInput = {
     id?: SortOrder
+    userId?: SortOrder
   }
 
   export type SensorMaxOrderByAggregateInput = {
@@ -7426,6 +7593,7 @@ export namespace Prisma {
     location?: SortOrder
     status?: SortOrder
     isActive?: SortOrder
+    userId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -7437,12 +7605,14 @@ export namespace Prisma {
     location?: SortOrder
     status?: SortOrder
     isActive?: SortOrder
+    userId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
   export type SensorSumOrderByAggregateInput = {
     id?: SortOrder
+    userId?: SortOrder
   }
 
   export type EnumSensorStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -7707,6 +7877,20 @@ export namespace Prisma {
     refreshInterval?: SortOrder
   }
 
+  export type SensorCreateNestedManyWithoutUserInput = {
+    create?: XOR<SensorCreateWithoutUserInput, SensorUncheckedCreateWithoutUserInput> | SensorCreateWithoutUserInput[] | SensorUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: SensorCreateOrConnectWithoutUserInput | SensorCreateOrConnectWithoutUserInput[]
+    createMany?: SensorCreateManyUserInputEnvelope
+    connect?: SensorWhereUniqueInput | SensorWhereUniqueInput[]
+  }
+
+  export type SensorUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<SensorCreateWithoutUserInput, SensorUncheckedCreateWithoutUserInput> | SensorCreateWithoutUserInput[] | SensorUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: SensorCreateOrConnectWithoutUserInput | SensorCreateOrConnectWithoutUserInput[]
+    createMany?: SensorCreateManyUserInputEnvelope
+    connect?: SensorWhereUniqueInput | SensorWhereUniqueInput[]
+  }
+
   export type StringFieldUpdateOperationsInput = {
     set?: string
   }
@@ -7723,12 +7907,46 @@ export namespace Prisma {
     set?: Date | string
   }
 
+  export type SensorUpdateManyWithoutUserNestedInput = {
+    create?: XOR<SensorCreateWithoutUserInput, SensorUncheckedCreateWithoutUserInput> | SensorCreateWithoutUserInput[] | SensorUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: SensorCreateOrConnectWithoutUserInput | SensorCreateOrConnectWithoutUserInput[]
+    upsert?: SensorUpsertWithWhereUniqueWithoutUserInput | SensorUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: SensorCreateManyUserInputEnvelope
+    set?: SensorWhereUniqueInput | SensorWhereUniqueInput[]
+    disconnect?: SensorWhereUniqueInput | SensorWhereUniqueInput[]
+    delete?: SensorWhereUniqueInput | SensorWhereUniqueInput[]
+    connect?: SensorWhereUniqueInput | SensorWhereUniqueInput[]
+    update?: SensorUpdateWithWhereUniqueWithoutUserInput | SensorUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: SensorUpdateManyWithWhereWithoutUserInput | SensorUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: SensorScalarWhereInput | SensorScalarWhereInput[]
+  }
+
   export type IntFieldUpdateOperationsInput = {
     set?: number
     increment?: number
     decrement?: number
     multiply?: number
     divide?: number
+  }
+
+  export type SensorUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<SensorCreateWithoutUserInput, SensorUncheckedCreateWithoutUserInput> | SensorCreateWithoutUserInput[] | SensorUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: SensorCreateOrConnectWithoutUserInput | SensorCreateOrConnectWithoutUserInput[]
+    upsert?: SensorUpsertWithWhereUniqueWithoutUserInput | SensorUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: SensorCreateManyUserInputEnvelope
+    set?: SensorWhereUniqueInput | SensorWhereUniqueInput[]
+    disconnect?: SensorWhereUniqueInput | SensorWhereUniqueInput[]
+    delete?: SensorWhereUniqueInput | SensorWhereUniqueInput[]
+    connect?: SensorWhereUniqueInput | SensorWhereUniqueInput[]
+    update?: SensorUpdateWithWhereUniqueWithoutUserInput | SensorUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: SensorUpdateManyWithWhereWithoutUserInput | SensorUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: SensorScalarWhereInput | SensorScalarWhereInput[]
+  }
+
+  export type UserCreateNestedOneWithoutSensorsInput = {
+    create?: XOR<UserCreateWithoutSensorsInput, UserUncheckedCreateWithoutSensorsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutSensorsInput
+    connect?: UserWhereUniqueInput
   }
 
   export type SensorReadingCreateNestedManyWithoutSensorInput = {
@@ -7761,6 +7979,14 @@ export namespace Prisma {
 
   export type EnumSensorStatusFieldUpdateOperationsInput = {
     set?: $Enums.SensorStatus
+  }
+
+  export type UserUpdateOneRequiredWithoutSensorsNestedInput = {
+    create?: XOR<UserCreateWithoutSensorsInput, UserUncheckedCreateWithoutSensorsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutSensorsInput
+    upsert?: UserUpsertWithoutSensorsInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutSensorsInput, UserUpdateWithoutSensorsInput>, UserUncheckedUpdateWithoutSensorsInput>
   }
 
   export type SensorReadingUpdateManyWithoutSensorNestedInput = {
@@ -8115,6 +8341,98 @@ export namespace Prisma {
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
+  export type SensorCreateWithoutUserInput = {
+    sensorCode: string
+    name: string
+    location: string
+    status?: $Enums.SensorStatus
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    readings?: SensorReadingCreateNestedManyWithoutSensorInput
+    alerts?: AlertCreateNestedManyWithoutSensorInput
+  }
+
+  export type SensorUncheckedCreateWithoutUserInput = {
+    id?: number
+    sensorCode: string
+    name: string
+    location: string
+    status?: $Enums.SensorStatus
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    readings?: SensorReadingUncheckedCreateNestedManyWithoutSensorInput
+    alerts?: AlertUncheckedCreateNestedManyWithoutSensorInput
+  }
+
+  export type SensorCreateOrConnectWithoutUserInput = {
+    where: SensorWhereUniqueInput
+    create: XOR<SensorCreateWithoutUserInput, SensorUncheckedCreateWithoutUserInput>
+  }
+
+  export type SensorCreateManyUserInputEnvelope = {
+    data: SensorCreateManyUserInput | SensorCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type SensorUpsertWithWhereUniqueWithoutUserInput = {
+    where: SensorWhereUniqueInput
+    update: XOR<SensorUpdateWithoutUserInput, SensorUncheckedUpdateWithoutUserInput>
+    create: XOR<SensorCreateWithoutUserInput, SensorUncheckedCreateWithoutUserInput>
+  }
+
+  export type SensorUpdateWithWhereUniqueWithoutUserInput = {
+    where: SensorWhereUniqueInput
+    data: XOR<SensorUpdateWithoutUserInput, SensorUncheckedUpdateWithoutUserInput>
+  }
+
+  export type SensorUpdateManyWithWhereWithoutUserInput = {
+    where: SensorScalarWhereInput
+    data: XOR<SensorUpdateManyMutationInput, SensorUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type SensorScalarWhereInput = {
+    AND?: SensorScalarWhereInput | SensorScalarWhereInput[]
+    OR?: SensorScalarWhereInput[]
+    NOT?: SensorScalarWhereInput | SensorScalarWhereInput[]
+    id?: IntFilter<"Sensor"> | number
+    sensorCode?: StringFilter<"Sensor"> | string
+    name?: StringFilter<"Sensor"> | string
+    location?: StringFilter<"Sensor"> | string
+    status?: EnumSensorStatusFilter<"Sensor"> | $Enums.SensorStatus
+    isActive?: BoolFilter<"Sensor"> | boolean
+    userId?: IntFilter<"Sensor"> | number
+    createdAt?: DateTimeFilter<"Sensor"> | Date | string
+    updatedAt?: DateTimeFilter<"Sensor"> | Date | string
+  }
+
+  export type UserCreateWithoutSensorsInput = {
+    name: string
+    email: string
+    password: string
+    role?: $Enums.Role
+    emailVerified?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type UserUncheckedCreateWithoutSensorsInput = {
+    id?: number
+    name: string
+    email: string
+    password: string
+    role?: $Enums.Role
+    emailVerified?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type UserCreateOrConnectWithoutSensorsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutSensorsInput, UserUncheckedCreateWithoutSensorsInput>
+  }
+
   export type SensorReadingCreateWithoutSensorInput = {
     temperature: number
     humidity: number
@@ -8169,6 +8487,38 @@ export namespace Prisma {
   export type AlertCreateManySensorInputEnvelope = {
     data: AlertCreateManySensorInput | AlertCreateManySensorInput[]
     skipDuplicates?: boolean
+  }
+
+  export type UserUpsertWithoutSensorsInput = {
+    update: XOR<UserUpdateWithoutSensorsInput, UserUncheckedUpdateWithoutSensorsInput>
+    create: XOR<UserCreateWithoutSensorsInput, UserUncheckedCreateWithoutSensorsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutSensorsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutSensorsInput, UserUncheckedUpdateWithoutSensorsInput>
+  }
+
+  export type UserUpdateWithoutSensorsInput = {
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserUncheckedUpdateWithoutSensorsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    emailVerified?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type SensorReadingUpsertWithWhereUniqueWithoutSensorInput = {
@@ -8238,6 +8588,7 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutSensorsInput
     alerts?: AlertCreateNestedManyWithoutSensorInput
   }
 
@@ -8248,6 +8599,7 @@ export namespace Prisma {
     location: string
     status?: $Enums.SensorStatus
     isActive?: boolean
+    userId: number
     createdAt?: Date | string
     updatedAt?: Date | string
     alerts?: AlertUncheckedCreateNestedManyWithoutSensorInput
@@ -8277,6 +8629,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutSensorsNestedInput
     alerts?: AlertUpdateManyWithoutSensorNestedInput
   }
 
@@ -8287,6 +8640,7 @@ export namespace Prisma {
     location?: StringFieldUpdateOperationsInput | string
     status?: EnumSensorStatusFieldUpdateOperationsInput | $Enums.SensorStatus
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    userId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     alerts?: AlertUncheckedUpdateManyWithoutSensorNestedInput
@@ -8300,6 +8654,7 @@ export namespace Prisma {
     isActive?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutSensorsInput
     readings?: SensorReadingCreateNestedManyWithoutSensorInput
   }
 
@@ -8310,6 +8665,7 @@ export namespace Prisma {
     location: string
     status?: $Enums.SensorStatus
     isActive?: boolean
+    userId: number
     createdAt?: Date | string
     updatedAt?: Date | string
     readings?: SensorReadingUncheckedCreateNestedManyWithoutSensorInput
@@ -8339,6 +8695,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutSensorsNestedInput
     readings?: SensorReadingUpdateManyWithoutSensorNestedInput
   }
 
@@ -8349,9 +8706,57 @@ export namespace Prisma {
     location?: StringFieldUpdateOperationsInput | string
     status?: EnumSensorStatusFieldUpdateOperationsInput | $Enums.SensorStatus
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    userId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     readings?: SensorReadingUncheckedUpdateManyWithoutSensorNestedInput
+  }
+
+  export type SensorCreateManyUserInput = {
+    id?: number
+    sensorCode: string
+    name: string
+    location: string
+    status?: $Enums.SensorStatus
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SensorUpdateWithoutUserInput = {
+    sensorCode?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    location?: StringFieldUpdateOperationsInput | string
+    status?: EnumSensorStatusFieldUpdateOperationsInput | $Enums.SensorStatus
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    readings?: SensorReadingUpdateManyWithoutSensorNestedInput
+    alerts?: AlertUpdateManyWithoutSensorNestedInput
+  }
+
+  export type SensorUncheckedUpdateWithoutUserInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    sensorCode?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    location?: StringFieldUpdateOperationsInput | string
+    status?: EnumSensorStatusFieldUpdateOperationsInput | $Enums.SensorStatus
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    readings?: SensorReadingUncheckedUpdateManyWithoutSensorNestedInput
+    alerts?: AlertUncheckedUpdateManyWithoutSensorNestedInput
+  }
+
+  export type SensorUncheckedUpdateManyWithoutUserInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    sensorCode?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    location?: StringFieldUpdateOperationsInput | string
+    status?: EnumSensorStatusFieldUpdateOperationsInput | $Enums.SensorStatus
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type SensorReadingCreateManySensorInput = {
@@ -8433,6 +8838,10 @@ export namespace Prisma {
   /**
    * Aliases for legacy arg types
    */
+    /**
+     * @deprecated Use UserCountOutputTypeDefaultArgs instead
+     */
+    export type UserCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = UserCountOutputTypeDefaultArgs<ExtArgs>
     /**
      * @deprecated Use SensorCountOutputTypeDefaultArgs instead
      */

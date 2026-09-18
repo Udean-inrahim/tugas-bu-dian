@@ -22,6 +22,8 @@ model User {
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
+  sensors Sensor[]
+
   @@map("users")
 }
 
@@ -38,12 +40,15 @@ model Sensor {
   location   String
   status     SensorStatus @default(OFFLINE)
   isActive   Boolean      @default(true) @map("is_active")
+  userId     Int          @map("user_id")
   createdAt  DateTime     @default(now()) @map("created_at")
   updatedAt  DateTime     @updatedAt @map("updated_at")
 
+  user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   readings SensorReading[]
   alerts   Alert[]
 
+  @@index([userId])
   @@map("sensors")
 }
 

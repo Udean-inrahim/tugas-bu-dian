@@ -3,7 +3,6 @@ import { toast } from "sonner";
 import { CheckCircle2, BellRing } from "lucide-react";
 import { useAlerts } from "@/hooks/useAlerts";
 import { useSettings } from "@/hooks/useSettings";
-import { useAuthStore } from "@/stores/authStore";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -42,8 +41,6 @@ const typeBadgeClass: Record<AlertType, string> = {
 export function AlertsPage() {
   const [filter, setFilter] = useState<"ACTIVE" | "RESOLVED" | "ALL">("ACTIVE");
   const { alerts, summary, refresh, resolve, pending, list } = useAlerts({ status: filter, limit: 50 });
-  const user = useAuthStore((s) => s.user);
-  const isAdmin = user?.role === "ADMIN";
   const { settings } = useSettings();
 
   const refreshMs = Math.min(
@@ -167,7 +164,7 @@ export function AlertsPage() {
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
-                      {a.status === "ACTIVE" && isAdmin ? (
+                      {a.status === "ACTIVE" ? (
                         <Button variant="outline" size="sm" onClick={() => handleResolve(a.id)}>
                           <CheckCircle2 className="mr-1.5 h-4 w-4" />
                           Resolve
@@ -175,9 +172,9 @@ export function AlertsPage() {
                       ) : (
                         <Badge
                           variant="secondary"
-                          className={a.status === "ACTIVE" ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"}
+                          className="bg-green-100 text-green-700"
                         >
-                          {a.status === "ACTIVE" ? "ACTIVE" : "RESOLVED"}
+                          RESOLVED
                         </Badge>
                       )}
                     </TableCell>

@@ -18,8 +18,9 @@ const sensorUpdateSchema = z.object({
 export async function sensorRoutes(app: FastifyInstance) {
   app.addHook("preHandler", app.authenticate);
 
-  app.get("/api/sensors", async () => {
+  app.get("/api/sensors", async (req) => {
     const sensors = await prisma.sensor.findMany({
+      where: { userId: req.user.sub },
       orderBy: { createdAt: "asc" },
     });
     return { data: sensors };
@@ -31,8 +32,8 @@ export async function sensorRoutes(app: FastifyInstance) {
     if (!Number.isInteger(sensorId)) {
       return reply.code(400).send({ error: "INVALID_ID", message: "ID tidak valid" });
     }
-    const sensor = await prisma.sensor.findUnique({
-      where: { id: sensorId },
+    const sensor = await prisma.sensor.findFirst({
+      where: { id: sensorId, userId: req.user.sub },
       include: {
         readings: { orderBy: { recordedAt: "desc" }, take: 1 },
       },
@@ -43,7 +44,7 @@ export async function sensorRoutes(app: FastifyInstance) {
     return sensor;
   });
 
-  app.post("/api/sensors", { preHandler: app.requireAdmin }, async (req, reply) => {
+  app.post("/api/sensors", async (req, reply) => {
     const parsed = sensorCreateSchema.safeParse(req.body);
     if (!parsed.success) {
       return reply.code(400).send({
@@ -57,11 +58,13 @@ export async function sensorRoutes(app: FastifyInstance) {
         .code(409)
         .send({ error: "CODE_TAKEN", message: "Sensor code sudah digunakan" });
     }
-    const sensor = await prisma.sensor.create({ data: parsed.data });
+    const sensor = await prisma.sensor.create({
+      data: { ...parsed.data, userId: req.user.sub },
+    });
     return reply.code(201).send(sensor);
   });
 
-  app.put("/api/sensors/:id", { preHandler: app.requireAdmin }, async (req, reply) => {
+  app.put("/api/sensors/:id", async (req, reply) => {
     const { id } = req.params as { id: string };
     const sensorId = Number(id);
     const parsed = sensorUpdateSchema.safeParse(req.body);
@@ -74,7 +77,7 @@ export async function sensorRoutes(app: FastifyInstance) {
         message: parsed.error.issues[0]?.message ?? "Input tidak valid",
       });
     }
-    const sensor = await prisma.sensor.findUnique({ where: { id: sensorId } });
+    const sensor = await prisma.sensor.findFirst({ where: { id: sensorId, userId: req.user.sub } });
     if (!sensor) {
       return reply.code(404).send({ error: "NOT_FOUND", message: "Sensor tidak ditemukan" });
     }
@@ -82,13 +85,13 @@ export async function sensorRoutes(app: FastifyInstance) {
     return updated;
   });
 
-  app.delete("/api/sensors/:id", { preHandler: app.requireAdmin }, async (req, reply) => {
+  app.delete("/api/sensors/:id", async (req, reply) => {
     const { id } = req.params as { id: string };
     const sensorId = Number(id);
     if (!Number.isInteger(sensorId)) {
       return reply.code(400).send({ error: "INVALID_ID", message: "ID tidak valid" });
     }
-    const sensor = await prisma.sensor.findUnique({ where: { id: sensorId } });
+    const sensor = await prisma.sensor.findFirst({ where: { id: sensorId, userId: req.user.sub } });
     if (!sensor) {
       return reply.code(404).send({ error: "NOT_FOUND", message: "Sensor tidak ditemukan" });
     }
@@ -96,10 +99,10 @@ export async function sensorRoutes(app: FastifyInstance) {
     return reply.code(204).send();
   });
 
-  app.patch("/api/sensors/:id/toggle", { preHandler: app.requireAdmin }, async (req, reply) => {
+  app.patch("/api/sensors/:id/toggle", async (req, reply) => {
     const { id } = req.params as { id: string };
     const sensorId = Number(id);
-    const sensor = await prisma.sensor.findUnique({ where: { id: sensorId } });
+    const sensor = await prisma.sensor.findFirst({ where: { id: sensorId, userId: req.user.sub } });
     if (!sensor) {
       return reply.code(404).send({ error: "NOT_FOUND", message: "Sensor tidak ditemukan" });
     }

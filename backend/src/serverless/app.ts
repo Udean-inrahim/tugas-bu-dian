@@ -68,6 +68,17 @@ function isOnline(sensor: { isActive: boolean }, last: Date | undefined | null) 
   return Date.now() - last.getTime() <= SENSOR_OFFLINE_TIMEOUT ? "ONLINE" : "OFFLINE";
 }
 
+// Sensor bersifat per-akun: ambil daftar id sensor milik user, dan pastikan
+// sebuah sensor benar milik user sebelum diakses/diubah.
+async function ownedSensorIds(userId: number) {
+  const rows = await prisma.sensor.findMany({ where: { userId }, select: { id: true } });
+  return rows.map((r) => r.id);
+}
+
+function findOwnedSensor(id: number, userId: number) {
+  return prisma.sensor.findFirst({ where: { id, userId } });
+}
+
 async function latestBySensor(sensorIds: number[]) {
   const map = new Map<number, Date>();
   if (sensorIds.length === 0) return map;
@@ -464,7 +475,10 @@ app.post("/api/auth/reset-code", async (c) => {
 
 app.get("/api/sensors", async (c) => {
   await ensureDemoHeartbeat();
-  const sensors = await prisma.sensor.findMany({ orderBy: { createdAt: "asc" } });
+  const sensors = await prisma.sensor.findMany({
+    where: { userId: c.get("user").id },
+    orderBy: { createdAt: "asc" },
+  });
   const last = await latestBySensor(sensors.map((s) => s.id));
   const data = sensors.map((s) => ({ ...s, status: isOnline(s, last.get(s.id)) }));
   return c.json({ data });
@@ -473,7 +487,7 @@ app.get("/api/sensors", async (c) => {
 app.get("/api/sensors/:id", async (c) => {
   const id = Number(c.req.param("id"));
   if (!Number.isInteger(id)) return c.json({ error: "INVALID_ID", message: "ID tidak valid" }, 400);
-  const sensor = await prisma.sensor.findUnique({ where: { id } });
+  const sensor = await findOwnedSensor(id, c.get("user").id);
   if (!sensor) return c.json({ error: "NOT_FOUND", message: "Sensor tidak ditemukan" }, 404);
   const lastReading = await prisma.sensorReading.findFirst({
     where: { sensorId: id },
@@ -483,42 +497,40 @@ app.get("/api/sensors/:id", async (c) => {
 });
 
 app.post("/api/sensors", async (c) => {
-  if (!isAdmin(c)) return c.json({ error: "FORBIDDEN", message: "Akses ditolak" }, 403);
   const parsed = sensorCreateSchema.safeParse(await c.req.json().catch(() => ({})));
   if (!parsed.success) return c.json(validationError(parsed.error), 400);
   const exists = await prisma.sensor.findUnique({ where: { sensorCode: parsed.data.sensorCode } });
   if (exists) return c.json({ error: "CODE_TAKEN", message: "Sensor code sudah digunakan" }, 409);
-  const sensor = await prisma.sensor.create({ data: parsed.data });
+  const sensor = await prisma.sensor.create({
+    data: { ...parsed.data, userId: c.get("user").id },
+  });
   return c.json(sensor, 201);
 });
 
 app.put("/api/sensors/:id", async (c) => {
-  if (!isAdmin(c)) return c.json({ error: "FORBIDDEN", message: "Akses ditolak" }, 403);
   const id = Number(c.req.param("id"));
   if (!Number.isInteger(id)) return c.json({ error: "INVALID_ID", message: "ID tidak valid" }, 400);
   const parsed = sensorUpdateSchema.safeParse(await c.req.json().catch(() => ({})));
   if (!parsed.success) return c.json(validationError(parsed.error), 400);
-  const sensor = await prisma.sensor.findUnique({ where: { id } });
+  const sensor = await findOwnedSensor(id, c.get("user").id);
   if (!sensor) return c.json({ error: "NOT_FOUND", message: "Sensor tidak ditemukan" }, 404);
   const updated = await prisma.sensor.update({ where: { id }, data: parsed.data });
   return c.json(updated);
 });
 
 app.delete("/api/sensors/:id", async (c) => {
-  if (!isAdmin(c)) return c.json({ error: "FORBIDDEN", message: "Akses ditolak" }, 403);
   const id = Number(c.req.param("id"));
   if (!Number.isInteger(id)) return c.json({ error: "INVALID_ID", message: "ID tidak valid" }, 400);
-  const sensor = await prisma.sensor.findUnique({ where: { id } });
+  const sensor = await findOwnedSensor(id, c.get("user").id);
   if (!sensor) return c.json({ error: "NOT_FOUND", message: "Sensor tidak ditemukan" }, 404);
   await prisma.sensor.delete({ where: { id } });
   return c.body(null, 204);
 });
 
 app.patch("/api/sensors/:id/toggle", async (c) => {
-  if (!isAdmin(c)) return c.json({ error: "FORBIDDEN", message: "Akses ditolak" }, 403);
   const id = Number(c.req.param("id"));
   if (!Number.isInteger(id)) return c.json({ error: "INVALID_ID", message: "ID tidak valid" }, 400);
-  const sensor = await prisma.sensor.findUnique({ where: { id } });
+  const sensor = await findOwnedSensor(id, c.get("user").id);
   if (!sensor) return c.json({ error: "NOT_FOUND", message: "Sensor tidak ditemukan" }, 404);
   const updated = await prisma.sensor.update({
     where: { id },
@@ -529,8 +541,12 @@ app.patch("/api/sensors/:id/toggle", async (c) => {
 
 app.get("/api/readings/latest", async (c) => {
   await ensureDemoHeartbeat();
+  const myIds = await ownedSensorIds(c.get("user").id);
   const sensorId = c.req.query("sensor_id");
   if (sensorId) {
+    if (!myIds.includes(Number(sensorId))) {
+      return c.json({ error: "NOT_FOUND", message: "Sensor tidak ditemukan" }, 404);
+    }
     const reading = await prisma.sensorReading.findFirst({
       where: { sensorId: Number(sensorId) },
       orderBy: { recordedAt: "desc" },
@@ -540,6 +556,7 @@ app.get("/api/readings/latest", async (c) => {
     return c.json(reading);
   }
   const reading = await prisma.sensorReading.findFirst({
+    where: { sensorId: { in: myIds } },
     orderBy: { recordedAt: "desc" },
     include: { sensor: { select: { id: true, sensorCode: true, name: true, location: true } } },
   });
@@ -550,8 +567,14 @@ app.get("/api/readings", async (c) => {
   await ensureDemoHeartbeat();
   const q = c.req.queries();
   const { page, limit, skip } = pagination(new URLSearchParams(c.req.url.split("?")[1] ?? ""));
+  const myIds = await ownedSensorIds(c.get("user").id);
   const where: Record<string, unknown> = {};
-  if (q.sensor_id?.[0]) where.sensorId = Number(q.sensor_id[0]);
+  if (q.sensor_id?.[0]) {
+    const sid = Number(q.sensor_id[0]);
+    where.sensorId = { in: myIds.includes(sid) ? [sid] : [] };
+  } else {
+    where.sensorId = { in: myIds };
+  }
   const from = parseDateParam(q.from?.[0]);
   const to = parseDateParam(q.to?.[0]);
   if (from) where.recordedAt = { ...((where.recordedAt as object) ?? {}), gte: from };
@@ -574,10 +597,16 @@ app.get("/api/readings", async (c) => {
 app.get("/api/alerts", async (c) => {
   const q = new URLSearchParams(c.req.url.split("?")[1] ?? "");
   const { page, limit, skip } = pagination(q);
+  const myIds = await ownedSensorIds(c.get("user").id);
   const where: Record<string, unknown> = {};
   const status = q.get("status");
   if (status && status !== "ALL") where.status = status;
-  if (q.get("sensor_id")) where.sensorId = Number(q.get("sensor_id"));
+  if (q.get("sensor_id")) {
+    const sid = Number(q.get("sensor_id"));
+    where.sensorId = { in: myIds.includes(sid) ? [sid] : [] };
+  } else {
+    where.sensorId = { in: myIds };
+  }
   if (q.get("severity")) where.severity = q.get("severity");
 
   const [total, data] = await Promise.all([
@@ -595,20 +624,25 @@ app.get("/api/alerts", async (c) => {
 });
 
 app.get("/api/alerts/summary", async (c) => {
+  const myIds = await ownedSensorIds(c.get("user").id);
+  const base = { status: "ACTIVE" as const, sensorId: { in: myIds } };
   const [active, critical, warning] = await Promise.all([
-    prisma.alert.count({ where: { status: "ACTIVE" } }),
-    prisma.alert.count({ where: { status: "ACTIVE", severity: "CRITICAL" } }),
-    prisma.alert.count({ where: { status: "ACTIVE", severity: "WARNING" } }),
+    prisma.alert.count({ where: base }),
+    prisma.alert.count({ where: { ...base, severity: "CRITICAL" } }),
+    prisma.alert.count({ where: { ...base, severity: "WARNING" } }),
   ]);
   return c.json({ active, critical, warning });
 });
 
 app.put("/api/alerts/:id/resolve", async (c) => {
-  if (!isAdmin(c)) return c.json({ error: "FORBIDDEN", message: "Akses ditolak" }, 403);
   const id = Number(c.req.param("id"));
   if (!Number.isInteger(id)) return c.json({ error: "INVALID_ID", message: "ID tidak valid" }, 400);
   const alert = await prisma.alert.findUnique({ where: { id } });
   if (!alert) return c.json({ error: "NOT_FOUND", message: "Alert tidak ditemukan" }, 404);
+  const myIds = await ownedSensorIds(c.get("user").id);
+  if (!myIds.includes(alert.sensorId)) {
+    return c.json({ error: "NOT_FOUND", message: "Alert tidak ditemukan" }, 404);
+  }
   const updated = await resolveAlert(id);
   return c.json(updated);
 });

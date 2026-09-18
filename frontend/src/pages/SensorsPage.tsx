@@ -2,7 +2,6 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Power, Radio } from "lucide-react";
 import { useSensors } from "@/hooks/useSensors";
-import { useAuthStore } from "@/stores/authStore";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -41,8 +40,6 @@ import type { Sensor } from "@/types";
 
 export function SensorsPage() {
   const { sensors, create, update, toggle, remove, loading } = useSensors();
-  const user = useAuthStore((s) => s.user);
-  const isAdmin = user?.role === "ADMIN";
 
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Sensor | null>(null);
@@ -108,16 +105,14 @@ export function SensorsPage() {
                 {sensors.filter((s) => s.isActive).length} sensor aktif terdaftar
               </CardDescription>
             </div>
-            {isAdmin && (
-              <button
-                type="button"
-                onClick={openCreate}
-                className="cursor-pointer rounded-full bg-brand-blue px-4 py-2 text-[12px] font-semibold text-white shadow-[0_8px_18px_rgba(83,110,232,0.3)] transition hover:bg-brand-blue/90"
-              >
-                <Plus className="mr-1 inline h-3.5 w-3.5" />
-                Tambah
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={openCreate}
+              className="cursor-pointer rounded-full bg-brand-blue px-4 py-2 text-[12px] font-semibold text-white shadow-[0_8px_18px_rgba(83,110,232,0.3)] transition hover:bg-brand-blue/90"
+            >
+              <Plus className="mr-1 inline h-3.5 w-3.5" />
+              Tambah
+            </button>
           </CardHeader>
         <CardContent>
           {loading && sensors.length === 0 ? (
@@ -141,7 +136,7 @@ export function SensorsPage() {
                 {sensors.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
-                      Belum ada sensor. Klik "Tambah Sensor" untuk menambahkan.
+                      Belum ada sensor. Klik tombol "Tambah" untuk menambahkan sensor pertamamu.
                     </TableCell>
                   </TableRow>
                 )}
@@ -192,32 +187,28 @@ export function SensorsPage() {
                       {formatTime(s.updatedAt)}
                     </TableCell>
                     <TableCell className="text-right">
-                      {isAdmin ? (
-                        <div className="flex items-center justify-end gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            title={s.isActive ? "Nonaktifkan" : "Aktifkan"}
-                            onClick={() => handleToggle(s)}
-                          >
-                            <Power className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon" title="Edit" onClick={() => openEdit(s)}>
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            title="Hapus"
-                            className="text-red-600 hover:text-red-700"
-                            onClick={() => setDeleting(s)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">—</span>
-                      )}
+                      <div className="flex items-center justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title={s.isActive ? "Nonaktifkan" : "Aktifkan"}
+                          onClick={() => handleToggle(s)}
+                        >
+                          <Power className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" title="Edit" onClick={() => openEdit(s)}>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="Hapus"
+                          className="text-red-600 hover:text-red-700"
+                          onClick={() => setDeleting(s)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

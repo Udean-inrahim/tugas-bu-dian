@@ -26,6 +26,15 @@ async function main() {
   });
   console.log(`✅ Admin user created: ${admin.email}`);
 
+  // Ensure the sensors.user_id column exists and backfill existing sensors to
+  // the admin account (per-account ownership migration).
+  await prisma.$executeRawUnsafe(
+    'ALTER TABLE "sensors" ADD COLUMN IF NOT EXISTS "user_id" integer'
+  );
+  await prisma.$executeRawUnsafe(
+    `UPDATE "sensors" SET "user_id" = (SELECT id FROM "users" WHERE role = 'ADMIN' ORDER BY id LIMIT 1) WHERE "user_id" IS NULL`
+  );
+
   // Default settings (id must be 1)
   const settings = await prisma.setting.upsert({
     where: { id: 1 },
@@ -41,15 +50,16 @@ async function main() {
   });
   console.log("✅ Default settings created");
 
-  // Demo sensor
+  // Demo sensor (milik admin)
   const sensor = await prisma.sensor.upsert({
     where: { sensorCode: "ST-001" },
-    update: {},
+    update: { userId: admin.id },
     create: {
       sensorCode: "ST-001",
       name: "Server Room",
       location: "Building A",
       status: "OFFLINE",
+      userId: admin.id,
     },
   });
   console.log(`✅ Demo sensor created: ${sensor.name} (${sensor.sensorCode})`);
