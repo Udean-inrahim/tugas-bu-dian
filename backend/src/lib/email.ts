@@ -26,10 +26,12 @@ let smtpTransporter: Transporter | null = null;
 function getSmtpTransporter(): Transporter | null {
   if (!process.env.SMTP_HOST) return null;
   if (!smtpTransporter) {
+    const secure = (process.env.SMTP_SECURE ?? "true") !== "false";
     smtpTransporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: Number(process.env.SMTP_PORT ?? 465),
-      secure: (process.env.SMTP_SECURE ?? "true") !== "false",
+      secure,
+      requireTLS: !secure,
       auth: process.env.SMTP_USER
         ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
         : undefined,
