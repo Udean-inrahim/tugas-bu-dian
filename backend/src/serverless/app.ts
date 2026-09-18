@@ -145,6 +145,13 @@ function pagination(q: URLSearchParams) {
   return { page, limit, skip: (page - 1) * limit };
 }
 
+function parseDateParam(value?: string): Date | undefined {
+  if (!value) return undefined;
+  const asNumber = Number(value);
+  const date = Number.isFinite(asNumber) ? new Date(asNumber) : new Date(value);
+  return Number.isNaN(date.getTime()) ? undefined : date;
+}
+
 const app = new Hono<{ Variables: Vars }>();
 
 app.onError((err, c) => {
@@ -356,10 +363,10 @@ app.get("/api/readings", async (c) => {
   const { page, limit, skip } = pagination(new URLSearchParams(c.req.url.split("?")[1] ?? ""));
   const where: Record<string, unknown> = {};
   if (q.sensor_id?.[0]) where.sensorId = Number(q.sensor_id[0]);
-  const from = q.from?.[0];
-  const to = q.to?.[0];
-  if (from) where.recordedAt = { ...((where.recordedAt as object) ?? {}), gte: new Date(from) };
-  if (to) where.recordedAt = { ...((where.recordedAt as object) ?? {}), lte: new Date(to) };
+  const from = parseDateParam(q.from?.[0]);
+  const to = parseDateParam(q.to?.[0]);
+  if (from) where.recordedAt = { ...((where.recordedAt as object) ?? {}), gte: from };
+  if (to) where.recordedAt = { ...((where.recordedAt as object) ?? {}), lte: to };
 
   const [total, data] = await Promise.all([
     prisma.sensorReading.count({ where }),

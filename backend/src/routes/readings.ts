@@ -15,6 +15,13 @@ const readingFromSensorSchema = z.object({
   humidity: z.number().min(0).max(100),
 });
 
+function parseDateParam(value?: string): Date | undefined {
+  if (!value) return undefined;
+  const asNumber = Number(value);
+  const date = Number.isFinite(asNumber) ? new Date(asNumber) : new Date(value);
+  return Number.isNaN(date.getTime()) ? undefined : date;
+}
+
 export async function readingRoutes(app: FastifyInstance) {
   // Public ingest endpoint (ESP32 → HTTP fallback, authenticated with a service token header)
   app.post("/api/readings", async (req, reply) => {
@@ -97,8 +104,10 @@ export async function readingRoutes(app: FastifyInstance) {
 
     const where: Record<string, unknown> = {};
     if (q.sensor_id) where.sensorId = Number(q.sensor_id);
-    if (q.from) where.recordedAt = { ...((where.recordedAt as object) ?? {}), gte: new Date(q.from) };
-    if (q.to) where.recordedAt = { ...((where.recordedAt as object) ?? {}), lte: new Date(q.to) };
+    const from = parseDateParam(q.from);
+    const to = parseDateParam(q.to);
+    if (from) where.recordedAt = { ...((where.recordedAt as object) ?? {}), gte: from };
+    if (to) where.recordedAt = { ...((where.recordedAt as object) ?? {}), lte: to };
 
     const [total, data] = await Promise.all([
       prisma.sensorReading.count({ where }),
