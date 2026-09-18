@@ -9,8 +9,9 @@
 - Buka `https://tugas-bu-dian.vercel.app` lalu **Ctrl+F5** (hard refresh).
 - Tab 1: login admin (`admin@example.com` / `admin123`).
 - Siapkan 1 email cadangan (bukan `vallino200@gmail.com`) untuk demo daftar.
+- Jalankan sensor laptop: buka PowerShell, jalankan `.\laptop-sensor.ps1`, biarkan jendelanya terbuka.
 - Pastikan internet stabil.
-
+- & "C:\Users\Administrator\Documents\Default Project\laptop-sensor.ps1"
 ---
 
 ## Alur Presentasi (Urutan Demo)
@@ -43,8 +44,8 @@
 - Katakan: "Monitoring menampilkan grafik yang diperbarui otomatis. History menampilkan seluruh riwayat pembacaan beserta waktu."
 
 **4c. Sensor & Alert**
-- Lakukan: buka Sensors → tunjuk `ST-001`; buka Alerts.
-- Katakan: "Sensor terdaftar beserta lokasinya. Ketika suhu/kelembapan keluar ambang, sistem otomatis membuat alert warning atau critical."
+- Lakukan: buka Sensors → tunjuk `ST-001` (Server Room) dan `LAPTOP-01` (Laptop); buka Alerts.
+- Katakan: "Ada dua sensor. Server Room datanya disimulasikan karena perangkat belum ada. Laptop suhunya benar-benar diukur dari perangkat ini secara langsung dan dikirim tiap 30 detik lewat API. Ketika suhu/kelembapan keluar ambang, sistem otomatis membuat alert warning atau critical."
 
 **4d. Settings (admin)**
 - Lakukan: buka Settings, tunjuk ambang suhu/kelembapan dan refresh interval.
@@ -90,7 +91,7 @@
 - **Kalau email tidak masuk?** Cek spam; atau kode tampil di layar (mode demo).
 - **Password bisa dilihat?** Tidak, tersimpan sebagai hash bcrypt.
 - **Kenapa serverless?** Gratis, tidak perlu server, otomatis deploy dari GitHub.
-- **Bisa pakai sensor asli?** Bisa; ESP32 kirim JSON ke endpoint yang sama.
+- **Bisa pakai sensor asli?** Bisa. Saat ini suhu laptop diukur sungguhan lewat skrip `laptop-sensor.ps1`; nanti ESP32 cukup mengirim JSON ke endpoint yang sama.
 - **Batasan?** Data demo dari simulator; Gmail ±500 email/hari.
 
 ---
