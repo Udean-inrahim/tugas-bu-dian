@@ -119,6 +119,9 @@ export function Sidebar({ onClose }: SidebarProps) {
               {user?.role ?? "Admin"}
             </p>
           </div>
+          <span className="ml-auto shrink-0 rounded-full bg-[#edf1ff] px-2 py-1 text-[9px] font-semibold text-brand-blue dark:bg-white/10 dark:text-indigo-200">
+            v{__APP_VERSION__}
+          </span>
         </div>
       </div>
     </div>

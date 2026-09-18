@@ -226,7 +226,7 @@ export function LoginPage() {
           </form>
 
           <p className="mt-[22px] text-sm font-light text-[#6b7694]">
-            {remember ? "Kamu akan tetap masuk sampai menekan Keluar." : "Sesi berakhir saat browser ditutup."}
+            {remember ? "cant touch the air." : "Sesi berakhir saat browser ditutup."}
             <br />
             Belum punya akun?{" "}
             <Link

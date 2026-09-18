@@ -153,10 +153,9 @@ export function RightRail() {
         </div>
       </div>
 
-      <p className="mt-3 text-center text-[9px] text-[#a5a8b0] dark:text-slate-500">
-        Pembaruan terakhir{" "}
-        {formatTime(new Date().toISOString())} · Smart Temp
-      </p>
+        <p className="mt-3 text-center text-[9px] text-[#a5a8b0] dark:text-slate-500">
+          Pembaruan terakhir {formatTime(new Date().toISOString())} · Smart Temp v{__APP_VERSION__}
+        </p>
     </div>
   );
 }
