@@ -20,6 +20,9 @@ export function RegisterPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const presetEmail = (location.state as { email?: string } | null)?.email ?? "";
+  const swapDir = (location.state as { dir?: string } | null)?.dir;
+  const swapClass =
+    swapDir === "to-login" ? "auth-swap-left" : swapDir === "to-register" ? "auth-swap-right" : "auth-swap-fade";
   const token = useAuthStore((s) => s.token);
   const hydrated = useAuthStore((s) => s.hydrated);
   const register = useAuthStore((s) => s.register);
@@ -114,7 +117,7 @@ export function RegisterPage() {
       </div>
 
       <div className="flex flex-1 items-center justify-center bg-background p-6 lg:p-16">
-        <Reveal delay={150} className="w-full max-w-sm">
+        <div className={`auth-swap ${swapClass} w-full max-w-sm`}>
           {step === "form" ? (
             <>
               <div className="mb-8">
@@ -182,7 +185,11 @@ export function RegisterPage() {
 
               <p className="mt-6 text-center text-sm text-black-light">
                 Sudah punya akun?{" "}
-                <Link to="/login" className="font-medium text-primary hover:underline">
+                <Link
+                  to="/login"
+                  state={{ dir: "to-login" }}
+                  className="font-medium text-primary hover:underline"
+                >
                   Login
                 </Link>
               </p>
@@ -246,7 +253,7 @@ export function RegisterPage() {
               </div>
             </>
           )}
-        </Reveal>
+        </div>
       </div>
     </div>
   );

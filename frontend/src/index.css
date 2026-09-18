@@ -304,7 +304,57 @@
     transform: translateX(4px);
   }
 
+  /* ===== Auth page swap (login <-> register) ===== */
+  .auth-swap {
+    animation-duration: 0.55s;
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    animation-fill-mode: both;
+    will-change: opacity, transform;
+  }
+  .auth-swap-left {
+    animation-name: auth-swap-left;
+  }
+  .auth-swap-right {
+    animation-name: auth-swap-right;
+  }
+  .auth-swap-fade {
+    animation-name: auth-swap-fade;
+  }
+  @keyframes auth-swap-left {
+    from {
+      opacity: 0;
+      transform: translateX(-56px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  @keyframes auth-swap-right {
+    from {
+      opacity: 0;
+      transform: translateX(56px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  @keyframes auth-swap-fade {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
+    .auth-swap {
+      animation: none;
+    }
     .reveal {
       opacity: 1;
       transform: none;

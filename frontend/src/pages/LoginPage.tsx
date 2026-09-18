@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/stores/authStore";
 import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,10 @@ import { toast } from "sonner";
 
 export function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const swapDir = (location.state as { dir?: string } | null)?.dir;
+  const swapClass =
+    swapDir === "to-login" ? "auth-swap-left" : swapDir === "to-register" ? "auth-swap-right" : "auth-swap-fade";
   const token = useAuthStore((s) => s.token);
   const hydrated = useAuthStore((s) => s.hydrated);
   const login = useAuthStore((s) => s.login);
@@ -49,7 +53,7 @@ export function LoginPage() {
         ?.response?.data;
       if (data?.error === "EMAIL_NOT_VERIFIED") {
         toast.error(data.message ?? "Email belum diverifikasi");
-        navigate("/register", { state: { email } });
+        navigate("/register", { state: { email, dir: "to-register" } });
       } else {
         toast.error("Email atau password salah");
       }
@@ -113,7 +117,7 @@ export function LoginPage() {
 
       {/* Right — login form */}
       <div className="flex flex-1 items-center justify-center bg-background p-6 lg:p-16">
-        <Reveal delay={150} className="w-full max-w-sm">
+        <div className={`auth-swap ${swapClass} w-full max-w-sm`}>
           <div className="mb-8">
             <p className="micro-label mb-2 flex items-center gap-2 text-primary">
               <span className="inline-block h-2 w-2 rounded-full bg-primary" />
@@ -187,12 +191,16 @@ export function LoginPage() {
             </Button>
             <p className="text-center text-sm text-black-light">
               Belum punya akun?{" "}
-              <Link to="/register" className="font-medium text-primary hover:underline">
+              <Link
+                to="/register"
+                state={{ dir: "to-register" }}
+                className="font-medium text-primary hover:underline"
+              >
                 Daftar
               </Link>
             </p>
             <p className="text-center text-xs uppercase tracking-wide text-black-light">
-              Demo: admin@example.com / admin123
+              mbg bracun
             </p>
           </form>
 
@@ -247,7 +255,7 @@ export function LoginPage() {
               </form>
             </DialogContent>
           </Dialog>
-        </Reveal>
+        </div>
       </div>
     </div>
   );
