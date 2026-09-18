@@ -1,13 +1,58 @@
 const RESEND_ENDPOINT = "https://api.resend.com/emails";
+const BREVO_ENDPOINT = "https://api.brevo.com/v3/smtp/email";
 
-export function emailConfigured() {
-  return Boolean(process.env.RESEND_API_KEY);
+type Sender = { name: string; email: string };
+
+function parseFrom(fallbackEmail: string): Sender {
+  const raw = (process.env.EMAIL_FROM ?? "").trim();
+  const match = /^(.*?)\s*<([^>]+)>\s*$/.exec(raw);
+  if (match) {
+    return { name: match[1].replace(/^"|"$/g, "") || "Smart Temp Monitor", email: match[2] };
+  }
+  if (raw.includes("@")) {
+    return { name: process.env.EMAIL_SENDER_NAME ?? "Smart Temp Monitor", email: raw };
+  }
+  return { name: "Smart Temp Monitor", email: fallbackEmail };
 }
 
-async function sendEmail(to: string, subject: string, html: string): Promise<boolean> {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) return false;
+export function emailConfigured() {
+  return Boolean(process.env.BREVO_API_KEY || process.env.RESEND_API_KEY);
+}
 
+async function sendViaBrevo(to: string, subject: string, html: string): Promise<boolean> {
+  const apiKey = process.env.BREVO_API_KEY as string;
+  const sender = parseFrom(process.env.EMAIL_SENDER ?? "");
+  if (!sender.email) {
+    console.error("Brevo: set EMAIL_FROM (mis. 'Smart Temp Monitor <email@verified.com>')");
+    return false;
+  }
+  try {
+    const res = await fetch(BREVO_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "api-key": apiKey,
+        "content-type": "application/json",
+        accept: "application/json",
+      },
+      body: JSON.stringify({
+        sender: { name: sender.name, email: sender.email },
+        to: [{ email: to }],
+        subject,
+        htmlContent: html,
+      }),
+    });
+    if (!res.ok) {
+      console.error("Brevo error:", res.status, await res.text().catch(() => ""));
+    }
+    return res.ok;
+  } catch (err) {
+    console.error("Gagal mengirim email via Brevo:", err);
+    return false;
+  }
+}
+
+async function sendViaResend(to: string, subject: string, html: string): Promise<boolean> {
+  const apiKey = process.env.RESEND_API_KEY as string;
   const from = process.env.EMAIL_FROM ?? "Smart Temp Monitor <onboarding@resend.dev>";
   try {
     const res = await fetch(RESEND_ENDPOINT, {
@@ -23,9 +68,15 @@ async function sendEmail(to: string, subject: string, html: string): Promise<boo
     }
     return res.ok;
   } catch (err) {
-    console.error("Gagal mengirim email:", err);
+    console.error("Gagal mengirim email via Resend:", err);
     return false;
   }
+}
+
+function sendEmail(to: string, subject: string, html: string): Promise<boolean> {
+  if (process.env.BREVO_API_KEY) return sendViaBrevo(to, subject, html);
+  if (process.env.RESEND_API_KEY) return sendViaResend(to, subject, html);
+  return Promise.resolve(false);
 }
 
 function codeBlock(code: string) {
