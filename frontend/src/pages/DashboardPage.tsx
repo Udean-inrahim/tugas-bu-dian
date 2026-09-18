@@ -4,14 +4,12 @@ import { useSettings } from "@/hooks/useSettings";
 import { useAlerts } from "@/hooks/useAlerts";
 import { useReadings } from "@/hooks/useReadings";
 import api from "@/lib/api";
-import { classifyTemperature } from "@/lib/threshold";
 import { TemperatureCard } from "@/components/dashboard/TemperatureCard";
 import { HumidityCard } from "@/components/dashboard/HumidityCard";
 import { SensorStatusCard } from "@/components/dashboard/SensorStatusCard";
 import { AlertsCard } from "@/components/dashboard/AlertsCard";
 import { MetricChart } from "@/components/dashboard/MetricChart";
 import { GradientRail } from "@/components/dashboard/GradientRail";
-import { MoodBar } from "@/components/dashboard/FunMascot";
 import { RecentMeasurements } from "@/components/dashboard/RecentMeasurements";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -116,10 +114,6 @@ export function DashboardPage() {
             <AlertsCard summary={summary} />
           </Reveal>
         </div>
-
-        <Reveal>
-          <MoodBar temperature={latest?.temperature ?? null} condition={classifyTemperature(latest?.temperature ?? null, settings)} />
-        </Reveal>
 
         <Reveal>
           <Card>
