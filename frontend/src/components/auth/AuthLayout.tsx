@@ -161,7 +161,12 @@ export function AuthLayout({ title, sub, children, cta }: AuthLayoutProps) {
               <p className="mt-1.5 text-[12.5px] text-[#6b7694]">alert otomatis saat melewati ambang</p>
             </div>
 
-            <div className="absolute top-[168px] right-[2%] w-[210px] rounded-[20px] bg-white/90 p-[18px_22px] shadow-[0_18px_40px_rgba(31,45,90,0.12)] max-[900px]:static max-[900px]:max-w-[230px] max-[900px]:flex-[1_1_180px]">
+            <a
+              href="https://github.com/Udean-inrahim/tugas-bu-dian/releases/latest"
+              target="_blank"
+              rel="noreferrer"
+              className="absolute top-[168px] right-[2%] block w-[210px] cursor-pointer rounded-[20px] bg-white/90 p-[18px_22px] shadow-[0_18px_40px_rgba(31,45,90,0.12)] transition hover:-translate-y-1 hover:shadow-[0_22px_46px_rgba(31,45,90,0.18)] max-[900px]:static max-[900px]:max-w-[230px] max-[900px]:flex-[1_1_180px]"
+            >
               <div className="mb-2 flex items-center gap-2.5 text-sm font-semibold text-[#6b7694]">
                 <span className="grid h-[30px] w-[30px] place-items-center rounded-full bg-[#f2385a] text-white">
                   <Globe className="h-4 w-4" />
@@ -170,7 +175,10 @@ export function AuthLayout({ title, sub, children, cta }: AuthLayoutProps) {
               </div>
               <p className="text-[clamp(22px,2.6vw,28px)] font-bold leading-[1.1] tracking-[-0.02em]">Web + APK</p>
               <p className="mt-1.5 text-[12.5px] text-[#6b7694]">desktop, HP, dan Android</p>
-            </div>
+              <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-[#e9edff] px-2.5 py-1 text-[10px] font-semibold text-[#2563f0]">
+                Unduh APK ↓
+              </span>
+            </a>
 
             <div className="absolute top-[300px] left-[4%] w-[220px] rounded-[20px] bg-white/90 p-[18px_22px] shadow-[0_18px_40px_rgba(31,45,90,0.12)] max-[900px]:static max-[900px]:max-w-[230px] max-[900px]:flex-[1_1_180px]">
               <div className="mb-2 flex items-center gap-2.5 text-sm font-semibold text-[#6b7694]">
