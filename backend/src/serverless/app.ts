@@ -106,7 +106,12 @@ async function recordReading(sensorId: number, temperature: number, humidity: nu
 // data baru ketika pembacaan terakhir sudah lebih lama dari DEMO_HEARTBEAT_MS,
 // agar status sensor ONLINE dan grafik tetap bergerak. DEMO_MODE=false untuk off.
 const DEMO_MODE = (process.env.DEMO_MODE ?? "true") !== "false";
-const DEMO_HEARTBEAT_MS = Number(process.env.DEMO_HEARTBEAT_MS ?? 4 * 60 * 1000);
+const DEMO_HEARTBEAT_MS = Number(process.env.DEMO_HEARTBEAT_MS ?? 60 * 1000);
+// Hanya sensor simulasi yang diisi otomatis; sensor asli (laptop/ESP32) dibiarkan.
+const DEMO_SENSOR_CODES = (process.env.DEMO_SENSOR_CODES ?? "ST-001")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
 let lastHeartbeatCheck = 0;
 
 async function ensureDemoHeartbeat() {
@@ -114,7 +119,10 @@ async function ensureDemoHeartbeat() {
   const now = Date.now();
   if (now - lastHeartbeatCheck < 30_000) return;
   lastHeartbeatCheck = now;
-  const sensors = await prisma.sensor.findMany({ where: { isActive: true }, select: { id: true } });
+  const sensors = await prisma.sensor.findMany({
+    where: { isActive: true, sensorCode: { in: DEMO_SENSOR_CODES } },
+    select: { id: true },
+  });
   if (sensors.length === 0) return;
   const last = await latestBySensor(sensors.map((s) => s.id));
   for (const sensor of sensors) {
@@ -383,7 +391,10 @@ app.post("/api/readings", async (c) => {
 // Menyuntik pembacaan acak untuk semua sensor aktif; aktif hanya saat DEMO_MODE.
 app.on(["GET", "POST"], "/api/demo/heartbeat", async (c) => {
   if (!DEMO_MODE) return c.json({ error: "DEMO_DISABLED", message: "Mode demo nonaktif" }, 403);
-  const sensors = await prisma.sensor.findMany({ where: { isActive: true }, select: { id: true } });
+  const sensors = await prisma.sensor.findMany({
+    where: { isActive: true, sensorCode: { in: DEMO_SENSOR_CODES } },
+    select: { id: true },
+  });
   const now = Date.now();
   for (const sensor of sensors) {
     const { temperature, humidity } = demoReading(now);
