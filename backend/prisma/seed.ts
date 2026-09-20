@@ -65,6 +65,16 @@ async function main() {
     `UPDATE "sensors" SET "user_id" = (SELECT id FROM "users" WHERE role = 'ADMIN' ORDER BY id LIMIT 1) WHERE "user_id" IS NULL`
   );
 
+  // API key per sensor (hash SHA-256, unik; key mentah hanya ditampilkan sekali
+  // saat sensor dibuat/di-regenerate). Kolom nullable agar sensor lama tetap
+  // bisa kirim data sampai owner membuat key-nya.
+  await prisma.$executeRawUnsafe(
+    'ALTER TABLE "sensors" ADD COLUMN IF NOT EXISTS "api_key_hash" text'
+  );
+  await prisma.$executeRawUnsafe(
+    'CREATE UNIQUE INDEX IF NOT EXISTS "sensors_api_key_hash_key" ON "sensors"("api_key_hash")'
+  );
+
   // Default settings (id must be 1)
   const settings = await prisma.setting.upsert({
     where: { id: 1 },

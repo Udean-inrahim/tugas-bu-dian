@@ -12,6 +12,7 @@ import {
 } from "../lib/resetCode.js";
 import { sendVerificationEmail, sendResetEmail } from "../lib/email.js";
 import { demoReading } from "../lib/demoData.js";
+import { generateApiKey, hashApiKey, publicSensor } from "../lib/apiKey.js";
 import { getActiveSettings, updateSettings } from "./settings.js";
 import {
   evaluateThresholds,
@@ -154,6 +155,7 @@ const readingSensorSchema = z.object({
   sensor_code: z.string().min(1),
   temperature: z.number().min(-40).max(125),
   humidity: z.number().min(0).max(100),
+  api_key: z.string().min(1).optional(),
 });
 
 const registerSchema = z.object({
@@ -469,6 +471,15 @@ app.post("/api/readings", async (c) => {
     if (!parsed.success) return c.json(validationError(parsed.error), 400);
     const sensor = await prisma.sensor.findUnique({ where: { sensorCode: parsed.data.sensor_code } });
     if (!sensor) return c.json({ error: "NOT_FOUND", message: "Sensor tidak dikenal" }, 404);
+
+    // Sensor yang sudah punya API key hanya menerima data dengan key yang cocok.
+    if (sensor.apiKeyHash) {
+      const key = typeof parsed.data.api_key === "string" ? parsed.data.api_key : "";
+      if (!key || hashApiKey(key) !== sensor.apiKeyHash) {
+        return c.json({ error: "UNAUTHORIZED", message: "API key sensor salah" }, 401);
+      }
+    }
+
     const reading = await recordReading(sensor.id, parsed.data.temperature, parsed.data.humidity);
     return c.json(reading, 201);
   }
@@ -593,7 +604,9 @@ app.get("/api/sensors", async (c) => {
     orderBy: { createdAt: "asc" },
   });
   const last = await latestBySensor(sensors.map((s) => s.id));
-  const data = sensors.map((s) => ({ ...s, status: isOnline(s, last.get(s.id)) }));
+  const data = sensors.map((s) =>
+    publicSensor({ ...s, status: isOnline(s, last.get(s.id)) })
+  );
   return c.json({ data });
 });
 
@@ -606,7 +619,9 @@ app.get("/api/sensors/:id", async (c) => {
     where: { sensorId: id },
     orderBy: { recordedAt: "desc" },
   });
-  return c.json({ ...sensor, status: isOnline(sensor, lastReading?.recordedAt), lastReading });
+  return c.json(
+    publicSensor({ ...sensor, status: isOnline(sensor, lastReading?.recordedAt), lastReading })
+  );
 });
 
 app.post("/api/sensors", async (c) => {
@@ -614,10 +629,22 @@ app.post("/api/sensors", async (c) => {
   if (!parsed.success) return c.json(validationError(parsed.error), 400);
   const exists = await prisma.sensor.findUnique({ where: { sensorCode: parsed.data.sensorCode } });
   if (exists) return c.json({ error: "CODE_TAKEN", message: "Sensor code sudah digunakan" }, 409);
+  // API key dibuat saat sensor didaftarkan; yang disimpan hanya hash-nya.
+  const apiKey = generateApiKey();
   const sensor = await prisma.sensor.create({
-    data: { ...parsed.data, userId: c.get("user").id },
+    data: { ...parsed.data, userId: c.get("user").id, apiKeyHash: hashApiKey(apiKey) },
   });
-  return c.json(sensor, 201);
+  return c.json({ ...publicSensor(sensor), apiKey }, 201);
+});
+
+app.post("/api/sensors/:id/regenerate-key", async (c) => {
+  const id = Number(c.req.param("id"));
+  if (!Number.isInteger(id)) return c.json({ error: "INVALID_ID", message: "ID tidak valid" }, 400);
+  const sensor = await findOwnedSensor(id, c.get("user").id);
+  if (!sensor) return c.json({ error: "NOT_FOUND", message: "Sensor tidak ditemukan" }, 404);
+  const apiKey = generateApiKey();
+  await prisma.sensor.update({ where: { id }, data: { apiKeyHash: hashApiKey(apiKey) } });
+  return c.json({ apiKey, sensorCode: sensor.sensorCode, name: sensor.name });
 });
 
 app.put("/api/sensors/:id", async (c) => {
@@ -628,7 +655,7 @@ app.put("/api/sensors/:id", async (c) => {
   const sensor = await findOwnedSensor(id, c.get("user").id);
   if (!sensor) return c.json({ error: "NOT_FOUND", message: "Sensor tidak ditemukan" }, 404);
   const updated = await prisma.sensor.update({ where: { id }, data: parsed.data });
-  return c.json(updated);
+  return c.json(publicSensor(updated));
 });
 
 app.delete("/api/sensors/:id", async (c) => {
@@ -649,7 +676,7 @@ app.patch("/api/sensors/:id/toggle", async (c) => {
     where: { id },
     data: { isActive: !sensor.isActive },
   });
-  return c.json(updated);
+  return c.json(publicSensor(updated));
 });
 
 app.get("/api/readings/latest", async (c) => {

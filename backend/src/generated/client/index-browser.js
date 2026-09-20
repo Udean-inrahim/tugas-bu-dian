@@ -141,6 +141,7 @@ exports.Prisma.SensorScalarFieldEnum = {
   location: 'location',
   status: 'status',
   isActive: 'isActive',
+  apiKeyHash: 'apiKeyHash',
   userId: 'userId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

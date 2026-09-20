@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Power, Radio } from "lucide-react";
+import { Plus, Pencil, Trash2, Power, Radio, KeyRound } from "lucide-react";
 import { useSensors } from "@/hooks/useSensors";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -39,11 +39,13 @@ import { cn } from "@/lib/utils";
 import type { Sensor } from "@/types";
 
 export function SensorsPage() {
-  const { sensors, create, update, toggle, remove, loading } = useSensors();
+  const { sensors, create, regenerateKey, update, toggle, remove, loading } = useSensors();
 
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Sensor | null>(null);
   const [deleting, setDeleting] = useState<Sensor | null>(null);
+  const [keyInfo, setKeyInfo] = useState<{ name: string; sensorCode: string; apiKey: string } | null>(null);
+  const [keyLoading, setKeyLoading] = useState(false);
 
   const openCreate = () => {
     setEditing(null);
@@ -55,8 +57,34 @@ export function SensorsPage() {
     setFormOpen(true);
   };
 
-  const handleSave = (values: { sensorCode: string; name: string; location: string }) => {
-    return editing ? update(editing.id, values) : create(values);
+  const handleSave = async (values: { sensorCode: string; name: string; location: string }) => {
+    if (editing) return update(editing.id, values);
+    const created = await create(values);
+    if (created.apiKey) {
+      setKeyInfo({ name: created.name, sensorCode: created.sensorCode, apiKey: created.apiKey });
+    }
+    return created;
+  };
+
+  const handleRegenerateKey = async (s: Sensor) => {
+    setKeyLoading(true);
+    try {
+      const res = await regenerateKey(s.id);
+      setKeyInfo({ name: res.name, sensorCode: res.sensorCode, apiKey: res.apiKey });
+      toast.success("API key baru dibuat. Key lama langsung tidak berlaku.");
+    } catch {
+      toast.error("Gagal membuat API key baru");
+    } finally {
+      setKeyLoading(false);
+    }
+  };
+
+  const copyKey = () => {
+    if (!keyInfo) return;
+    navigator.clipboard?.writeText(keyInfo.apiKey).then(
+      () => toast.success("API key disalin"),
+      () => toast.error("Gagal menyalin")
+    );
   };
 
   const handleToggle = async (s: Sensor) => {
@@ -149,6 +177,18 @@ export function SensorsPage() {
                           <div className="flex items-center gap-1.5">
                             <span className="truncate text-sm font-medium">{s.name}</span>
                             <span className="text-xs text-muted-foreground">{s.sensorCode}</span>
+                            <Badge
+                              variant={s.hasApiKey ? "secondary" : "outline"}
+                              className={cn(
+                                "text-[10px]",
+                                s.hasApiKey
+                                  ? "bg-emerald-100 text-emerald-700"
+                                  : "text-muted-foreground"
+                              )}
+                              title="API key untuk mengirim data"
+                            >
+                              {s.hasApiKey ? "API Key ✓" : "Tanpa Key"}
+                            </Badge>
                           </div>
                           <p className="truncate text-xs text-muted-foreground md:hidden">
                             {s.location}
@@ -188,6 +228,15 @@ export function SensorsPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title={s.hasApiKey ? "API key / buat key baru" : "Buat API key"}
+                          disabled={keyLoading}
+                          onClick={() => handleRegenerateKey(s)}
+                        >
+                          <KeyRound className="h-4 w-4" />
+                        </Button>
                         <Button
                           variant="ghost"
                           size="icon"
@@ -254,6 +303,38 @@ export function SensorsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={Boolean(keyInfo)} onOpenChange={(o) => !o && setKeyInfo(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>API Key Sensor</DialogTitle>
+            <DialogDescription>
+              Kunci rahasia untuk <strong>{keyInfo?.name}</strong> ({keyInfo?.sensorCode}).
+              Tempel kunci ini di firmware/skrip sensor saat mengirim data.
+            </DialogDescription>
+          </DialogHeader>
+          {keyInfo && (
+            <div className="space-y-4">
+              <div className="rounded-xl border bg-[#f3f5fb] p-4">
+                <p className="break-all text-center font-mono text-[15px] font-bold tracking-wide text-ink">
+                  {keyInfo.apiKey}
+                </p>
+              </div>
+              <div className="rounded-lg border border-amber-300/60 bg-amber-50 p-3 text-xs text-amber-800">
+                Salin & simpan di tempat aman. Key hanya tampil{" "}
+                <strong>sekali ini</strong> — kalau lupa, buat key baru lewat tombol kunci di daftar
+                sensor.
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setKeyInfo(null)}>
+                  Tutup
+                </Button>
+                <Button onClick={copyKey}>Salin API Key</Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

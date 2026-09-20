@@ -18,9 +18,14 @@ export interface Sensor {
   location: string;
   status: SensorStatusType;
   isActive: boolean;
+  hasApiKey?: boolean;
   createdAt: string;
   updatedAt: string;
   lastReading?: SensorReading | null;
+}
+
+export interface SensorCreateResult extends Sensor {
+  apiKey?: string;
 }
 
 export type AlertType =

@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
+import { generateApiKey, hashApiKey, publicSensor } from "../lib/apiKey.js";
 
 const sensorCreateSchema = z.object({
   sensorCode: z.string().min(1, "Sensor code wajib diisi").max(20),
@@ -23,7 +24,7 @@ export async function sensorRoutes(app: FastifyInstance) {
       where: { userId: req.user.sub },
       orderBy: { createdAt: "asc" },
     });
-    return { data: sensors };
+    return { data: sensors.map(publicSensor) };
   });
 
   app.get("/api/sensors/:id", async (req, reply) => {
@@ -41,7 +42,7 @@ export async function sensorRoutes(app: FastifyInstance) {
     if (!sensor) {
       return reply.code(404).send({ error: "NOT_FOUND", message: "Sensor tidak ditemukan" });
     }
-    return sensor;
+    return publicSensor(sensor);
   });
 
   app.post("/api/sensors", async (req, reply) => {
@@ -58,10 +59,30 @@ export async function sensorRoutes(app: FastifyInstance) {
         .code(409)
         .send({ error: "CODE_TAKEN", message: "Sensor code sudah digunakan" });
     }
+    // API key dibuat saat sensor didaftarkan; yang disimpan hanya hash-nya.
+    const apiKey = generateApiKey();
     const sensor = await prisma.sensor.create({
-      data: { ...parsed.data, userId: req.user.sub },
+      data: { ...parsed.data, userId: req.user.sub, apiKeyHash: hashApiKey(apiKey) },
     });
-    return reply.code(201).send(sensor);
+    return reply.code(201).send({ ...publicSensor(sensor), apiKey });
+  });
+
+  app.post("/api/sensors/:id/regenerate-key", async (req, reply) => {
+    const { id } = req.params as { id: string };
+    const sensorId = Number(id);
+    if (!Number.isInteger(sensorId)) {
+      return reply.code(400).send({ error: "INVALID_ID", message: "ID tidak valid" });
+    }
+    const sensor = await prisma.sensor.findFirst({ where: { id: sensorId, userId: req.user.sub } });
+    if (!sensor) {
+      return reply.code(404).send({ error: "NOT_FOUND", message: "Sensor tidak ditemukan" });
+    }
+    const apiKey = generateApiKey();
+    await prisma.sensor.update({
+      where: { id: sensorId },
+      data: { apiKeyHash: hashApiKey(apiKey) },
+    });
+    return { apiKey, sensorCode: sensor.sensorCode, name: sensor.name };
   });
 
   app.put("/api/sensors/:id", async (req, reply) => {
@@ -82,7 +103,7 @@ export async function sensorRoutes(app: FastifyInstance) {
       return reply.code(404).send({ error: "NOT_FOUND", message: "Sensor tidak ditemukan" });
     }
     const updated = await prisma.sensor.update({ where: { id: sensorId }, data: parsed.data });
-    return updated;
+    return publicSensor(updated);
   });
 
   app.delete("/api/sensors/:id", async (req, reply) => {
@@ -110,6 +131,6 @@ export async function sensorRoutes(app: FastifyInstance) {
       where: { id: sensorId },
       data: { isActive: !sensor.isActive },
     });
-    return updated;
+    return publicSensor(updated);
   });
 }

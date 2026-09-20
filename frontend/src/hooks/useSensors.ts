@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import api from "@/lib/api";
-import type { Sensor } from "@/types";
+import type { Sensor, SensorCreateResult } from "@/types";
 
 type SensorInput = {
   sensorCode: string;
@@ -32,8 +32,9 @@ export function useSensors() {
     setLoading(true);
     setError(null);
     try {
-      const { data } = await api.post<Sensor>("/sensors", body);
-      setSensors((prev) => [...prev, data]);
+      const { data } = await api.post<SensorCreateResult>("/sensors", body);
+      const { apiKey, ...sensor } = data;
+      setSensors((prev) => [...prev, sensor]);
       return data;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Gagal menambah sensor");
@@ -42,6 +43,23 @@ export function useSensors() {
       setLoading(false);
     }
   }, []);
+
+  const regenerateKey = useCallback(async (id: number) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data } = await api.post<{ apiKey: string; sensorCode: string; name: string }>(
+        `/sensors/${id}/regenerate-key`
+      );
+      await list(true);
+      return data;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Gagal membuat API key baru");
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [list]);
 
   const update = useCallback(async (id: number, body: Partial<Sensor>) => {
     setLoading(true);
@@ -91,5 +109,5 @@ export function useSensors() {
     list();
   }, [list]);
 
-  return { sensors, list, create, update, toggle, remove, loading, error };
+  return { sensors, list, create, regenerateKey, update, toggle, remove, loading, error };
 }

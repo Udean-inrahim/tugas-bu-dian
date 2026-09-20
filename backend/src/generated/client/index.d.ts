@@ -2388,6 +2388,7 @@ export namespace Prisma {
     location: string | null
     status: $Enums.SensorStatus | null
     isActive: boolean | null
+    apiKeyHash: string | null
     userId: number | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -2400,6 +2401,7 @@ export namespace Prisma {
     location: string | null
     status: $Enums.SensorStatus | null
     isActive: boolean | null
+    apiKeyHash: string | null
     userId: number | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -2412,6 +2414,7 @@ export namespace Prisma {
     location: number
     status: number
     isActive: number
+    apiKeyHash: number
     userId: number
     createdAt: number
     updatedAt: number
@@ -2436,6 +2439,7 @@ export namespace Prisma {
     location?: true
     status?: true
     isActive?: true
+    apiKeyHash?: true
     userId?: true
     createdAt?: true
     updatedAt?: true
@@ -2448,6 +2452,7 @@ export namespace Prisma {
     location?: true
     status?: true
     isActive?: true
+    apiKeyHash?: true
     userId?: true
     createdAt?: true
     updatedAt?: true
@@ -2460,6 +2465,7 @@ export namespace Prisma {
     location?: true
     status?: true
     isActive?: true
+    apiKeyHash?: true
     userId?: true
     createdAt?: true
     updatedAt?: true
@@ -2559,6 +2565,7 @@ export namespace Prisma {
     location: string
     status: $Enums.SensorStatus
     isActive: boolean
+    apiKeyHash: string | null
     userId: number
     createdAt: Date
     updatedAt: Date
@@ -2590,6 +2597,7 @@ export namespace Prisma {
     location?: boolean
     status?: boolean
     isActive?: boolean
+    apiKeyHash?: boolean
     userId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -2606,6 +2614,7 @@ export namespace Prisma {
     location?: boolean
     status?: boolean
     isActive?: boolean
+    apiKeyHash?: boolean
     userId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -2619,6 +2628,7 @@ export namespace Prisma {
     location?: boolean
     status?: boolean
     isActive?: boolean
+    apiKeyHash?: boolean
     userId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -2648,6 +2658,7 @@ export namespace Prisma {
       location: string
       status: $Enums.SensorStatus
       isActive: boolean
+      apiKeyHash: string | null
       userId: number
       createdAt: Date
       updatedAt: Date
@@ -3053,6 +3064,7 @@ export namespace Prisma {
     readonly location: FieldRef<"Sensor", 'String'>
     readonly status: FieldRef<"Sensor", 'SensorStatus'>
     readonly isActive: FieldRef<"Sensor", 'Boolean'>
+    readonly apiKeyHash: FieldRef<"Sensor", 'String'>
     readonly userId: FieldRef<"Sensor", 'Int'>
     readonly createdAt: FieldRef<"Sensor", 'DateTime'>
     readonly updatedAt: FieldRef<"Sensor", 'DateTime'>
@@ -6438,6 +6450,7 @@ export namespace Prisma {
     location: 'location',
     status: 'status',
     isActive: 'isActive',
+    apiKeyHash: 'apiKeyHash',
     userId: 'userId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -6738,6 +6751,7 @@ export namespace Prisma {
     location?: StringFilter<"Sensor"> | string
     status?: EnumSensorStatusFilter<"Sensor"> | $Enums.SensorStatus
     isActive?: BoolFilter<"Sensor"> | boolean
+    apiKeyHash?: StringNullableFilter<"Sensor"> | string | null
     userId?: IntFilter<"Sensor"> | number
     createdAt?: DateTimeFilter<"Sensor"> | Date | string
     updatedAt?: DateTimeFilter<"Sensor"> | Date | string
@@ -6753,6 +6767,7 @@ export namespace Prisma {
     location?: SortOrder
     status?: SortOrder
     isActive?: SortOrder
+    apiKeyHash?: SortOrderInput | SortOrder
     userId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -6764,6 +6779,7 @@ export namespace Prisma {
   export type SensorWhereUniqueInput = Prisma.AtLeast<{
     id?: number
     sensorCode?: string
+    apiKeyHash?: string
     AND?: SensorWhereInput | SensorWhereInput[]
     OR?: SensorWhereInput[]
     NOT?: SensorWhereInput | SensorWhereInput[]
@@ -6777,7 +6793,7 @@ export namespace Prisma {
     user?: XOR<UserRelationFilter, UserWhereInput>
     readings?: SensorReadingListRelationFilter
     alerts?: AlertListRelationFilter
-  }, "id" | "sensorCode">
+  }, "id" | "sensorCode" | "apiKeyHash">
 
   export type SensorOrderByWithAggregationInput = {
     id?: SortOrder
@@ -6786,6 +6802,7 @@ export namespace Prisma {
     location?: SortOrder
     status?: SortOrder
     isActive?: SortOrder
+    apiKeyHash?: SortOrderInput | SortOrder
     userId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -6806,6 +6823,7 @@ export namespace Prisma {
     location?: StringWithAggregatesFilter<"Sensor"> | string
     status?: EnumSensorStatusWithAggregatesFilter<"Sensor"> | $Enums.SensorStatus
     isActive?: BoolWithAggregatesFilter<"Sensor"> | boolean
+    apiKeyHash?: StringNullableWithAggregatesFilter<"Sensor"> | string | null
     userId?: IntWithAggregatesFilter<"Sensor"> | number
     createdAt?: DateTimeWithAggregatesFilter<"Sensor"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Sensor"> | Date | string
@@ -7105,6 +7123,7 @@ export namespace Prisma {
     location: string
     status?: $Enums.SensorStatus
     isActive?: boolean
+    apiKeyHash?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutSensorsInput
@@ -7119,6 +7138,7 @@ export namespace Prisma {
     location: string
     status?: $Enums.SensorStatus
     isActive?: boolean
+    apiKeyHash?: string | null
     userId: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -7132,6 +7152,7 @@ export namespace Prisma {
     location?: StringFieldUpdateOperationsInput | string
     status?: EnumSensorStatusFieldUpdateOperationsInput | $Enums.SensorStatus
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    apiKeyHash?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutSensorsNestedInput
@@ -7146,6 +7167,7 @@ export namespace Prisma {
     location?: StringFieldUpdateOperationsInput | string
     status?: EnumSensorStatusFieldUpdateOperationsInput | $Enums.SensorStatus
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    apiKeyHash?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -7160,6 +7182,7 @@ export namespace Prisma {
     location: string
     status?: $Enums.SensorStatus
     isActive?: boolean
+    apiKeyHash?: string | null
     userId: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -7171,6 +7194,7 @@ export namespace Prisma {
     location?: StringFieldUpdateOperationsInput | string
     status?: EnumSensorStatusFieldUpdateOperationsInput | $Enums.SensorStatus
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    apiKeyHash?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -7182,6 +7206,7 @@ export namespace Prisma {
     location?: StringFieldUpdateOperationsInput | string
     status?: EnumSensorStatusFieldUpdateOperationsInput | $Enums.SensorStatus
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    apiKeyHash?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -7642,6 +7667,7 @@ export namespace Prisma {
     location?: SortOrder
     status?: SortOrder
     isActive?: SortOrder
+    apiKeyHash?: SortOrder
     userId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -7659,6 +7685,7 @@ export namespace Prisma {
     location?: SortOrder
     status?: SortOrder
     isActive?: SortOrder
+    apiKeyHash?: SortOrder
     userId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -7671,6 +7698,7 @@ export namespace Prisma {
     location?: SortOrder
     status?: SortOrder
     isActive?: SortOrder
+    apiKeyHash?: SortOrder
     userId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -8443,6 +8471,7 @@ export namespace Prisma {
     location: string
     status?: $Enums.SensorStatus
     isActive?: boolean
+    apiKeyHash?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     readings?: SensorReadingCreateNestedManyWithoutSensorInput
@@ -8456,6 +8485,7 @@ export namespace Prisma {
     location: string
     status?: $Enums.SensorStatus
     isActive?: boolean
+    apiKeyHash?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     readings?: SensorReadingUncheckedCreateNestedManyWithoutSensorInput
@@ -8498,6 +8528,7 @@ export namespace Prisma {
     location?: StringFilter<"Sensor"> | string
     status?: EnumSensorStatusFilter<"Sensor"> | $Enums.SensorStatus
     isActive?: BoolFilter<"Sensor"> | boolean
+    apiKeyHash?: StringNullableFilter<"Sensor"> | string | null
     userId?: IntFilter<"Sensor"> | number
     createdAt?: DateTimeFilter<"Sensor"> | Date | string
     updatedAt?: DateTimeFilter<"Sensor"> | Date | string
@@ -8686,6 +8717,7 @@ export namespace Prisma {
     location: string
     status?: $Enums.SensorStatus
     isActive?: boolean
+    apiKeyHash?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutSensorsInput
@@ -8699,6 +8731,7 @@ export namespace Prisma {
     location: string
     status?: $Enums.SensorStatus
     isActive?: boolean
+    apiKeyHash?: string | null
     userId: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -8727,6 +8760,7 @@ export namespace Prisma {
     location?: StringFieldUpdateOperationsInput | string
     status?: EnumSensorStatusFieldUpdateOperationsInput | $Enums.SensorStatus
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    apiKeyHash?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutSensorsNestedInput
@@ -8740,6 +8774,7 @@ export namespace Prisma {
     location?: StringFieldUpdateOperationsInput | string
     status?: EnumSensorStatusFieldUpdateOperationsInput | $Enums.SensorStatus
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    apiKeyHash?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -8752,6 +8787,7 @@ export namespace Prisma {
     location: string
     status?: $Enums.SensorStatus
     isActive?: boolean
+    apiKeyHash?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutSensorsInput
@@ -8765,6 +8801,7 @@ export namespace Prisma {
     location: string
     status?: $Enums.SensorStatus
     isActive?: boolean
+    apiKeyHash?: string | null
     userId: number
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -8793,6 +8830,7 @@ export namespace Prisma {
     location?: StringFieldUpdateOperationsInput | string
     status?: EnumSensorStatusFieldUpdateOperationsInput | $Enums.SensorStatus
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    apiKeyHash?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutSensorsNestedInput
@@ -8806,6 +8844,7 @@ export namespace Prisma {
     location?: StringFieldUpdateOperationsInput | string
     status?: EnumSensorStatusFieldUpdateOperationsInput | $Enums.SensorStatus
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    apiKeyHash?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -8819,6 +8858,7 @@ export namespace Prisma {
     location: string
     status?: $Enums.SensorStatus
     isActive?: boolean
+    apiKeyHash?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -8829,6 +8869,7 @@ export namespace Prisma {
     location?: StringFieldUpdateOperationsInput | string
     status?: EnumSensorStatusFieldUpdateOperationsInput | $Enums.SensorStatus
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    apiKeyHash?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     readings?: SensorReadingUpdateManyWithoutSensorNestedInput
@@ -8842,6 +8883,7 @@ export namespace Prisma {
     location?: StringFieldUpdateOperationsInput | string
     status?: EnumSensorStatusFieldUpdateOperationsInput | $Enums.SensorStatus
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    apiKeyHash?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     readings?: SensorReadingUncheckedUpdateManyWithoutSensorNestedInput
@@ -8855,6 +8897,7 @@ export namespace Prisma {
     location?: StringFieldUpdateOperationsInput | string
     status?: EnumSensorStatusFieldUpdateOperationsInput | $Enums.SensorStatus
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    apiKeyHash?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

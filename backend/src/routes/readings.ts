@@ -2,6 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
 import { readingService } from "../services/reading.service.js";
+import { SensorApiKeyError } from "../lib/apiKey.js";
 
 const readingCreateSchema = z.object({
   sensor_id: z.number().int().positive(),
@@ -13,6 +14,7 @@ const readingFromSensorSchema = z.object({
   sensor_code: z.string().min(1),
   temperature: z.number().min(-40).max(125),
   humidity: z.number().min(0).max(100),
+  api_key: z.string().min(1).optional(),
 });
 
 function parseDateParam(value?: string): Date | undefined {
@@ -36,15 +38,23 @@ export async function readingRoutes(app: FastifyInstance) {
           message: parsed.error.issues[0]?.message ?? "Input tidak valid",
         });
       }
-      const reading = await readingService.ingestFromSensor(
-        parsed.data.sensor_code,
-        parsed.data.temperature,
-        parsed.data.humidity
-      );
-      if (!reading) {
-        return reply.code(404).send({ error: "NOT_FOUND", message: "Sensor tidak dikenal" });
+      try {
+        const reading = await readingService.ingestFromSensor(
+          parsed.data.sensor_code,
+          parsed.data.temperature,
+          parsed.data.humidity,
+          parsed.data.api_key
+        );
+        return reply.code(201).send(reading);
+      } catch (err) {
+        if (err instanceof SensorApiKeyError) {
+          return reply.code(401).send({ error: "UNAUTHORIZED", message: "API key sensor salah" });
+        }
+        if (err instanceof Error && err.message === "UNKNOWN_SENSOR") {
+          return reply.code(404).send({ error: "NOT_FOUND", message: "Sensor tidak dikenal" });
+        }
+        throw err;
       }
-      return reply.code(201).send(reading);
     }
 
     const parsed = readingCreateSchema.safeParse(body);

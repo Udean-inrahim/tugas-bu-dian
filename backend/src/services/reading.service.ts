@@ -2,6 +2,7 @@ import { prisma } from "../lib/prisma.js";
 import { wsHub } from "../lib/wsHub.js";
 import { evaluateThresholds, resolveOfflineAlert, createOfflineAlert } from "./alert.service.js";
 import { config } from "../config/index.js";
+import { hashApiKey, SensorApiKeyError } from "../lib/apiKey.js";
 
 // In-memory map of last contact time per sensor id.
 export const lastContact = new Map<number, number>();
@@ -11,11 +12,23 @@ export class ReadingService {
     lastContact.set(sensorId, Date.now());
   }
 
-  async ingestFromSensor(sensorCode: string, temperature: number, humidity: number) {
+  async ingestFromSensor(
+    sensorCode: string,
+    temperature: number,
+    humidity: number,
+    apiKey?: string
+  ) {
     const sensor = await prisma.sensor.findUnique({ where: { sensorCode } });
     if (!sensor) {
       console.warn(`⚠️  Unknown sensor code: ${sensorCode} — ignoring reading`);
-      return null;
+      throw new Error("UNKNOWN_SENSOR");
+    }
+    // Sensor yang sudah punya API key hanya menerima data dengan key yang cocok.
+    if (sensor.apiKeyHash) {
+      const key = typeof apiKey === "string" ? apiKey : "";
+      if (!key || hashApiKey(key) !== sensor.apiKeyHash) {
+        throw new SensorApiKeyError();
+      }
     }
     return this.recordReading(sensor.id, temperature, humidity);
   }

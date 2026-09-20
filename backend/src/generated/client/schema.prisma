@@ -41,6 +41,7 @@ model Sensor {
   location   String
   status     SensorStatus @default(OFFLINE)
   isActive   Boolean      @default(true) @map("is_active")
+  apiKeyHash String?      @unique @map("api_key_hash")
   userId     Int          @map("user_id")
   createdAt  DateTime     @default(now()) @map("created_at")
   updatedAt  DateTime     @updatedAt @map("updated_at")

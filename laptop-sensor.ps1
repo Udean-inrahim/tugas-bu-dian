@@ -14,6 +14,7 @@
 param(
   [string]$ApiUrl = "https://tugas-bu-dian.vercel.app",
   [string]$SensorCode = "LAPTOP-01",
+  [string]$ApiKey = "",  # ambil dari dashboard (menu Sensor -> tombol kunci). "" = kirim tanpa key.
   [int]$IntervalSeconds = 30
 )
 
@@ -39,10 +40,12 @@ while ($true) {
       sensor_code = $SensorCode
       temperature = $temp
       humidity    = $humidity
-    } | ConvertTo-Json -Compress
+    }
+    if ($ApiKey) { $body.api_key = $ApiKey }
+    $json = $body | ConvertTo-Json -Compress
     try {
       Invoke-RestMethod -Uri "$ApiUrl/api/readings" -Method POST `
-        -ContentType "application/json" -Body $body -TimeoutSec 20 | Out-Null
+        -ContentType "application/json" -Body $json -TimeoutSec 20 | Out-Null
       Write-Host ("{0}  {1,5:N1} C  kelembapan {2:N1}%  -> terkirim" -f (Get-Date -Format "HH:mm:ss"), $temp, $humidity)
     } catch {
       Write-Host ("{0}  GAGAL kirim: {1}" -f (Get-Date -Format "HH:mm:ss"), $_.Exception.Message)
