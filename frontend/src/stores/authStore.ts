@@ -8,8 +8,9 @@ interface AuthState {
   loading: boolean;
   hydrated: boolean;
   login: (email: string, password: string, remember?: boolean) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<RegisterResult>;
-  verifyEmail: (email: string, code: string) => Promise<void>;
+  register: (name: string, email: string) => Promise<RegisterResult>;
+  verifyCode: (email: string, code: string) => Promise<void>;
+  verifyEmail: (email: string, code: string, password?: string) => Promise<void>;
   logout: () => Promise<void>;
   loadFromStorage: () => void;
   get isAuthenticated(): boolean;
@@ -67,13 +68,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  register: async (name: string, email: string, password: string) => {
+  register: async (name: string, email: string) => {
     set({ loading: true });
     try {
       const { data } = await api.post<RegisterResult>("/auth/register", {
         name,
         email,
-        password,
       });
       return data;
     } finally {
@@ -81,10 +81,23 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  verifyEmail: async (email: string, code: string) => {
+  verifyCode: async (email: string, code: string) => {
     set({ loading: true });
     try {
-      const { data } = await api.post<LoginResponse>("/auth/verify-email", { email, code });
+      await api.post("/auth/verify-code", { email, code });
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  verifyEmail: async (email: string, code: string, password?: string) => {
+    set({ loading: true });
+    try {
+      const { data } = await api.post<LoginResponse>("/auth/verify-email", {
+        email,
+        code,
+        password,
+      });
       writeAuth(data.token, data.user, true);
       set({ user: data.user, token: data.token, loading: false });
     } catch (error) {

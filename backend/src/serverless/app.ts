@@ -156,6 +156,18 @@ const readingSensorSchema = z.object({
   humidity: z.number().min(0).max(100),
 });
 
+const registerSchema = z.object({
+  name: z.string().min(1, "Nama wajib diisi"),
+  email: z.string().email("Email tidak valid"),
+  password: z.string().min(6, "Password minimal 6 karakter").optional(),
+});
+
+const verifyEmailSchema = z.object({
+  email: z.string().email("Email tidak valid"),
+  code: z.string().min(4, "Kode verifikasi wajib diisi"),
+  password: z.string().min(6, "Password minimal 6 karakter").optional(),
+});
+
 const sensorCreateSchema = z.object({
   sensorCode: z.string().min(1, "Sensor code wajib diisi").max(20),
   name: z.string().min(1, "Nama wajib diisi").max(100),
@@ -247,12 +259,7 @@ app.post("/api/auth/login", async (c) => {
 });
 
 app.post("/api/auth/register", async (c) => {
-  const schema = z.object({
-    name: z.string().min(1, "Nama wajib diisi"),
-    email: z.string().email("Email tidak valid"),
-    password: z.string().min(6, "Password minimal 6 karakter"),
-  });
-  const parsed = schema.safeParse(await c.req.json().catch(() => ({})));
+  const parsed = registerSchema.safeParse(await c.req.json().catch(() => ({})));
   if (!parsed.success) return c.json(validationError(parsed.error), 400);
 
   const exists = await prisma.user.findUnique({ where: { email: parsed.data.email } });
@@ -268,7 +275,10 @@ app.post("/api/auth/register", async (c) => {
     return c.json({ error: "EMAIL_TAKEN", message: "Email sudah terdaftar" }, 409);
   }
 
-  const password = await bcrypt.hash(parsed.data.password, 10);
+  // Password boleh dikosongkan dulu; diisi pada langkah terakhir pendaftaran.
+  const password = parsed.data.password
+    ? await bcrypt.hash(parsed.data.password, 10)
+    : await bcrypt.hash(`pending-${Date.now()}-${Math.random()}`, 10);
   const user = await prisma.user.create({
     data: {
       name: parsed.data.name,
@@ -293,8 +303,8 @@ app.post("/api/auth/register", async (c) => {
   );
 });
 
-// Verify email with the 6-digit code, then log the user in
-app.post("/api/auth/verify-email", async (c) => {
+// Validasi kode verifikasi (tanpa efek samping) sebelum password dimasukkan.
+app.post("/api/auth/verify-code", async (c) => {
   const schema = z.object({
     email: z.string().email("Email tidak valid"),
     code: z.string().min(4, "Kode verifikasi wajib diisi"),
@@ -304,10 +314,33 @@ app.post("/api/auth/verify-email", async (c) => {
 
   const user = await prisma.user.findUnique({ where: { email: parsed.data.email } });
   if (!user) return c.json({ error: "NOT_FOUND", message: "Email tidak terdaftar" }, 404);
+  if (user.emailVerified) return c.json({ valid: true });
+
+  if (!verifyVerifyCode(user.email, parsed.data.code)) {
+    return c.json({ error: "INVALID_CODE", message: "Kode verifikasi salah atau kedaluwarsa" }, 400);
+  }
+  return c.json({ valid: true });
+});
+
+// Verify email with the 6-digit code, optionally set/confirm password, then log the user in
+app.post("/api/auth/verify-email", async (c) => {
+  const parsed = verifyEmailSchema.safeParse(await c.req.json().catch(() => ({})));
+  if (!parsed.success) return c.json(validationError(parsed.error), 400);
+
+  const user = await prisma.user.findUnique({ where: { email: parsed.data.email } });
+  if (!user) return c.json({ error: "NOT_FOUND", message: "Email tidak terdaftar" }, 404);
+
+  const applyPassword =
+    parsed.data.password !== undefined
+      ? await bcrypt.hash(parsed.data.password, 10)
+      : undefined;
 
   if (user.emailVerified) {
-    const token = await tokenFor(user);
-    return c.json({ token, user: publicUser(user) });
+    const updated = applyPassword
+      ? await prisma.user.update({ where: { id: user.id }, data: { password: applyPassword } })
+      : user;
+    const token = await tokenFor(updated);
+    return c.json({ token, user: publicUser(updated) });
   }
 
   if (!verifyVerifyCode(user.email, parsed.data.code)) {
@@ -316,7 +349,7 @@ app.post("/api/auth/verify-email", async (c) => {
 
   const updated = await prisma.user.update({
     where: { id: user.id },
-    data: { emailVerified: true },
+    data: { emailVerified: true, ...(applyPassword ? { password: applyPassword } : {}) },
   });
   const token = await tokenFor(updated);
   return c.json({ token, user: publicUser(updated) });
