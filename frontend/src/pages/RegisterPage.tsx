@@ -302,7 +302,7 @@ export function RegisterPage() {
                       <Label htmlFor="regUsername">Username</Label>
                       <Input
                         id="regUsername"
-                        placeholder="misal: budi_99"
+                        placeholder="misal:antek-antek aseng"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         required
