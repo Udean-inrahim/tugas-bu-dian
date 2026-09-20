@@ -30,6 +30,7 @@ export function LoginPage() {
   const hydrated = useAuthStore((s) => s.hydrated);
   const login = useAuthStore((s) => s.login);
   const loading = useAuthStore((s) => s.loading);
+  const [loginMode, setLoginMode] = useState<"email" | "username">("email");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -66,9 +67,11 @@ export function LoginPage() {
         ?.response?.data;
       if (data?.error === "EMAIL_NOT_VERIFIED") {
         toast.error(data.message ?? "Email belum diverifikasi");
-        navigate("/register", { state: { email, dir: "to-register" } });
+        if (loginMode === "email") {
+          navigate("/register", { state: { email, dir: "to-register" } });
+        }
       } else {
-        toast.error("Email atau password salah");
+        toast.error(data?.message ?? "Email, username, atau password salah");
       }
     }
   };
@@ -142,16 +145,40 @@ export function LoginPage() {
       >
         <div className={`auth-swap ${swapClass}`}>
           <form onSubmit={handleSubmit} className="max-w-[420px]" noValidate>
+            <div className="mb-5 flex rounded-full border border-[rgba(20,33,61,0.10)] bg-[#f3f5fb] p-1 text-sm">
+              {(
+                [
+                  ["email", "Email"],
+                  ["username", "Username"],
+                ] as const
+              ).map(([mode, label]) => (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => setLoginMode(mode)}
+                  className={`flex-1 cursor-pointer rounded-full px-3 py-2 font-semibold transition ${
+                    loginMode === mode
+                      ? "bg-[#2563f0] text-white shadow"
+                      : "bg-transparent text-[#6b7694] hover:text-[#2563f0]"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
             <div className="mb-4">
               <label htmlFor="email" className="mb-[7px] block text-[13px] font-semibold text-[#14213d]">
-                Email
+                {loginMode === "email" ? "Email" : "Username"}
               </label>
               <input
                 id="email"
                 name="email"
-                type="email"
-                autoComplete="email"
-                placeholder="nama@email.com"
+                type={loginMode === "email" ? "email" : "text"}
+                autoComplete={loginMode === "email" ? "email" : "username"}
+                autoCapitalize="none"
+                spellCheck={false}
+                placeholder={loginMode === "email" ? "nama@email.com" : "misal: budi_99"}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required

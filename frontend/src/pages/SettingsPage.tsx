@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Save, Lock, KeyRound } from "lucide-react";
+import { Save, Lock, KeyRound, UserCog } from "lucide-react";
 import { useSettings } from "@/hooks/useSettings";
 import { useAuthStore } from "@/stores/authStore";
 import api from "@/lib/api";
@@ -129,6 +129,9 @@ export function SettingsPage() {
       <div className="space-y-6">
         <PageHeader title="Pengaturan" description="Pengaturan sistem dan ambang batas." />
         <Reveal>
+          <AccountCard />
+        </Reveal>
+        <Reveal>
           <Card>
             <CardContent className="flex flex-col items-center justify-center gap-3 py-12 text-center">
               <Lock className="h-8 w-8 text-muted-foreground" />
@@ -159,6 +162,10 @@ export function SettingsPage() {
   return (
     <div className="space-y-6">
       <PageHeader title="Pengaturan" description="Atur ambang suhu, kelembapan, dan interval monitoring." />
+
+      <Reveal>
+        <AccountCard />
+      </Reveal>
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Reveal>
@@ -375,6 +382,136 @@ function ReadonlyCard({
               <p className="mt-0.5 text-[16px] font-bold text-ink">{it.value}</p>
             </div>
           ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function AccountCard() {
+  const { user, updateMe } = useAuthStore();
+  const [username, setUsername] = useState(user?.username ?? "");
+  const [saving, setSaving] = useState(false);
+  const [usernameState, setUsernameState] = useState<{
+    checking?: boolean;
+    taken?: boolean;
+    invalid?: boolean;
+  }>({});
+
+  useEffect(() => {
+    const val = username.trim();
+    if (!val) {
+      setUsernameState({});
+      return;
+    }
+    if (!/^[a-zA-Z0-9_.-]{3,20}$/.test(val)) {
+      setUsernameState({ invalid: true });
+      return;
+    }
+    const current = user?.username;
+    setUsernameState({ checking: true });
+    const timer = setTimeout(async () => {
+      try {
+        const { data } = await api.get<{ available: boolean; valid: boolean }>(
+          "/auth/check-username",
+          { params: { username: val } }
+        );
+        if (current && current.toLowerCase() === val.toLowerCase()) {
+          setUsernameState({});
+          return;
+        }
+        setUsernameState(data.valid ? { taken: !data.available } : { invalid: true });
+      } catch {
+        setUsernameState({});
+      }
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [username, user?.username]);
+
+  const handleSave = async () => {
+    const val = username.trim();
+    if (!/^[a-zA-Z0-9_.-]{3,20}$/.test(val)) {
+      toast.error("Username 3-20 karakter: huruf, angka, titik, garis bawah, atau strip");
+      return;
+    }
+    if (usernameState.taken) {
+      toast.error("Username telah digunakan");
+      return;
+    }
+    setSaving(true);
+    try {
+      await updateMe({ username: val });
+      toast.success("Username berhasil disimpan");
+    } catch (err) {
+      const msg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+        "Gagal menyimpan username";
+      toast.error(msg);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2 text-[15px] font-bold text-ink">
+          <UserCog className="h-4 w-4 text-primary" /> Akun
+        </CardTitle>
+        <CardDescription>
+          Username dipakai untuk login bersama email. Harus unik — tidak boleh dipakai akun lain.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label>Nama</Label>
+            <Input value={user?.name ?? ""} readOnly className="bg-muted/50" />
+          </div>
+          <div className="space-y-2">
+            <Label>Email</Label>
+            <Input value={user?.email ?? ""} readOnly className="bg-muted/50" />
+          </div>
+        </div>
+        <div className="space-y-2 sm:max-w-xs">
+          <Label htmlFor="accUsername">Username</Label>
+          <Input
+            id="accUsername"
+            placeholder="misal: budi_99"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            autoCapitalize="none"
+            spellCheck={false}
+            className={
+              usernameState.taken
+                ? "border-destructive focus-visible:ring-destructive"
+                : usernameState.invalid
+                  ? "border-destructive/60 focus-visible:ring-destructive/60"
+                  : ""
+            }
+          />
+          {(usernameState.taken || usernameState.invalid) && !usernameState.checking && (
+            <p className="text-xs font-medium text-destructive">
+              {usernameState.taken
+                ? "Username telah digunakan"
+                : "3-20 karakter: huruf, angka, titik, garis bawah, atau strip"}
+            </p>
+          )}
+          {usernameState.checking && (
+            <p className="text-xs text-muted-foreground">Memeriksa ketersediaan...</p>
+          )}
+          {!usernameState.taken &&
+            !usernameState.invalid &&
+            !usernameState.checking &&
+            username.trim().length >= 3 &&
+            username.trim().toLowerCase() !== (user?.username ?? "").toLowerCase() && (
+              <p className="text-xs font-medium text-emerald-600">Username tersedia</p>
+            )}
+        </div>
+        <div>
+          <Button onClick={handleSave} disabled={saving || usernameState.checking}>
+            {saving ? "Menyimpan..." : "Simpan Username"}
+          </Button>
         </div>
       </CardContent>
     </Card>

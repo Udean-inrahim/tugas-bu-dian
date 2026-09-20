@@ -84,6 +84,8 @@ export function RegisterPage() {
 
   const [step, setStep] = useState<Step>(presetEmail ? "code" : "form");
   const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
+  const [usernameState, setUsernameState] = useState<{ checking?: boolean; taken?: boolean; invalid?: boolean }>({});
   const [email, setEmail] = useState(presetEmail);
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -94,10 +96,43 @@ export function RegisterPage() {
     if (hydrated && token) navigate("/", { replace: true });
   }, [hydrated, token, navigate]);
 
+  // Cek ketersediaan username langsung saat mengetik (debounce 400ms).
+  useEffect(() => {
+    const val = username.trim();
+    if (!val) {
+      setUsernameState({});
+      return;
+    }
+    if (!/^[a-zA-Z0-9_.-]{3,20}$/.test(val)) {
+      setUsernameState({ invalid: true });
+      return;
+    }
+    setUsernameState({ checking: true });
+    const timer = setTimeout(async () => {
+      try {
+        const { data } = await api.get<{ available: boolean; valid: boolean }>("/auth/check-username", {
+          params: { username: val },
+        });
+        setUsernameState(data.valid ? { taken: !data.available } : { invalid: true });
+      } catch {
+        setUsernameState({});
+      }
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [username]);
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (usernameState.taken) {
+      toast.error("Username telah digunakan");
+      return;
+    }
+    if (!/^[a-zA-Z0-9_.-]{3,20}$/.test(username.trim())) {
+      toast.error("Username 3-20 karakter: huruf, angka, titik, garis bawah, atau strip");
+      return;
+    }
     try {
-      const res = await register(name, email);
+      const res = await register(name, username.trim(), email);
       setDemoCode(res.code ?? null);
       setEmail(res.email);
       setStep("code");
@@ -262,6 +297,38 @@ export function RegisterPage() {
                         onChange={(e) => setName(e.target.value)}
                         required
                       />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="regUsername">Username</Label>
+                      <Input
+                        id="regUsername"
+                        placeholder="misal: budi_99"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        required
+                        autoComplete="username"
+                        autoCapitalize="none"
+                        spellCheck={false}
+                        className={
+                          usernameState.taken
+                            ? "border-destructive focus-visible:ring-destructive"
+                            : usernameState.invalid
+                              ? "border-destructive/60 focus-visible:ring-destructive/60"
+                              : ""
+                        }
+                      />
+                      {(usernameState.taken || usernameState.invalid) &&
+                        !usernameState.checking && (
+                          <p className="text-xs font-medium text-destructive">
+                            {usernameState.taken ? "Username telah digunakan" : "3-20 karakter: huruf, angka, titik, garis bawah, atau strip"}
+                          </p>
+                        )}
+                      {usernameState.checking && (
+                        <p className="text-xs text-muted-foreground">Memeriksa ketersediaan...</p>
+                      )}
+                      {!usernameState.taken && !usernameState.invalid && !usernameState.checking && username.trim().length >= 3 && (
+                        <p className="text-xs font-medium text-emerald-600">Username tersedia</p>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="regEmail">Email</Label>

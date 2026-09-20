@@ -7,10 +7,11 @@ interface AuthState {
   token: string | null;
   loading: boolean;
   hydrated: boolean;
-  login: (email: string, password: string, remember?: boolean) => Promise<void>;
-  register: (name: string, email: string) => Promise<RegisterResult>;
+  login: (emailOrUsername: string, password: string, remember?: boolean) => Promise<void>;
+  register: (name: string, username: string, email: string) => Promise<RegisterResult>;
   verifyCode: (email: string, code: string) => Promise<void>;
   verifyEmail: (email: string, code: string, password?: string) => Promise<void>;
+  updateMe: (data: { name?: string; username?: string }) => Promise<void>;
   logout: () => Promise<void>;
   loadFromStorage: () => void;
   get isAuthenticated(): boolean;
@@ -53,11 +54,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     return Boolean(get().token);
   },
 
-  login: async (email: string, password: string, remember = true) => {
+  login: async (emailOrUsername: string, password: string, remember = true) => {
     set({ loading: true });
     try {
       const { data } = await api.post<LoginResponse>("/auth/login", {
-        email,
+        email: emailOrUsername,
         password,
       });
       writeAuth(data.token, data.user, remember);
@@ -68,11 +69,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  register: async (name: string, email: string) => {
+  register: async (name: string, username: string, email: string) => {
     set({ loading: true });
     try {
       const { data } = await api.post<RegisterResult>("/auth/register", {
         name,
+        username,
         email,
       });
       return data;
@@ -100,6 +102,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       });
       writeAuth(data.token, data.user, true);
       set({ user: data.user, token: data.token, loading: false });
+    } catch (error) {
+      set({ loading: false });
+      throw error;
+    }
+  },
+
+  updateMe: async (data: { name?: string; username?: string }) => {
+    set({ loading: true });
+    try {
+      const { data: updated } = await api.put<User>("/auth/me", data);
+      const currentToken = get().token;
+      if (currentToken) writeAuth(currentToken, updated, true);
+      set({ user: updated, loading: false });
     } catch (error) {
       set({ loading: false });
       throw error;

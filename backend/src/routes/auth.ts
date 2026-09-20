@@ -7,7 +7,7 @@ import { sendVerificationEmail, sendResetEmail } from "../lib/email.js";
 import { config } from "../config/index.js";
 
 const loginSchema = z.object({
-  email: z.string().email("Email tidak valid"),
+  email: z.string().min(1, "Email atau username tidak boleh kosong"),
   password: z.string().min(6, "Password minimal 6 karakter"),
 });
 
@@ -21,15 +21,19 @@ export async function authRoutes(app: FastifyInstance) {
       });
     }
 
-    const { email, password } = parsed.data;
-    const user = await prisma.user.findUnique({ where: { email } });
+    const identifier = parsed.data.email.trim().toLowerCase();
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [{ email: identifier }, { username: { equals: identifier, mode: "insensitive" } }],
+      },
+    });
     if (!user) {
-      return reply.code(401).send({ error: "UNAUTHORIZED", message: "Email atau password salah" });
+      return reply.code(401).send({ error: "UNAUTHORIZED", message: "Email, username, atau password salah" });
     }
 
-    const valid = await bcrypt.compare(password, user.password);
+    const valid = await bcrypt.compare(parsed.data.password, user.password);
     if (!valid) {
-      return reply.code(401).send({ error: "UNAUTHORIZED", message: "Email atau password salah" });
+      return reply.code(401).send({ error: "UNAUTHORIZED", message: "Email, username, atau password salah" });
     }
 
     if (!user.emailVerified) {
@@ -48,7 +52,7 @@ export async function authRoutes(app: FastifyInstance) {
 
     return reply.send({
       token,
-      user: { id: user.id, name: user.name, email: user.email, role: user.role },
+      user: { id: user.id, name: user.name, email: user.email, username: user.username, role: user.role },
     });
   });
 
@@ -112,7 +116,7 @@ export async function authRoutes(app: FastifyInstance) {
     const userId = (req.user as { sub: number }).sub;
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, name: true, email: true, role: true, createdAt: true },
+      select: { id: true, name: true, email: true, username: true, role: true, createdAt: true },
     });
     if (!user) {
       const err = new Error("User tidak ditemukan") as Error & { statusCode: number };
@@ -122,15 +126,69 @@ export async function authRoutes(app: FastifyInstance) {
     return user;
   });
 
+  // Update nama / username profil sendiri.
+  app.put("/api/auth/me", { preHandler: app.authenticate }, async (req, reply) => {
+    const userId = (req.user as { sub: number }).sub;
+    const schema = z.object({
+      name: z.string().min(1, "Nama wajib diisi").max(100).optional(),
+      username: z
+        .string()
+        .min(3, "Username minimal 3 karakter")
+        .max(20, "Username maksimal 20 karakter")
+        .regex(/^[a-zA-Z0-9_.-]+$/, "Username hanya boleh huruf, angka, titik, garis bawah, atau strip")
+        .transform((v) => v.trim())
+        .optional(),
+    });
+    const parsed = schema.safeParse(req.body);
+    if (!parsed.success) {
+      return reply.code(400).send({ error: "VALIDATION_ERROR", message: "Input tidak valid" });
+    }
+
+    if (parsed.data.username) {
+      const taken = await prisma.user.findFirst({
+        where: {
+          username: { equals: parsed.data.username, mode: "insensitive" },
+          id: { not: userId },
+        },
+      });
+      if (taken) {
+        return reply.code(409).send({ error: "USERNAME_TAKEN", message: "Username telah digunakan" });
+      }
+    }
+
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        ...(parsed.data.name !== undefined ? { name: parsed.data.name } : {}),
+        ...(parsed.data.username !== undefined ? { username: parsed.data.username } : {}),
+      },
+      select: { id: true, name: true, email: true, username: true, role: true, createdAt: true },
+    });
+    return user;
+  });
+
   app.post("/api/auth/register", async (req, reply) => {
     const schema = z.object({
       name: z.string().min(1, "Nama wajib diisi"),
+      username: z
+        .string()
+        .min(3, "Username minimal 3 karakter")
+        .max(20, "Username maksimal 20 karakter")
+        .regex(/^[a-zA-Z0-9_.-]+$/, "Username hanya boleh huruf, angka, titik, garis bawah, atau strip")
+        .transform((v) => v.trim()),
       email: z.string().email("Email tidak valid"),
       password: z.string().min(6, "Password minimal 6 karakter").optional(),
     });
     const parsed = schema.safeParse(req.body);
     if (!parsed.success) {
       return reply.code(400).send({ error: "VALIDATION_ERROR", message: "Input tidak valid" });
+    }
+
+    const usernameTaken = await prisma.user.findFirst({
+      where: { username: { equals: parsed.data.username, mode: "insensitive" } },
+    });
+    if (usernameTaken) {
+      return reply.code(409).send({ error: "USERNAME_TAKEN", message: "Username telah digunakan" });
     }
 
     const exists = await prisma.user.findUnique({ where: { email: parsed.data.email } });
@@ -153,15 +211,24 @@ export async function authRoutes(app: FastifyInstance) {
     const password = parsed.data.password
       ? await bcrypt.hash(parsed.data.password, 10)
       : await bcrypt.hash(`pending-${Date.now()}-${Math.random()}`, 10);
-    const user = await prisma.user.create({
-      data: {
-        name: parsed.data.name,
-        email: parsed.data.email,
-        password,
-        role: "USER",
-        emailVerified: false,
-      },
-    });
+    let user: { id: number; name: string; email: string; username: string | null; role: string } | null = null;
+    try {
+      user = await prisma.user.create({
+        data: {
+          name: parsed.data.name,
+          username: parsed.data.username,
+          email: parsed.data.email,
+          password,
+          role: "USER",
+          emailVerified: false,
+        },
+      });
+    } catch (err) {
+      if ((err as { code?: string })?.code === "P2002") {
+        return reply.code(409).send({ error: "USERNAME_TAKEN", message: "Username telah digunakan" });
+      }
+      throw err;
+    }
 
     const { code, expiresAt } = createVerifyCode(user.email);
     const sent = await sendVerificationEmail(user.email, code);
@@ -173,6 +240,18 @@ export async function authRoutes(app: FastifyInstance) {
       emailSent: sent,
       ...(sent ? {} : { code }),
     });
+  });
+
+  // Cek ketersediaan username secara langsung (sebelum submit).
+  app.get("/api/auth/check-username", async (req, reply) => {
+    const username = String((req.query as { username?: unknown } | undefined)?.username ?? "").trim();
+    if (!/^[a-zA-Z0-9_.-]{3,20}$/.test(username)) {
+      return reply.send({ available: false, valid: false });
+    }
+    const taken = await prisma.user.findFirst({
+      where: { username: { equals: username, mode: "insensitive" } },
+    });
+    return reply.send({ available: !taken, valid: true });
   });
 
   // Validasi kode verifikasi (tanpa efek samping) sebelum password dimasukkan.

@@ -11,6 +11,35 @@ async function main() {
     'ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "email_verified" boolean NOT NULL DEFAULT false'
   );
 
+  // Ensure the username column exists (nullable, unique) and backfill existing
+  // users with a unique username derived from their email local-part.
+  await prisma.$executeRawUnsafe('ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "username" text');
+  const missingUsernames = await prisma.$queryRawUnsafe<{ id: number }[]>(
+    'SELECT id FROM "users" WHERE "username" IS NULL'
+  );
+  for (const { id } of missingUsernames) {
+    // Build a unique username: base = email-local-part; append -2, -3 ... if taken.
+    const base = (await prisma.$queryRawUnsafe<{ candidate: string }[]>(
+      'SELECT lower(split_part("email", \'@\', 1)) AS candidate FROM "users" WHERE "id" = $1',
+      id
+    ))?.[0]?.candidate ?? `user${id}`;
+    let candidate = base;
+    let n = 2;
+    for (;;) {
+      const taken = await prisma.$queryRawUnsafe<{ id: number }[]>(
+        'SELECT id FROM "users" WHERE "username" = $1::text',
+        candidate
+      );
+      if (taken.length === 0) break;
+      candidate = `${base}-${n}`;
+      n += 1;
+    }
+    await prisma.$executeRawUnsafe('UPDATE "users" SET "username" = $1::text WHERE "id" = $2', candidate, id);
+  }
+  await prisma.$executeRawUnsafe(
+    'CREATE UNIQUE INDEX IF NOT EXISTS "users_username_key" ON "users"("username")'
+  );
+
   // Admin user
   const password = await bcrypt.hash("admin123", 10);
   const admin = await prisma.user.upsert({
@@ -18,13 +47,14 @@ async function main() {
     update: { emailVerified: true },
     create: {
       name: "Admin",
+      username: "admin",
       email: "admin@example.com",
       password,
       role: "ADMIN",
       emailVerified: true,
     },
   });
-  console.log(`✅ Admin user created: ${admin.email}`);
+  console.log(`✅ Admin user created: ${admin.email} (login juga bisa pakai username "admin")`);
 
   // Ensure the sensors.user_id column exists and backfill existing sensors to
   // the admin account (per-account ownership migration).
