@@ -178,7 +178,7 @@ export function LoginPage() {
                 autoComplete={loginMode === "email" ? "email" : "username"}
                 autoCapitalize="none"
                 spellCheck={false}
-                placeholder={loginMode === "email" ? "nama@email.com" : "misal: budi_99"}
+                placeholder={loginMode === "email" ? "nama@email.com" : "misal: prabowo_gaming969"}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -253,7 +253,7 @@ export function LoginPage() {
           </form>
 
           <p className="mt-[22px] text-sm font-light text-[#6b7694]">
-            {remember ? "cant touch the air." : "Sesi berakhir saat browser ditutup."}
+            {remember ? "heiiiiii antek-antek aseng." : "Sesi berakhir saat browser ditutup."}
             <br />
             Belum punya akun?{" "}
             <Link
