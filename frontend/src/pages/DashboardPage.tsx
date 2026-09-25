@@ -49,7 +49,7 @@ type LineChart = {
   tempArea: string;
   humPath: string;
   targetAt: number | null;
-  xTicks: { label: string; at: number }[];
+  xTicks: { label: string; at: number; align: "start" | "middle" | "end" }[];
   last: { at: number; tempAt: number; humAt: number; temperature: number; humidity: number; t: string };
 };
 
@@ -84,17 +84,24 @@ function buildLine(rows: HourlyPoint[], hours: number, t: StmSettings | null): L
   const baseY = (LINE_H - 2).toFixed(1);
   const tempArea = `${tempPath} L${x(pts.length - 1).toFixed(1)} ${baseY} L${x(0).toFixed(1)} ${baseY} Z`;
 
-  const xTicks: { label: string; at: number }[] = [];
+  const xTicks: { label: string; at: number; align: "start" | "middle" | "end" }[] = [];
+  const pushTick = (label: string, at: number) => {
+    const last = xTicks[xTicks.length - 1];
+    if (last && at - last.at < 0.055) return;
+    const align = at < 0.02 ? "start" : at > 0.98 ? "end" : "middle";
+    xTicks.push({ label, at, align });
+  };
   if (hours <= 24) {
     pts.forEach((p, i) => {
       const d = new Date(p.t);
       if (d.getHours() % 4 === 0) {
-        xTicks.push({ label: `${String(d.getHours()).padStart(2, "0")}:00`, at: x(i) / LINE_W });
+        pushTick(`${String(d.getHours()).padStart(2, "0")}:00`, x(i) / LINE_W);
       }
     });
     if (xTicks.length < 2) {
       xTicks.length = 0;
-      xTicks.push({ label: "24 jam", at: 0 }, { label: "sekarang", at: 1 });
+      xTicks.push({ label: "24 jam", at: 0, align: "start" });
+      xTicks.push({ label: "sekarang", at: 1, align: "end" });
     }
   } else {
     let lastDay = "";
@@ -103,7 +110,7 @@ function buildLine(rows: HourlyPoint[], hours: number, t: StmSettings | null): L
       const key = d.toDateString();
       if (key !== lastDay) {
         lastDay = key;
-        xTicks.push({ label: DAY_SHORT[d.getDay()], at: x(i) / LINE_W });
+        pushTick(DAY_SHORT[d.getDay()], x(i) / LINE_W);
       }
     });
   }
@@ -496,60 +503,62 @@ export function DashboardPage() {
                 )}
                 {line && (
                   <>
-                    <svg
-                      viewBox={`0 0 ${LINE_W} ${LINE_H}`}
-                      preserveAspectRatio="none"
-                      className="dash-line-svg"
-                      role="img"
-                      aria-label={`Grafik suhu dan kelembapan per jam, ${line.points} titik`}
-                    >
-                      <defs>
-                        <linearGradient id="dashTempFill" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#37bc99" stopOpacity="0.3" />
-                          <stop offset="100%" stopColor="#37bc99" stopOpacity="0" />
-                        </linearGradient>
-                      </defs>
-                      {[0.25, 0.5, 0.75].map((g) => (
-                        <line
-                          key={g}
-                          x1={0}
-                          x2={LINE_W}
-                          y1={LINE_H * g}
-                          y2={LINE_H * g}
-                          className="dash-line-grid"
+                    <div className="dash-line-plot">
+                      <svg
+                        viewBox={`0 0 ${LINE_W} ${LINE_H}`}
+                        preserveAspectRatio="none"
+                        className="dash-line-svg"
+                        role="img"
+                        aria-label={`Grafik suhu dan kelembapan per jam, ${line.points} titik`}
+                      >
+                        <defs>
+                          <linearGradient id="dashTempFill" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#37bc99" stopOpacity="0.3" />
+                            <stop offset="100%" stopColor="#37bc99" stopOpacity="0" />
+                          </linearGradient>
+                        </defs>
+                        {[0.25, 0.5, 0.75].map((g) => (
+                          <line
+                            key={g}
+                            x1={0}
+                            x2={LINE_W}
+                            y1={LINE_H * g}
+                            y2={LINE_H * g}
+                            className="dash-line-grid"
+                            vectorEffect="non-scaling-stroke"
+                          />
+                        ))}
+                        {line.targetAt !== null && (
+                          <line
+                            x1={0}
+                            x2={LINE_W}
+                            y1={line.targetAt * LINE_H}
+                            y2={line.targetAt * LINE_H}
+                            className="dash-line-target"
+                            vectorEffect="non-scaling-stroke"
+                          />
+                        )}
+                        <path d={line.tempArea} fill="url(#dashTempFill)" />
+                        <path
+                          d={line.tempPath}
+                          className="dash-line-temp"
                           vectorEffect="non-scaling-stroke"
                         />
-                      ))}
-                      {line.targetAt !== null && (
-                        <line
-                          x1={0}
-                          x2={LINE_W}
-                          y1={line.targetAt * LINE_H}
-                          y2={line.targetAt * LINE_H}
-                          className="dash-line-target"
+                        <path
+                          d={line.humPath}
+                          className="dash-line-hum"
                           vectorEffect="non-scaling-stroke"
                         />
-                      )}
-                      <path d={line.tempArea} fill="url(#dashTempFill)" />
-                      <path
-                        d={line.tempPath}
-                        className="dash-line-temp"
-                        vectorEffect="non-scaling-stroke"
+                      </svg>
+                      <span
+                        className="dash-line-dot temp"
+                        style={{ left: `${line.last.at * 100}%`, top: `${line.last.tempAt * 100}%` }}
                       />
-                      <path
-                        d={line.humPath}
-                        className="dash-line-hum"
-                        vectorEffect="non-scaling-stroke"
+                      <span
+                        className="dash-line-dot hum"
+                        style={{ left: `${line.last.at * 100}%`, top: `${line.last.humAt * 100}%` }}
                       />
-                    </svg>
-                    <span
-                      className="dash-line-dot temp"
-                      style={{ left: `${line.last.at * 100}%`, top: `${line.last.tempAt * 100}%` }}
-                    />
-                    <span
-                      className="dash-line-dot hum"
-                      style={{ left: `${line.last.at * 100}%`, top: `${line.last.humAt * 100}%` }}
-                    />
+                    </div>
                     <div className="dash-axis-y left">
                       <span>{line.tHi.toFixed(0)}°C</span>
                       <span>{((line.tHi + line.tLo) / 2).toFixed(0)}°C</span>
@@ -565,7 +574,11 @@ export function DashboardPage() {
               </div>
               <div className="dash-axis-x">
                 {line?.xTicks.map((tick) => (
-                  <span key={`${tick.label}-${tick.at}`} style={{ left: `${tick.at * 100}%` }}>
+                  <span
+                    key={`${tick.label}-${tick.at}`}
+                    className={tick.align}
+                    style={{ left: `${tick.at * 100}%` }}
+                  >
                     {tick.label}
                   </span>
                 ))}
