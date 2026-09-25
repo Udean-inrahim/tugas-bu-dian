@@ -19,25 +19,25 @@ export function TemperatureCard({ temperature, sensorName, lastUpdate, settings 
   return (
     <Card className="p-5">
       <div className="flex items-start justify-between">
-        <span className="chip-icon bg-orange-50 text-orange-500">
+        <span className="chip-icon bg-[#fdf6e3] text-[#c2761a]">
           <Thermometer className="h-6 w-6" />
         </span>
         <ConditionBadge condition={condition} />
       </div>
-      <p className="mt-4 text-[13px] font-semibold text-muted-foreground">Suhu</p>
+      <p className="mt-4 text-[13px] font-semibold text-[#545b6c]">Suhu</p>
       <p
         className={cn(
-          "mt-1 whitespace-nowrap text-4xl font-extrabold tabular-nums tracking-tight",
-          temperature === null && "text-muted-foreground"
+          "mt-1 whitespace-nowrap text-[40px] font-extrabold leading-none tabular-nums tracking-tight text-[#272a3b]",
+          temperature === null && "text-[#6b7280]"
         )}
       >
         {temperature !== null ? animated.toFixed(1) : "--"}
-        <span className="ml-0.5 text-xl font-semibold text-muted-foreground">°C</span>
+        <span className="ml-0.5 text-[19px] font-semibold text-[#6b7280]">°C</span>
       </p>
-      <p className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+      <p className="mt-2.5 flex items-center gap-2 text-[12.5px] text-[#616879]">
         <StatusDot color={condition.color} />
         <span className="truncate">{sensorName ?? "Semua sensor"}</span>
-        {lastUpdate ? <span>• {formatTime(lastUpdate)}</span> : null}
+        {lastUpdate ? <span>· {formatTime(lastUpdate)}</span> : null}
       </p>
     </Card>
   );

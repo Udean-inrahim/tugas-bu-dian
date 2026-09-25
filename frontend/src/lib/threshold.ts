@@ -17,24 +17,24 @@ export function classifyHumidity(value: number | null, t: Settings | null): Cond
 }
 
 export const statusColor: Record<string, string> = {
-  green: "text-green-600",
-  yellow: "text-yellow-600",
-  red: "text-red-600",
-  blue: "text-blue-600",
+  green: "text-[#1e9e7e]",
+  yellow: "text-[#8a6d12]",
+  red: "text-[#d64550]",
+  blue: "text-[#2563eb]",
 };
 
 export const dotBg: Record<string, string> = {
-  green: "bg-green-500",
-  yellow: "bg-yellow-500",
-  red: "bg-red-500",
-  blue: "bg-blue-500",
+  green: "bg-[#37bc99]",
+  yellow: "bg-[#e4bd4e]",
+  red: "bg-[#ff6570]",
+  blue: "bg-[#6fb6f5]",
 };
 
 export const statusBg: Record<string, string> = {
-  green: "bg-green-100 text-green-700",
-  yellow: "bg-yellow-100 text-yellow-700",
-  red: "bg-red-100 text-red-700",
-  blue: "bg-blue-100 text-blue-700",
+  green: "bg-[#e6f7f1] text-[#1e9e7e]",
+  yellow: "bg-[#fdf6e3] text-[#8a6d12]",
+  red: "bg-[#ffe9eb] text-[#d64550]",
+  blue: "bg-[#e8f2fd] text-[#2563eb]",
 };
 
 export function formatTime(iso?: string | null) {

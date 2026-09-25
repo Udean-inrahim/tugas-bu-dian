@@ -14,19 +14,21 @@ export function PageHeader({ title, description, eyebrow, action, className }: P
   return (
     <Reveal
       className={cn(
-        "flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between",
+        "flex flex-col gap-3 border-b border-dashed border-[#e2e5ee] pb-4 sm:flex-row sm:items-end sm:justify-between",
         className
       )}
     >
       <div>
         {eyebrow && (
-          <p className="micro-label mb-2 inline-flex items-center gap-2 rounded-full bg-[#edf1ff] px-3 py-1 text-brand-blue">
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand-blue" />
+          <p className="mb-2 inline-flex items-center gap-2 rounded-[7px] bg-[#f1f3f9] px-2.5 py-1 text-[12px] font-semibold text-[#3d41ad]">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#3d41ad]" />
             {eyebrow}
           </p>
         )}
-        <h2 className="text-[22px] font-extrabold tracking-[-0.02em] text-ink">{title}</h2>
-        {description && <p className="mt-1 text-[11px] text-muted-foreground">{description}</p>}
+        <h2 className="text-[24px] font-extrabold leading-tight tracking-[-0.02em] text-[#272a3b]">
+          {title}
+        </h2>
+        {description && <p className="mt-1.5 text-[13.5px] text-[#616879]">{description}</p>}
       </div>
       {action && <div className="shrink-0">{action}</div>}
     </Reveal>

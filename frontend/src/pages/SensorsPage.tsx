@@ -117,10 +117,10 @@ export function SensorsPage() {
 
       <Reveal>
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <StatChip label="Total Sensor" value={sensors.length} dot="bg-brand-blue" bg="bg-[#edf1ff] dark:bg-indigo-500/15" />
-          <StatChip label="Online" value={sensors.filter((s) => s.isActive && s.status === "ONLINE").length} dot="bg-brand-green" bg="bg-[#e8f7f4] dark:bg-emerald-500/15" />
-          <StatChip label="Offline" value={sensors.filter((s) => s.isActive && s.status !== "ONLINE").length} dot="bg-brand-danger" bg="bg-[#fde7ec] dark:bg-rose-500/15" />
-          <StatChip label="Nonaktif" value={sensors.filter((s) => !s.isActive).length} dot="bg-[#8b8f9a]" bg="bg-[#eceef0] dark:bg-slate-500/20" />
+          <StatChip label="Total Sensor" value={sensors.length} dot="bg-[#4448b8]" />
+          <StatChip label="Online" value={sensors.filter((s) => s.isActive && s.status === "ONLINE").length} dot="bg-[#37bc99]" />
+          <StatChip label="Offline" value={sensors.filter((s) => s.isActive && s.status !== "ONLINE").length} dot="bg-[#ff6570]" />
+          <StatChip label="Nonaktif" value={sensors.filter((s) => !s.isActive).length} dot="bg-[#b9bfcc]" />
         </div>
       </Reveal>
 
@@ -133,14 +133,10 @@ export function SensorsPage() {
                 {sensors.filter((s) => s.isActive).length} sensor aktif terdaftar
               </CardDescription>
             </div>
-            <button
-              type="button"
-              onClick={openCreate}
-              className="cursor-pointer rounded-full bg-brand-blue px-4 py-2 text-[12px] font-semibold text-white shadow-[0_8px_18px_rgba(83,110,232,0.3)] transition hover:bg-brand-blue/90"
-            >
-              <Plus className="mr-1 inline h-3.5 w-3.5" />
+            <Button type="button" onClick={openCreate} className="shrink-0">
+              <Plus className="h-4 w-4" />
               Tambah
-            </button>
+            </Button>
           </CardHeader>
         <CardContent>
           {loading && sensors.length === 0 ? (
@@ -180,14 +176,13 @@ export function SensorsPage() {
                             <Badge
                               variant={s.hasApiKey ? "secondary" : "outline"}
                               className={cn(
-                                "text-[10px]",
                                 s.hasApiKey
-                                  ? "bg-emerald-100 text-emerald-700"
-                                  : "text-muted-foreground"
+                                  ? "bg-[#e6f7f1] text-[#1e9e7e]"
+                                  : "text-[#6b7280]"
                               )}
                               title="API key untuk mengirim data"
                             >
-                              {s.hasApiKey ? "API Key ✓" : "Tanpa Key"}
+                              {s.hasApiKey ? "API Key" : "Tanpa Key"}
                             </Badge>
                           </div>
                           <p className="truncate text-xs text-muted-foreground md:hidden">
@@ -201,16 +196,15 @@ export function SensorsPage() {
                         <span
                           className={cn(
                             "h-2 w-2 rounded-full",
-                            s.status === "ONLINE" ? "bg-green-500" : "bg-red-500"
+                            s.status === "ONLINE" ? "bg-[#37bc99]" : "bg-[#ff6570]"
                           )}
                         />
                         <Badge
                           variant="secondary"
                           className={cn(
-                            "text-xs",
                             s.status === "ONLINE"
-                              ? "bg-green-100 text-green-700"
-                              : "bg-red-100 text-red-700"
+                              ? "bg-[#e6f7f1] text-[#1e9e7e]"
+                              : "bg-[#ffe9eb] text-[#d64550]"
                           )}
                         >
                           {s.status === "ONLINE" ? "Online" : "Offline"}
@@ -269,7 +263,7 @@ export function SensorsPage() {
       </Reveal>
 
       <Dialog open={formOpen} onOpenChange={setFormOpen}>
-        <DialogContent>
+        <DialogContent className="rounded-[20px] border-[#eceef5] bg-white shadow-[0_25px_70px_rgba(55,66,100,0.22)]">
           <DialogHeader>
             <DialogTitle>{editing ? "Edit Sensor" : "Tambah Sensor"}</DialogTitle>
             <DialogDescription>
@@ -305,7 +299,7 @@ export function SensorsPage() {
       </AlertDialog>
 
       <Dialog open={Boolean(keyInfo)} onOpenChange={(o) => !o && setKeyInfo(null)}>
-        <DialogContent>
+        <DialogContent className="rounded-[20px] border-[#eceef5] bg-white shadow-[0_25px_70px_rgba(55,66,100,0.22)]">
           <DialogHeader>
             <DialogTitle>API Key Sensor</DialogTitle>
             <DialogDescription>
@@ -315,14 +309,14 @@ export function SensorsPage() {
           </DialogHeader>
           {keyInfo && (
             <div className="space-y-4">
-              <div className="rounded-xl border bg-[#f3f5fb] p-4">
-                <p className="break-all text-center font-mono text-[15px] font-bold tracking-wide text-ink">
+              <div className="rounded-[14px] border border-[#e2e5ee] bg-[#f8f9fc] p-4">
+                <p className="break-all text-center font-mono text-[15px] font-bold tracking-wide text-[#272a3b]">
                   {keyInfo.apiKey}
                 </p>
               </div>
-              <div className="rounded-lg border border-amber-300/60 bg-amber-50 p-3 text-xs text-amber-800">
-                Salin & simpan di tempat aman. Key hanya tampil{" "}
-                <strong>sekali ini</strong> — kalau lupa, buat key baru lewat tombol kunci di daftar
+              <div className="rounded-[12px] border border-dashed border-[#e4bd4e] bg-[#fdf9ee] p-3 text-[13px] leading-relaxed text-[#6b5a1f]">
+                Salin dan simpan di tempat aman. Key hanya tampil{" "}
+                <strong>sekali ini</strong>. Kalau lupa, buat key baru lewat tombol kunci di daftar
                 sensor.
               </div>
               <div className="flex justify-end gap-2">
@@ -339,14 +333,12 @@ export function SensorsPage() {
   );
 }
 
-function StatChip({ label, value, dot, bg }: { label: string; value: number; dot: string; bg: string }) {
+function StatChip({ label, value, dot }: { label: string; value: number; dot: string }) {
   return (
-    <div className={cn("flex items-center justify-between rounded-2xl p-4", bg)}>
+    <div className="tech-frame flex items-center justify-between p-4">
       <div>
-        <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-          {label}
-        </p>
-        <p className="mt-1 text-[20px] font-bold leading-none text-ink">{value}</p>
+        <p className="text-[12px] font-semibold text-[#616879]">{label}</p>
+        <p className="mt-1 text-[26px] font-bold leading-none text-[#272a3b]">{value}</p>
       </div>
       <i className={`h-2.5 w-2.5 rounded-full ${dot}`} />
     </div>

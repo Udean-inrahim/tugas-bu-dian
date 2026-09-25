@@ -5,6 +5,7 @@ import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { AuthLayout } from "@/components/auth/AuthLayout";
 import { Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 
@@ -13,15 +14,6 @@ type Step = "form" | "code" | "password";
 function errorMessage(err: unknown, fallback: string) {
   return (
     (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? fallback
-  );
-}
-
-function PulseDot({ className }: { className?: string }) {
-  return (
-    <span className={`relative flex h-2 w-2 ${className}`}>
-      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-current opacity-60" />
-      <span className="relative inline-flex h-2 w-2 rounded-full bg-current" />
-    </span>
   );
 }
 
@@ -204,88 +196,24 @@ export function RegisterPage() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-ink">
-      <div className="pointer-events-none absolute inset-0 panel-gradient" />
-      <div className="hero-grid pointer-events-none absolute inset-0 [mask-image:radial-gradient(ellipse_at_top,rgba(0,0,0,1),rgba(0,0,0,0.55))]" />
-      <div className="pointer-events-none absolute -left-24 bottom-8 h-80 w-80 rounded-full bg-[#AEB2E6]/40 blur-3xl" />
-      <div className="pointer-events-none absolute -right-24 top-0 h-96 w-96 rounded-full bg-emerald-400/20 blur-3xl" />
-
-      <div className="relative z-10 mx-auto grid min-h-screen w-full max-w-6xl items-center gap-12 px-6 py-10 lg:grid-cols-2 lg:px-10">
-        <div className="text-white">
-          <div className="flex items-center gap-3">
-            <span className="grid h-10 w-10 place-items-center rounded-xl bg-white/15 text-sm font-extrabold ring-1 ring-white/30 backdrop-blur">
-              ST
-            </span>
-            <span className="micro-label text-white/80">Smart Temp Monitor</span>
-          </div>
-
-          <div className="mt-14 space-y-6">
-            <p className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-white/85 ring-1 ring-white/15 backdrop-blur">
-              <PulseDot className="text-emerald-300" />
-              Buat akun baru
-            </p>
-            <h1 className="heading-page max-w-lg text-white">
-              Mulai Memantau dalam <span className="text-[#A7F3D0]">Hitungan Menit.</span>
-            </h1>
-            <p className="max-w-md text-[15px] leading-relaxed text-white/70">
-              Daftar dengan email aktif, verifikasi lewat kode 6 digit, lalu langsung masuk ke
-              dashboard monitoring Anda.
-            </p>
-          </div>
-
-          <div className="mt-12 hidden max-w-sm lg:block">
-            <div className="rounded-2xl border border-white/15 bg-white/10 p-5 backdrop-blur">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/60">
-                  Sensor Zona
-                </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-400/20 px-2 py-0.5 text-[10px] font-bold text-emerald-200">
-                  <PulseDot className="text-emerald-300" />
-                  2 ONLINE
-                </span>
-              </div>
-              <div className="flex items-center gap-5">
-                <svg width="72" height="72" viewBox="0 0 100 100" aria-hidden>
-                  <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,.14)" strokeWidth="9" />
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="42"
-                    fill="none"
-                    stroke="#6EE7B7"
-                    strokeWidth="9"
-                    strokeLinecap="round"
-                    strokeDasharray="198 264"
-                    transform="rotate(-90 50 50)"
-                  />
-                  <text x="50" y="50" textAnchor="middle" dominantBaseline="middle" className="fill-white" style={{ fontSize: 22, fontWeight: 800 }}>
-                    58
-                  </text>
-                  <text x="50" y="66" textAnchor="middle" className="fill-white/60" style={{ fontSize: 8 }}>
-                    % RH
-                  </text>
-                </svg>
-                <p className="text-sm leading-relaxed text-white/70">
-                  Kelembapan stabil di zona aman. Notifikasi hanya saat melewati ambang batas.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="mx-auto w-full max-w-md">
-          <div className={`auth-swap ${swapClass}`}>
-            <div className="rounded-3xl border border-white/40 bg-white p-8 shadow-2xl shadow-indigo-950/40 backdrop-blur">
-              <div className="mb-8">
-                <p className="micro-label mb-3 inline-flex items-center gap-2 rounded-full bg-indigo-50 px-3 py-1 text-primary">
-                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary" />
-                  {stepInfo[step].badge}
-                </p>
-                <h2 className="heading-page text-ink">{stepInfo[step].title}</h2>
-                <p className="mt-2 text-sm text-muted-foreground">{stepInfo[step].desc}</p>
-              </div>
-
-              {step === "form" && (
+    <AuthLayout
+      title={stepInfo[step].title}
+      subtitle={stepInfo[step].desc}
+      swapClass={swapClass}
+      footer={
+        <>
+          Sudah punya akun?{" "}
+          <Link
+            to="/login"
+            state={{ dir: "to-login" }}
+            className="font-semibold text-[#3d41ad] hover:underline"
+          >
+            Login
+          </Link>
+        </>
+      }
+    >
+      {step === "form" && (
                 <>
                   <form onSubmit={handleRegister} className="space-y-5">
                     <div className="space-y-2">
@@ -435,21 +363,6 @@ export function RegisterPage() {
                   </div>
                 </>
               )}
-
-              <p className="mt-6 text-center text-sm text-muted-foreground">
-                Sudah punya akun?{" "}
-                <Link
-                  to="/login"
-                  state={{ dir: "to-login" }}
-                  className="font-medium text-primary hover:underline"
-                >
-                  Login
-                </Link>
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    </AuthLayout>
   );
 }

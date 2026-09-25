@@ -31,11 +31,11 @@ const typeLabel: Record<AlertType, string> = {
 };
 
 const typeBadgeClass: Record<AlertType, string> = {
-  HIGH_TEMP: "bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-300",
-  LOW_TEMP: "bg-blue-100 text-blue-700 dark:bg-sky-500/15 dark:text-sky-300",
-  HIGH_HUMIDITY: "bg-yellow-100 text-yellow-700 dark:bg-amber-500/15 dark:text-amber-300",
-  LOW_HUMIDITY: "bg-blue-100 text-blue-700 dark:bg-sky-500/15 dark:text-sky-300",
-  SENSOR_OFFLINE: "bg-gray-100 text-gray-700 dark:bg-slate-500/20 dark:text-slate-300",
+  HIGH_TEMP: "bg-[#ffe9eb] text-[#d64550]",
+  LOW_TEMP: "bg-[#e8f2fd] text-[#2563eb]",
+  HIGH_HUMIDITY: "bg-[#fdf6e3] text-[#8a6d12]",
+  LOW_HUMIDITY: "bg-[#e8f2fd] text-[#2563eb]",
+  SENSOR_OFFLINE: "bg-[#f1f3f9] text-[#545b6c]",
 };
 
 export function AlertsPage() {
@@ -73,7 +73,7 @@ export function AlertsPage() {
               <TabsTrigger value="ACTIVE">
                 Aktif
                 {summary.active > 0 && (
-                  <span className="ml-1.5 rounded-full bg-red-600 px-1.5 text-[10px] font-bold text-white">
+                  <span className="ml-1.5 rounded-[6px] bg-[#ff6570] px-1.5 py-0.5 text-[11px] font-bold leading-4 text-white">
                     {summary.active}
                   </span>
                 )}
@@ -89,19 +89,19 @@ export function AlertsPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-3">
             <div>
-              <CardTitle className="flex items-center gap-2 text-[15px] font-bold text-ink">
-                <BellRing className="h-4 w-4 text-brand-blue" />
+              <CardTitle className="flex items-center gap-2">
+                <BellRing className="h-4 w-4 text-[#3d41ad]" />
                 Daftar Alert
               </CardTitle>
               <CardDescription>
-                {summary.critical} critical · {summary.warning} warning aktif
+                {summary.critical} critical, {summary.warning} warning aktif
               </CardDescription>
             </div>
             <div className="flex shrink-0 items-center gap-1.5">
-              <span className="rounded-full bg-red-100 px-2.5 py-1 text-[9px] font-bold text-red-600 dark:bg-red-500/15 dark:text-red-300">
+              <span className="rounded-[8px] bg-[#ffe9eb] px-2.5 py-1 text-[12px] font-bold text-[#d64550]">
                 {summary.critical} Critical
               </span>
-              <span className="rounded-full bg-yellow-100 px-2.5 py-1 text-[9px] font-bold text-yellow-700 dark:bg-amber-500/15 dark:text-amber-300">
+              <span className="rounded-[8px] bg-[#fdf6e3] px-2.5 py-1 text-[12px] font-bold text-[#8a6d12]">
                 {summary.warning} Warning
               </span>
             </div>
@@ -157,24 +157,24 @@ export function AlertsPage() {
                         <span
                           className={cn(
                             "h-2 w-2 shrink-0 rounded-full",
-                            a.severity === "CRITICAL" ? "bg-red-500" : "bg-yellow-500"
+                            a.severity === "CRITICAL" ? "bg-[#ff6570]" : "bg-[#e4bd4e]"
                           )}
                         />
-                        <span className="truncate text-sm">{a.message}</span>
+                        <span className="truncate text-[13.5px]">{a.message}</span>
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
                       {a.status === "ACTIVE" ? (
                         <Button variant="outline" size="sm" onClick={() => handleResolve(a.id)}>
-                          <CheckCircle2 className="mr-1.5 h-4 w-4" />
-                          Resolve
+                          <CheckCircle2 className="h-4 w-4" />
+                          Tandai selesai
                         </Button>
                       ) : (
                         <Badge
                           variant="secondary"
-                          className="bg-green-100 text-green-700"
+                          className="bg-[#e6f7f1] text-[#1e9e7e]"
                         >
-                          RESOLVED
+                          Selesai
                         </Badge>
                       )}
                     </TableCell>

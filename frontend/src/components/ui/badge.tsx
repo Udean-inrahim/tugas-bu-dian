@@ -3,17 +3,17 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  "inline-flex items-center gap-1 rounded-lg border px-2.5 py-[3px] text-[12px] font-semibold leading-5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
   {
     variants: {
       variant: {
-        default: "border-transparent bg-primary text-primary-foreground",
-        secondary: "border-transparent bg-secondary text-secondary-foreground",
+        default: "border-transparent bg-[#3d41ad] text-white",
+        secondary: "border-transparent bg-[#f1f3f9] text-[#545b6c]",
         destructive: "border-transparent bg-destructive text-destructive-foreground",
-        outline: "border-ink text-foreground",
-        success: "border-transparent bg-chip text-white",
-        warning: "border-transparent bg-amber-500 text-white",
-        info: "border-transparent bg-sky-500 text-white",
+        outline: "border-[#e2e5ee] bg-white text-[#545b6c]",
+        success: "border-transparent bg-[#37bc99] text-white",
+        warning: "border-transparent bg-[#e4bd4e] text-[#3a3116]",
+        info: "border-transparent bg-[#6fb6f5] text-[#12324d]",
         white: "border-white text-white bg-transparent",
       },
     },

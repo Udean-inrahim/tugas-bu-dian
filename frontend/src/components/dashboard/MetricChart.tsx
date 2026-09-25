@@ -20,12 +20,12 @@ interface Props {
 
 const THEME: Record<SeriesKey, { stroke: string; gradient: string; label: string }> = {
   temperature: {
-    stroke: "hsl(233 76% 62%)",
+    stroke: "#c2761a",
     gradient: "url(#stmGradTemp)",
     label: "Suhu (°C)",
   },
   humidity: {
-    stroke: "hsl(183 57% 51%)",
+    stroke: "#2563eb",
     gradient: "url(#stmGradHum)",
     label: "Kelembapan (%)",
   },
@@ -61,24 +61,24 @@ export function MetricChart({ data, type, height = 260 }: Props) {
       <AreaChart data={chartData} margin={{ top: 5, right: 10, bottom: 0, left: -12 }}>
         <defs>
           <linearGradient id="stmGradTemp" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="hsl(233 76% 62%)" stopOpacity={0.28} />
-            <stop offset="100%" stopColor="hsl(233 76% 62%)" stopOpacity={0} />
+            <stop offset="0%" stopColor="#c2761a" stopOpacity={0.24} />
+            <stop offset="100%" stopColor="#c2761a" stopOpacity={0} />
           </linearGradient>
           <linearGradient id="stmGradHum" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="hsl(183 57% 51%)" stopOpacity={0.25} />
-            <stop offset="100%" stopColor="hsl(183 57% 51%)" stopOpacity={0} />
+            <stop offset="0%" stopColor="#2563eb" stopOpacity={0.22} />
+            <stop offset="100%" stopColor="#2563eb" stopOpacity={0} />
           </linearGradient>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke="#eef0f4" vertical={false} />
+        <CartesianGrid strokeDasharray="3 3" stroke="#eef0f6" vertical={false} />
         <XAxis
           dataKey="time"
-          tick={{ fontSize: 11, fill: "#a5a8b0" }}
+          tick={{ fontSize: 12, fill: "#6b7280" }}
           tickLine={false}
-          axisLine={{ stroke: "#eef0f4" }}
+          axisLine={{ stroke: "#eef0f6" }}
           minTickGap={24}
         />
         <YAxis
-          tick={{ fontSize: 11, fill: "#a5a8b0" }}
+          tick={{ fontSize: 12, fill: "#6b7280" }}
           tickLine={false}
           axisLine={false}
           domain={["auto", "auto"]}
@@ -87,9 +87,10 @@ export function MetricChart({ data, type, height = 260 }: Props) {
         <Tooltip
           contentStyle={{
             borderRadius: 12,
-            border: "1px solid hsl(220 18% 91%)",
-            fontSize: 12,
-            boxShadow: "0 8px 24px rgba(15,23,42,.08)",
+            border: "1px solid #eceef5",
+            fontSize: 13,
+            color: "#272a3b",
+            boxShadow: "0 12px 35px rgba(72,78,105,.12)",
           }}
         />
         <Area

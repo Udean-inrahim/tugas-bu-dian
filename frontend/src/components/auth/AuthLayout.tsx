@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { Activity, BellRing, Globe, Clock, PlayCircle, Sparkles, Cpu } from "lucide-react";
+import { Cpu, Download, PlayCircle, ListChecks } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -16,9 +16,9 @@ const INFO: Record<InfoKey, { title: string; body: ReactNode }> = {
     title: "Cara kerja",
     body: (
       <ul className="list-decimal space-y-2 pl-5">
-        <li>Pasang sensor suhu & kelembapan di ruangan yang dipantau.</li>
-        <li>Sensor mengirim data ke server secara berkala (tiap beberapa menit).</li>
-        <li>Masuk ke dasbor untuk memantau, dan terima notifikasi email otomatis saat suhu melewati ambang batas.</li>
+        <li>Pasang sensor suhu dan kelembapan di ruangan yang dipantau.</li>
+        <li>Sensor mengirim data ke server secara berkala melalui MQTT.</li>
+        <li>Masuk ke dasbor untuk memantau, dan terima notifikasi email saat ambang batas terlampaui.</li>
       </ul>
     ),
   },
@@ -26,11 +26,11 @@ const INFO: Record<InfoKey, { title: string; body: ReactNode }> = {
     title: "Fitur",
     body: (
       <ul className="list-disc space-y-2 pl-5">
-        <li>Dashboard suhu & kelembapan secara real-time.</li>
-        <li>Grafik riwayat & rentang pemantauan (1 jam - 7 hari).</li>
-        <li>Alert email otomatis saat melewati ambang batas.</li>
-        <li>Manajemen sensor dan ambang batas yang mudah.</li>
-        <li>Riwayat letusan alert / perangkat yang offline.</li>
+        <li>Dashboard suhu dan kelembapan real-time lewat WebSocket.</li>
+        <li>Grafik riwayat 1 jam sampai 7 hari.</li>
+        <li>Alert otomatis saat melewati ambang batas.</li>
+        <li>Manajemen sensor dan ambang batas.</li>
+        <li>Riwayat alert dan status perangkat.</li>
       </ul>
     ),
   },
@@ -38,171 +38,173 @@ const INFO: Record<InfoKey, { title: string; body: ReactNode }> = {
     title: "Perangkat",
     body: (
       <ul className="list-disc space-y-2 pl-5">
-        <li>Mikrokontroler dengan sensor suhu & kelembapan (misal DHT11/DHT22).</li>
-        <li>Laptop atau komputer sebagai pengirim data sensor (tersedia skrip berjalan).</li>
-        <li>Akses dari desktop, HP, atau aplikasi Android (APK).</li>
+        <li>Mikrokontroler dengan sensor suhu dan kelembapan, misalnya DHT11 atau DHT22.</li>
+        <li>Laptop atau komputer sebagai pengirim data sensor.</li>
+        <li>Akses dari desktop, HP, atau aplikasi Android.</li>
       </ul>
     ),
   },
 };
 
+const FEATURES = [
+  "Monitoring real-time lewat WebSocket",
+  "Riwayat 1 jam sampai 7 hari",
+  "Alert otomatis saat melewati ambang batas",
+];
+
 interface AuthLayoutProps {
-  title: ReactNode;
-  sub: ReactNode;
+  title: string;
+  subtitle: string;
   children: ReactNode;
-  cta?: { to: string; label: string; state?: unknown };
+  footer: ReactNode;
+  swapClass?: string;
 }
 
-export function AuthLayout({ title, sub, children, cta }: AuthLayoutProps) {
+export function AuthLayout({ title, subtitle, children, footer, swapClass }: AuthLayoutProps) {
   const [info, setInfo] = useState<InfoKey | null>(null);
-  const pill = (key: InfoKey) =>
-    [
-      "flex cursor-pointer items-center gap-2 rounded-full border-0 px-4 py-1.5 text-[12px] font-semibold transition active:scale-95",
-      info === key
-        ? "bg-[#2563f0] text-white shadow-[0_10px_22px_rgba(37,99,240,0.35)] scale-[1.03]"
-        : "bg-transparent text-[#6b7694] hover:bg-[#2563f0] hover:text-white hover:shadow-[0_8px_18px_rgba(37,99,240,0.28)]",
-    ].join(" ");
-  return (
-    <div
-      className="relative min-h-dvh flex items-center justify-center overflow-x-hidden px-4 py-8"
-      style={{
-        background:
-          "radial-gradient(900px 620px at 12% 8%, #f7f3ff 0%, transparent 60%), radial-gradient(900px 700px at 88% 12%, #e8f0ff 0%, transparent 62%), #eef2ff",
-      }}
+
+  const infoButton = (key: InfoKey, label: string, icon: ReactNode) => (
+    <button
+      key={key}
+      type="button"
+      onClick={() => setInfo(key)}
+      className="inline-flex cursor-pointer items-center gap-2 rounded-[10px] border border-white/15 bg-white/10 px-3.5 py-2 text-[13px] font-semibold text-white/85 transition-colors hover:bg-white/20"
     >
-      {/* blob & titik dekoratif */}
-      <div aria-hidden className="pointer-events-none absolute z-0">
-        <span className="absolute left-[52%] top-[-90px] h-[230px] w-[230px] rounded-full bg-[#8b5cf6] opacity-85" />
-        <span className="absolute bottom-[-130px] left-[-90px] h-[340px] w-[340px] rounded-full bg-[#f5a623] opacity-80" />
-        <span className="absolute bottom-[-10px] left-[120px] h-[150px] w-[150px] rounded-full bg-[#f5a623] opacity-35" />
-        <span className="absolute left-[6%] top-[-40px] h-[190px] w-[190px] rounded-full bg-white opacity-50" />
-        <span className="absolute left-[4%] top-[120px] h-[60px] w-[60px] rounded-full bg-white opacity-70" />
-        <span className="absolute left-[47%] top-[26%] h-4 w-4 rounded-full bg-[#ec4b9b]" />
-        <span className="absolute right-[6%] top-[64%] h-3.5 w-3.5 rounded-full bg-[#ec4b9b]" />
-        <span className="absolute bottom-[12%] left-[22%] h-[18px] w-[18px] rounded-full bg-[#16c79a]" />
-        <span className="absolute bottom-[-34px] right-[34%] h-[86px] w-[86px] rounded-full bg-[#2563f0]" />
-        <span className="absolute right-[14%] top-[5%] h-[26px] w-[26px] rounded-full bg-white opacity-75" />
-      </div>
+      {icon}
+      {label}
+    </button>
+  );
 
-      <main className="relative z-10 w-[min(1120px,100%)] rounded-[34px] border border-white/60 bg-white/60 px-[clamp(20px,4vw,48px)] pb-[clamp(34px,5vw,54px)] pt-[26px] shadow-[0_40px_90px_rgba(31,45,90,0.18)] backdrop-blur-[22px]">
-        <nav className="mb-[clamp(24px,4vw,44px)] flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3 text-sm font-bold tracking-[0.06em] text-[#14213d]">
-            <span className="grid h-[30px] w-[30px] place-items-center rounded-full bg-[#8b5cf6] text-[15px] font-bold text-white">
-              ST
-            </span>
-            SMART TEMP
-          </div>
-<div className="hidden min-[760px]:flex items-center gap-2.5 rounded-full border border-white/70 bg-white/60 p-1.5 shadow-[0_10px_26px_rgba(31,45,90,0.08)] backdrop-blur">
-              <button
-                type="button"
-                onClick={() => setInfo("cara")}
-                className={pill("cara")}
-              >
-                <PlayCircle className="h-4 w-4" />
-                Cara kerja
-              </button>
-              <button
-                type="button"
-                onClick={() => setInfo("fitur")}
-                className={pill("fitur")}
-              >
-                <Sparkles className="h-4 w-4" />
-                Fitur
-              </button>
-              <button
-                type="button"
-                onClick={() => setInfo("perangkat")}
-                className={pill("perangkat")}
-              >
-                <Cpu className="h-4 w-4" />
-                Perangkat
-              </button>
-            </div>
-          {cta && (
-            <Link
-              to={cta.to}
-              state={cta.state}
-              className="rounded-full bg-[#2563f0] px-7 py-[11px] text-sm font-semibold text-white shadow-[0_10px_22px_rgba(37,99,240,0.32)] transition hover:bg-[#1b4fd6]"
-            >
-              {cta.label}
-            </Link>
-          )}
-        </nav>
-
-        <div className="grid grid-cols-1 items-center gap-[clamp(26px,4vw,56px)] min-[900px]:grid-cols-[1.02fr_0.98fr]">
-          <section>
-            <h1 className="mb-[14px] text-[clamp(28px,4.2vw,44px)] font-extrabold leading-[1.1] tracking-[-0.02em] text-[#14213d]">
-              {title}
-            </h1>
-            <p className="mb-[28px] max-w-[40ch] text-[14px] leading-[1.7] text-[#6b7694]">{sub}</p>
-            {children}
-          </section>
-
-          <aside aria-hidden className="relative min-h-[440px] max-[900px]:flex max-[900px]:min-h-0 max-[900px]:flex-wrap max-[900px]:justify-center max-[900px]:gap-3.5">
-            <div className="absolute top-0 right-[6%] w-[210px] rounded-[20px] bg-white/90 p-[18px_22px] shadow-[0_18px_40px_rgba(31,45,90,0.12)] max-[900px]:static max-[900px]:max-w-[230px] max-[900px]:flex-[1_1_180px]">
-              <div className="mb-2 flex items-center gap-2.5 text-sm font-semibold text-[#6b7694]">
-                <span className="grid h-[30px] w-[30px] place-items-center rounded-full bg-[#16c79a] text-white">
-                  <Activity className="h-4 w-4" />
-                </span>
-                Data real-time
-              </div>
-              <p className="text-[clamp(22px,2.6vw,28px)] font-bold leading-[1.1] tracking-[-0.02em]">5 mnt</p>
-              <p className="mt-1.5 text-[12.5px] text-[#6b7694]">interval pembaruan data</p>
-            </div>
-
-            <div className="absolute top-[96px] left-0 w-[216px] rounded-[20px] bg-white/90 p-[18px_22px] shadow-[0_18px_40px_rgba(31,45,90,0.12)] max-[900px]:static max-[900px]:max-w-[230px] max-[900px]:flex-[1_1_180px]">
-              <div className="mb-2 flex items-center gap-2.5 text-sm font-semibold text-[#6b7694]">
-                <span className="grid h-[30px] w-[30px] place-items-center rounded-full bg-[#2563f0] text-white">
-                  <BellRing className="h-4 w-4" />
-                </span>
-                Notifikasi email
-              </div>
-              <p className="text-[clamp(22px,2.6vw,28px)] font-bold leading-[1.1] tracking-[-0.02em]">24/7</p>
-              <p className="mt-1.5 text-[12.5px] text-[#6b7694]">alert otomatis saat melewati ambang</p>
-            </div>
-
-            <a
-              href="https://github.com/Udean-inrahim/tugas-bu-dian/releases/latest"
-              target="_blank"
-              rel="noreferrer"
-              className="absolute top-[168px] right-[2%] block w-[210px] cursor-pointer rounded-[20px] bg-white/90 p-[18px_22px] shadow-[0_18px_40px_rgba(31,45,90,0.12)] transition hover:-translate-y-1 hover:shadow-[0_22px_46px_rgba(31,45,90,0.18)] max-[900px]:static max-[900px]:max-w-[230px] max-[900px]:flex-[1_1_180px]"
-            >
-              <div className="mb-2 flex items-center gap-2.5 text-sm font-semibold text-[#6b7694]">
-                <span className="grid h-[30px] w-[30px] place-items-center rounded-full bg-[#f2385a] text-white">
-                  <Globe className="h-4 w-4" />
-                </span>
-                Akses di mana saja
-              </div>
-              <p className="text-[clamp(22px,2.6vw,28px)] font-bold leading-[1.1] tracking-[-0.02em]">Web + APK</p>
-              <p className="mt-1.5 text-[12.5px] text-[#6b7694]">desktop, HP, dan Android</p>
-              <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-[#e9edff] px-2.5 py-1 text-[10px] font-semibold text-[#2563f0]">
-                Unduh APK ↓
+  return (
+    <div className="flex min-h-dvh items-center justify-center bg-[#f1f3f9] px-4 py-8">
+      <main className="w-[min(1320px,100%)] overflow-hidden rounded-[30px] bg-[#262a4a] p-[clamp(16px,2.2vw,28px)] shadow-[0_30px_80px_rgba(38,42,74,0.28)]">
+        <div className="grid items-center gap-10 min-[880px]:grid-cols-[1.08fr_0.92fr] min-[1200px]:gap-14">
+          <section className="text-white">
+            <div className="flex items-center gap-3">
+              <span className="grid h-10 w-10 place-items-center rounded-[12px] bg-[#4448b8] text-[15px] font-extrabold text-white">
+                ST
               </span>
-            </a>
+              <span className="text-[15px] font-bold tracking-[-0.01em]">Smart Temp Monitor</span>
+            </div>
 
-            <div className="absolute top-[300px] left-[4%] w-[220px] rounded-[20px] bg-white/90 p-[18px_22px] shadow-[0_18px_40px_rgba(31,45,90,0.12)] max-[900px]:static max-[900px]:max-w-[230px] max-[900px]:flex-[1_1_180px]">
-              <div className="mb-2 flex items-center gap-2.5 text-sm font-semibold text-[#6b7694]">
-                <span className="grid h-[30px] w-[30px] place-items-center rounded-full bg-[#8b5cf6] text-white">
-                  <Clock className="h-4 w-4" />
+            <h1 className="mt-10 text-[clamp(26px,3.4vw,38px)] font-extrabold leading-[1.12] tracking-[-0.02em]">
+              Pantau Suhu dan Kelembapan dari Satu Tempat
+            </h1>
+            <p className="mt-4 max-w-[42ch] text-[14.5px] leading-relaxed text-white/70">
+              Data sensor masuk lewat MQTT, disimpan di database, lalu dikirim ke dasbor secara
+              langsung. Tidak ada angka yang dibuat-buat.
+            </p>
+
+            <div className="mt-8 max-w-[380px] rounded-[18px] border border-white/12 bg-white/[0.07] p-5">
+              <div className="flex items-center justify-between">
+                <span className="text-[12.5px] font-semibold text-white/70">Ringkasan monitoring</span>
+                <span className="inline-flex items-center gap-1.5 rounded-[8px] bg-[#37bc99]/20 px-2 py-1 text-[11.5px] font-bold text-[#7fe3c6]">
+                  <i className="h-1.5 w-1.5 rounded-full bg-[#37bc99]" />
+                  Live
                 </span>
-                Aktif 24 jam
               </div>
-              <div className="mt-2.5 flex h-[76px] items-end gap-[10px]">
-                {[38, 74, 52, 60, 44, 88].map((h, i) => (
-                  <span key={i} className="flex-1 rounded-[2px] bg-[#1f4b99]" style={{ height: `${h}%` }} />
+              <svg
+                viewBox="0 0 120 64"
+                className="mt-4 h-[72px] w-full"
+                role="img"
+                aria-label="Ilustrasi meter suhu dengan zona dingin, aman, dan panas"
+              >
+                <path
+                  d="M10 58 A50 50 0 0 1 110 58"
+                  pathLength={100}
+                  fill="none"
+                  stroke="#6fb6f5"
+                  strokeOpacity={0.55}
+                  strokeWidth={11}
+                  strokeLinecap="round"
+                  strokeDasharray="26 74"
+                />
+                <path
+                  d="M10 58 A50 50 0 0 1 110 58"
+                  pathLength={100}
+                  fill="none"
+                  stroke="#37bc99"
+                  strokeOpacity={0.75}
+                  strokeWidth={11}
+                  strokeLinecap="butt"
+                  strokeDasharray="32 68"
+                  strokeDashoffset={-26}
+                />
+                <path
+                  d="M10 58 A50 50 0 0 1 110 58"
+                  pathLength={100}
+                  fill="none"
+                  stroke="#ff9aa3"
+                  strokeOpacity={0.6}
+                  strokeWidth={11}
+                  strokeLinecap="round"
+                  strokeDasharray="24 76"
+                  strokeDashoffset={-58}
+                />
+              </svg>
+              <div className="mt-3 flex h-10 items-end gap-2">
+                {[38, 62, 46, 74, 54, 88, 66].map((h, i) => (
+                  <span
+                    key={i}
+                    className="flex-1 rounded-t-[3px] bg-white/25"
+                    style={{ height: `${h}%` }}
+                  />
                 ))}
               </div>
             </div>
-          </aside>
+
+            <ul className="mt-8 space-y-2.5">
+              {FEATURES.map((f) => (
+                <li key={f} className="flex items-start gap-2.5 text-[13.5px] text-white/80">
+                  <ListChecks className="mt-0.5 h-4 w-4 shrink-0 text-[#9aa2ff]" />
+                  {f}
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-8 flex flex-wrap items-center gap-2">
+              {infoButton("cara", "Cara kerja", <PlayCircle className="h-4 w-4" />)}
+              {infoButton("fitur", "Fitur", <ListChecks className="h-4 w-4" />)}
+              {infoButton("perangkat", "Perangkat", <Cpu className="h-4 w-4" />)}
+              <a
+                href="https://github.com/Udean-inrahim/tugas-bu-dian/releases/latest"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex cursor-pointer items-center gap-2 rounded-[10px] bg-[#4448b8] px-3.5 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-[#5256c9]"
+              >
+                <Download className="h-4 w-4" />
+                Unduh APK
+              </a>
+            </div>
+          </section>
+
+          <section className="auth-card rounded-[22px] border border-[#eceef5] bg-white p-[clamp(24px,2.6vw,40px)] shadow-[0_18px_45px_rgba(20,24,50,0.18)]">
+            <div className="flex items-center gap-2.5">
+              <span className="grid h-8 w-8 place-items-center rounded-[9px] bg-[#4448b8] text-[12px] font-extrabold text-white">
+                ST
+              </span>
+              <span className="text-[13.5px] font-bold text-[#272a3b]">Smart Temp</span>
+            </div>
+            <h2 className="mt-6 text-[clamp(24px,2.6vw,30px)] font-extrabold leading-tight tracking-[-0.02em] text-[#272a3b]">
+              {title}
+            </h2>
+            <p className="mt-2 text-[13.5px] leading-relaxed text-[#616879]">{subtitle}</p>
+
+            <div className={`auth-swap mt-7 ${swapClass ?? ""}`}>{children}</div>
+
+            <div className="mt-7 border-t border-dashed border-[#e2e5ee] pt-5 text-center text-[13.5px] text-[#616879]">
+              {footer}
+            </div>
+          </section>
         </div>
       </main>
 
       <Dialog open={info !== null} onOpenChange={(open) => !open && setInfo(null)}>
-        <DialogContent>
+        <DialogContent className="rounded-[20px] border-[#eceef5] bg-white">
           <DialogHeader>
             <DialogTitle>{info ? INFO[info].title : ""}</DialogTitle>
             <DialogDescription asChild>
-              <div className="text-sm leading-relaxed text-[#6b7694]">
+              <div className="text-[13.5px] leading-relaxed text-[#616879]">
                 {info ? INFO[info].body : null}
               </div>
             </DialogDescription>
@@ -210,5 +212,13 @@ export function AuthLayout({ title, sub, children, cta }: AuthLayoutProps) {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+export function AuthFooterLink({ to, state, children }: { to: string; state?: unknown; children: ReactNode }) {
+  return (
+    <Link to={to} state={state} className="font-semibold text-[#3d41ad] hover:underline">
+      {children}
+    </Link>
   );
 }

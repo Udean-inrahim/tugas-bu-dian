@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Save, Lock, KeyRound, UserCog } from "lucide-react";
+import { Save, Lock, KeyRound, UserCog, Thermometer, Droplets } from "lucide-react";
 import { useSettings } from "@/hooks/useSettings";
 import { useAuthStore } from "@/stores/authStore";
 import api from "@/lib/api";
@@ -171,14 +171,14 @@ export function SettingsPage() {
         <Reveal>
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-[15px] font-bold text-ink">
-                <span className="text-orange-500">🌡️</span> Temperature
+              <CardTitle className="flex items-center gap-2">
+                <Thermometer className="h-4 w-4 text-[#c2761a]" /> Suhu
               </CardTitle>
               <CardDescription>Batas suhu (°C) untuk status normal</CardDescription>
             </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="minTemp">Minimum Temperature</Label>
+              <Label htmlFor="minTemp">Suhu minimum</Label>
               <div className="relative">
                 <Input
                   id="minTemp"
@@ -194,7 +194,7 @@ export function SettingsPage() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="maxTemp">Maximum Temperature</Label>
+              <Label htmlFor="maxTemp">Suhu maksimum</Label>
               <div className="relative">
                 <Input
                   id="maxTemp"
@@ -209,8 +209,9 @@ export function SettingsPage() {
                 </span>
               </div>
             </div>
-            <p className="text-xs text-muted-foreground sm:col-span-2">
-              Di bawah {minTemp}°C → Dingin · {minTemp}–{maxTemp}°C → Normal · di atas {maxTemp}°C → Panas
+            <p className="text-[12.5px] leading-relaxed text-[#616879] sm:col-span-2">
+              Di bawah {minTemp}°C disebut Dingin. {minTemp}°C sampai {maxTemp}°C disebut Normal. Di atas{" "}
+              {maxTemp}°C disebut Panas.
             </p>
           </CardContent>
         </Card>
@@ -219,14 +220,14 @@ export function SettingsPage() {
         <Reveal delay={80}>
           <Card>
             <CardHeader>
-<CardTitle className="flex items-center gap-2 text-[15px] font-bold text-ink">
-                <span className="text-cyan-500">💧</span> Humidity
+              <CardTitle className="flex items-center gap-2">
+                <Droplets className="h-4 w-4 text-[#2563eb]" /> Kelembapan
               </CardTitle>
               <CardDescription>Batas kelembapan (%) untuk status normal</CardDescription>
             </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="minHum">Minimum Humidity</Label>
+              <Label htmlFor="minHum">Kelembapan minimum</Label>
               <div className="relative">
                 <Input
                   id="minHum"
@@ -242,7 +243,7 @@ export function SettingsPage() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="maxHum">Maximum Humidity</Label>
+              <Label htmlFor="maxHum">Kelembapan maksimum</Label>
               <div className="relative">
                 <Input
                   id="maxHum"
@@ -257,8 +258,9 @@ export function SettingsPage() {
                 </span>
               </div>
             </div>
-            <p className="text-xs text-muted-foreground sm:col-span-2">
-              Di bawah {minHum}% → Kering · {minHum}–{maxHum}% → Normal · di atas {maxHum}% → Lembap
+            <p className="text-[12.5px] leading-relaxed text-[#616879] sm:col-span-2">
+              Di bawah {minHum}% disebut Kering. {minHum}% sampai {maxHum}% disebut Normal. Di atas{" "}
+              {maxHum}% disebut Lembap.
             </p>
           </CardContent>
         </Card>
@@ -268,12 +270,12 @@ export function SettingsPage() {
       <Reveal>
         <Card>
           <CardHeader>
-            <CardTitle className="text-[15px] font-bold text-ink">Monitoring</CardTitle>
+            <CardTitle>Monitoring</CardTitle>
             <CardDescription>Interval pembaruan data pada dashboard</CardDescription>
           </CardHeader>
         <CardContent className="grid gap-4 sm:max-w-xs">
           <div className="space-y-2">
-            <Label htmlFor="refresh">Refresh Interval</Label>
+            <Label htmlFor="refresh">Interval pembaruan</Label>
             <Select value={refresh} onValueChange={setRefresh}>
               <SelectTrigger id="refresh">
                 <SelectValue />
@@ -294,8 +296,8 @@ export function SettingsPage() {
       <Reveal>
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-[15px] font-bold text-ink">
-              <KeyRound className="h-4 w-4 text-primary" /> Reset Password Pengguna
+            <CardTitle className="flex items-center gap-2">
+              <KeyRound className="h-4 w-4 text-[#3d41ad]" /> Reset Password Pengguna
             </CardTitle>
             <CardDescription>
               Buat kode reset 6 digit untuk pengguna yang lupa password, lalu berikan kode tersebut
@@ -369,17 +371,15 @@ function ReadonlyCard({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-[15px] font-bold text-ink">{title}</CardTitle>
+        <CardTitle>{title}</CardTitle>
         <CardDescription>Nilai ambang saat ini</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid gap-2 sm:grid-cols-2">
           {items.map((it) => (
-            <div key={it.label} className="rounded-xl bg-[#edf1ff] px-3 py-2.5 dark:bg-white/5">
-              <p className="text-[9px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
-                {it.label}
-              </p>
-              <p className="mt-0.5 text-[16px] font-bold text-ink">{it.value}</p>
+            <div key={it.label} className="rounded-[12px] border border-[#eceef5] bg-[#f8f9fc] px-3.5 py-2.5">
+              <p className="text-[12px] font-semibold text-[#616879]">{it.label}</p>
+              <p className="mt-0.5 text-[18px] font-bold text-[#272a3b]">{it.value}</p>
             </div>
           ))}
         </div>

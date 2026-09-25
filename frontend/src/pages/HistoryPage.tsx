@@ -91,14 +91,14 @@ export function HistoryPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="History"
+        title="Riwayat"
         description="Riwayat pengukuran suhu dan kelembapan."
       />
 
       <Reveal>
         <Card>
           <CardHeader>
-            <CardTitle className="text-[15px] font-bold text-ink">Filter</CardTitle>
+            <CardTitle>Filter</CardTitle>
             <CardDescription>Filter riwayat berdasarkan tanggal &amp; sensor</CardDescription>
           </CardHeader>
         <CardContent>
@@ -162,10 +162,10 @@ export function HistoryPage() {
 <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle className="text-[15px] font-bold text-ink">Riwayat Pengukuran</CardTitle>
+              <CardTitle>Riwayat Pengukuran</CardTitle>
               <CardDescription>{meta.total} data ditemukan</CardDescription>
             </div>
-            <span className="rounded-full bg-[#e9edff] px-2.5 py-1 text-[9px] font-semibold text-brand-blue dark:bg-white/10 dark:text-indigo-200">
+            <span className="shrink-0 rounded-[8px] bg-[#f1f3f9] px-2.5 py-1 text-[12px] font-semibold text-[#3d41ad]">
               {meta.page}/{meta.totalPages}
             </span>
           </CardHeader>
@@ -206,16 +206,18 @@ export function HistoryPage() {
                         <TableCell className="tabular-nums whitespace-nowrap">
                           {formatDateTime(r.recordedAt)}
                         </TableCell>
-                        <TableCell>
+                      <TableCell>
+                        <span className="font-medium text-[#272a3b]">
                           {r.sensor?.name ?? `Sensor #${r.sensorId}`}
-                          <span className="ml-1 text-xs text-muted-foreground">
-                            {r.sensor?.sensorCode}
-                          </span>
-                        </TableCell>
-                        <TableCell className="text-right tabular-nums font-medium text-orange-600">
+                        </span>
+                        <span className="ml-1.5 text-[12.5px] text-[#6b7280]">
+                          {r.sensor?.sensorCode}
+                        </span>
+                      </TableCell>
+                        <TableCell className="text-right tabular-nums font-semibold text-[#c2761a]">
                           {r.temperature.toFixed(1)}°C
                         </TableCell>
-                        <TableCell className="text-right tabular-nums font-medium text-blue-600">
+                        <TableCell className="text-right tabular-nums font-semibold text-[#2563eb]">
                           {r.humidity.toFixed(1)}%
                         </TableCell>
                         <TableCell className="hidden sm:table-cell">
@@ -235,7 +237,7 @@ export function HistoryPage() {
               </Table>
 
               <div className="mt-4 flex items-center justify-between">
-                <p className="text-xs text-muted-foreground">
+                <p className="text-[12.5px] text-[#616879]">
                   Halaman {meta.page} dari {meta.totalPages}
                 </p>
                 <div className="flex items-center gap-2">
@@ -246,7 +248,7 @@ export function HistoryPage() {
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                   >
                     <ChevronLeft className="h-4 w-4" />
-                    Prev
+                    Sebelumnya
                   </Button>
                   <Button
                     variant="outline"
@@ -254,7 +256,7 @@ export function HistoryPage() {
                     disabled={page >= meta.totalPages}
                     onClick={() => setPage((p) => Math.min(meta.totalPages, p + 1))}
                   >
-                    Next
+                    Berikutnya
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>

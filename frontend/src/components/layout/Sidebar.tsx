@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import { useAuthStore } from "@/stores/authStore";
 import { useSensors } from "@/hooks/useSensors";
-import { ThemeToggle } from "./ThemeToggle";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -39,22 +38,20 @@ export function Sidebar({ onClose }: SidebarProps) {
   };
 
   return (
-    <div className="flex h-full flex-col border-r border-line bg-card">
-      <div className="flex items-center gap-2.5 px-5 pt-7 pb-8">
-        <span className="brand-gradient grid h-9 w-9 shrink-0 place-items-center rounded-xl text-[15px] font-bold text-white">
+    <div className="flex h-full flex-col border-r border-[#e9ebf2] bg-white">
+      <div className="flex items-center gap-2.5 px-5 pt-7 pb-7">
+        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-[10px] bg-[#4448b8] text-[15px] font-bold text-white">
           ST
         </span>
         <div className="min-w-0">
-          <p className="truncate text-lg font-bold leading-none tracking-[-0.02em] text-ink">
+          <p className="truncate text-[16px] font-bold leading-none tracking-[-0.01em] text-[#272a3b]">
             Smart Temp
           </p>
-          <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-            Monitoring
-          </p>
+          <p className="mt-1 text-[11.5px] font-medium text-[#6b7280]">Monitoring</p>
         </div>
       </div>
 
-      <nav className="flex flex-1 flex-col gap-1.5 px-3">
+      <nav className="flex flex-1 flex-col gap-1 px-3">
         {navItems.map((item) => (
           <NavLink
             key={item.to}
@@ -63,10 +60,10 @@ export function Sidebar({ onClose }: SidebarProps) {
             onClick={onClose}
             className={({ isActive }) =>
               cn(
-                "flex items-center gap-3 rounded-[10px] px-3 py-[11px] text-[13px] font-semibold transition dark:text-slate-300",
+                "flex items-center gap-3 rounded-[13px] px-3 py-[11px] text-[13.5px] font-semibold transition-colors",
                 isActive
-                  ? "bg-[#edf1ff] text-brand-blue dark:bg-white/10 dark:text-indigo-200"
-                  : "text-[#626875] hover:bg-[#edf1ff]/60 hover:text-brand-blue dark:hover:bg-white/10 dark:hover:text-indigo-200"
+                  ? "bg-[#3d41ad] text-white shadow-[0_12px_25px_rgba(61,65,173,0.25)]"
+                  : "text-[#626875] hover:bg-[#f1f3f9] hover:text-[#3d41ad]"
               )
             }
           >
@@ -77,49 +74,47 @@ export function Sidebar({ onClose }: SidebarProps) {
       </nav>
 
       <div className="px-3 pb-4 pt-4">
-        <div className="relative overflow-hidden rounded-2xl p-4 pb-5 text-white [background:linear-gradient(135deg,#22242b,#48416e)]">
+        <div className="rounded-[16px] border border-[#eceef5] bg-[#f8f9fc] p-4">
           <div className="flex items-center gap-2">
-            <Radio className="h-3.5 w-3.5 text-[#ff8b8e]" />
-            <span className="text-[11px] font-semibold text-white/85">
-              Sensor aktif
-            </span>
-            <span className="ml-auto rounded-full bg-[#38c8a5]/20 px-2 py-0.5 text-[9px] font-bold text-[#5fe0c0]">
-              LIVE
+            <Radio className="h-4 w-4 text-[#37bc99]" />
+            <span className="text-[12.5px] font-semibold text-[#545b6c]">Sensor aktif</span>
+            <span
+              className={cn(
+                "ml-auto inline-flex items-center gap-1.5 rounded-[7px] px-2 py-0.5 text-[11px] font-bold",
+                online > 0 ? "bg-[#e6f7f1] text-[#1e9e7e]" : "bg-[#ffe9eb] text-[#d64550]"
+              )}
+            >
+              <i className="h-1.5 w-1.5 rounded-full bg-current" />
+              {online > 0 ? "LIVE" : "OFF"}
             </span>
           </div>
-          <p className="mt-3 text-[26px] font-bold leading-none tracking-[-0.02em]">
+          <p className="mt-3 text-[28px] font-bold leading-none tracking-[-0.02em] text-[#272a3b]">
             {online}
-            <span className="text-sm font-semibold text-white/60">/{activeSensors.length}</span>
+            <span className="text-[15px] font-semibold text-[#6b7280]">/{activeSensors.length}</span>
           </p>
-          <p className="mt-1.5 text-[10px] text-white/60">
-            sensor terhubung dari total aktif
-          </p>
-          <div className="pointer-events-none absolute -right-6 -bottom-8 h-16 w-16 rounded-full bg-[#a9f0f0]/40 blur-2xl" />
+          <p className="mt-1.5 text-[12px] text-[#616879]">sensor terhubung dari total aktif</p>
         </div>
 
-        <div className="mt-4 flex gap-2">
-          <ThemeToggle className="shrink-0" />
+        <div className="mt-4">
           <button
             type="button"
             onClick={handleLogout}
-            className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-brand-blue py-2.5 text-[12px] font-semibold text-white transition hover:bg-brand-blue/90"
+            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-[10px] bg-[#282b3d] py-2.5 text-[13px] font-semibold text-white transition-colors hover:bg-[#4549b6]"
           >
-            <LogOut className="h-3.5 w-3.5" />
+            <LogOut className="h-4 w-4" />
             Keluar
           </button>
         </div>
 
-        <div className="mt-4 flex items-center gap-2.5 border-t border-line pt-4">
-          <div className="brand-gradient flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white">
+        <div className="mt-4 flex items-center gap-2.5 border-t border-[#eceef5] pt-4">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-[#edf0fa] text-[13px] font-bold text-[#3d41ad]">
             {user?.name?.charAt(0).toUpperCase() ?? "U"}
           </div>
           <div className="min-w-0">
-            <p className="truncate text-[12px] font-bold text-ink">{user?.name ?? "User"}</p>
-            <p className="text-[10px] font-medium text-muted-foreground">
-              {user?.role ?? "Admin"}
-            </p>
+            <p className="truncate text-[13px] font-bold text-[#272a3b]">{user?.name ?? "User"}</p>
+            <p className="text-[11.5px] font-medium text-[#6b7280]">{user?.role ?? "Admin"}</p>
           </div>
-          <span className="ml-auto shrink-0 rounded-full bg-[#edf1ff] px-2 py-1 text-[9px] font-semibold text-brand-blue dark:bg-white/10 dark:text-indigo-200">
+          <span className="ml-auto shrink-0 rounded-[7px] bg-[#f1f3f9] px-2 py-1 text-[11px] font-semibold text-[#616879]">
             v{__APP_VERSION__}
           </span>
         </div>

@@ -113,9 +113,9 @@ export function MonitoringPage() {
               </SelectContent>
             </Select>
             <Tabs value={range} onValueChange={(v) => setRange(v as ChartRange)}>
-              <TabsList className="flex-wrap">
+              <TabsList>
                 {CHART_RANGES.map((r) => (
-                  <TabsTrigger key={r.value} value={r.value} className="px-2.5 text-xs">
+                  <TabsTrigger key={r.value} value={r.value}>
                     {r.label}
                   </TabsTrigger>
                 ))}
@@ -148,7 +148,7 @@ export function MonitoringPage() {
         <Reveal>
           <Card>
             <CardHeader>
-              <CardTitle className="text-[15px] font-bold text-ink">Suhu (°C)</CardTitle>
+              <CardTitle>Suhu (°C)</CardTitle>
               <CardDescription>
                 Grafik suhu {selectedSensor?.name ?? "semua sensor"}
               </CardDescription>
@@ -166,7 +166,7 @@ export function MonitoringPage() {
         <Reveal delay={80}>
           <Card>
             <CardHeader>
-              <CardTitle className="text-[15px] font-bold text-ink">Kelembapan (%)</CardTitle>
+              <CardTitle>Kelembapan (%)</CardTitle>
               <CardDescription>
                 Grafik kelembapan {selectedSensor?.name ?? "semua sensor"}
               </CardDescription>

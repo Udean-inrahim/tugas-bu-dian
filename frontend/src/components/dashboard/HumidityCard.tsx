@@ -19,25 +19,25 @@ export function HumidityCard({ humidity, sensorName, lastUpdate, settings }: Pro
   return (
     <Card className="p-5">
       <div className="flex items-start justify-between">
-        <span className="chip-icon bg-blue-50 text-blue-500">
+        <span className="chip-icon bg-[#e8f2fd] text-[#2563eb]">
           <Droplets className="h-6 w-6" />
         </span>
         <ConditionBadge condition={condition} />
       </div>
-      <p className="mt-4 text-[13px] font-semibold text-muted-foreground">Kelembapan</p>
+      <p className="mt-4 text-[13px] font-semibold text-[#545b6c]">Kelembapan</p>
       <p
         className={cn(
-          "mt-1 whitespace-nowrap text-4xl font-extrabold tabular-nums tracking-tight",
-          humidity === null && "text-muted-foreground"
+          "mt-1 whitespace-nowrap text-[40px] font-extrabold leading-none tabular-nums tracking-tight text-[#272a3b]",
+          humidity === null && "text-[#6b7280]"
         )}
       >
         {humidity !== null ? animated.toFixed(1) : "--"}
-        <span className="ml-0.5 text-xl font-semibold text-muted-foreground">%</span>
+        <span className="ml-0.5 text-[19px] font-semibold text-[#6b7280]">%</span>
       </p>
-      <p className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+      <p className="mt-2.5 flex items-center gap-2 text-[12.5px] text-[#616879]">
         <StatusDot color={condition.color} />
         <span className="truncate">{sensorName ?? "Semua sensor"}</span>
-        {lastUpdate ? <span>• {formatTime(lastUpdate)}</span> : null}
+        {lastUpdate ? <span>· {formatTime(lastUpdate)}</span> : null}
       </p>
     </Card>
   );

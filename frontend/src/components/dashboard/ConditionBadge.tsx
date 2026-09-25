@@ -13,10 +13,10 @@ export function ConditionBadge({ condition, className }: { condition: Condition;
 
 export function StatusDot({ color }: { color: Condition["color"] }) {
   const colors: Record<string, string> = {
-    green: "bg-green-500",
-    yellow: "bg-yellow-500",
-    red: "bg-red-500",
-    blue: "bg-blue-500",
+    green: "bg-[#37bc99]",
+    yellow: "bg-[#e4bd4e]",
+    red: "bg-[#ff6570]",
+    blue: "bg-[#6fb6f5]",
   };
   return <span className={cn("inline-block h-2 w-2 rounded-full", colors[color])} />;
 }

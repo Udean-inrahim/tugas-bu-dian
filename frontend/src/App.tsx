@@ -52,16 +52,59 @@ export default function App() {
         path="/"
         element={
           <ProtectedRoute>
+            <DashboardPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/monitoring"
+        element={
+          <ProtectedRoute>
             <AppLayout />
           </ProtectedRoute>
         }
       >
-        <Route index element={<DashboardPage />} />
-        <Route path="monitoring" element={<MonitoringPage />} />
-        <Route path="sensors" element={<SensorsPage />} />
-        <Route path="history" element={<HistoryPage />} />
-        <Route path="alerts" element={<AlertsPage />} />
-        <Route path="settings" element={<SettingsPage />} />
+        <Route index element={<MonitoringPage />} />
+      </Route>
+      <Route
+        path="/sensors"
+        element={
+          <ProtectedRoute>
+            <AppLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<SensorsPage />} />
+      </Route>
+      <Route
+        path="/history"
+        element={
+          <ProtectedRoute>
+            <AppLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<HistoryPage />} />
+      </Route>
+      <Route
+        path="/alerts"
+        element={
+          <ProtectedRoute>
+            <AppLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<AlertsPage />} />
+      </Route>
+      <Route
+        path="/settings"
+        element={
+          <ProtectedRoute>
+            <AppLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<SettingsPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
