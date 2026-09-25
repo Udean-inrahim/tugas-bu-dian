@@ -35,6 +35,102 @@ const NAV_ITEMS = [
 const CHART_MAX = 150;
 const REVIEW_MAX = 45;
 
+const LINE_W = 1000;
+const LINE_H = 220;
+const LINE_PAD_X = 8;
+
+type LineChart = {
+  points: number;
+  tLo: number;
+  tHi: number;
+  hLo: number;
+  hHi: number;
+  tempPath: string;
+  tempArea: string;
+  humPath: string;
+  targetAt: number | null;
+  xTicks: { label: string; at: number }[];
+  last: { at: number; tempAt: number; humAt: number; temperature: number; humidity: number; t: string };
+};
+
+function buildLine(rows: HourlyPoint[], hours: number, t: StmSettings | null): LineChart | null {
+  const cutoff = Date.now() - hours * 3600_000;
+  const pts = rows
+    .filter((r) => new Date(r.t).getTime() >= cutoff)
+    .sort((a, b) => new Date(a.t).getTime() - new Date(b.t).getTime());
+  if (pts.length === 0) return null;
+
+  const temps = pts.map((p) => p.temperature);
+  const hums = pts.map((p) => p.humidity);
+  const tLo = Math.min(...temps, t?.minTemperature ?? Infinity) - 1.5;
+  const tHi = Math.max(...temps, t?.maxTemperature ?? -Infinity) + 1.5;
+  const hLo = Math.max(0, Math.min(...hums, t?.minHumidity ?? Infinity) - 4);
+  const hHi = Math.min(100, Math.max(...hums, t?.maxHumidity ?? -Infinity) + 4);
+  const spanT = Math.max(0.5, tHi - tLo);
+  const spanH = Math.max(0.5, hHi - hLo);
+  const innerW = LINE_W - LINE_PAD_X * 2;
+
+  const x = (i: number) =>
+    LINE_PAD_X + (pts.length === 1 ? innerW / 2 : (i * innerW) / (pts.length - 1));
+  const yT = (v: number) => LINE_H - ((v - tLo) / spanT) * LINE_H;
+  const yH = (v: number) => LINE_H - ((v - hLo) / spanH) * LINE_H;
+  const path = (y: (v: number) => number, pick: (p: HourlyPoint) => number) =>
+    pts
+      .map((p, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)} ${y(pick(p)).toFixed(1)}`)
+      .join(" ");
+
+  const tempPath = path(yT, (p) => p.temperature);
+  const humPath = path(yH, (p) => p.humidity);
+  const baseY = (LINE_H - 2).toFixed(1);
+  const tempArea = `${tempPath} L${x(pts.length - 1).toFixed(1)} ${baseY} L${x(0).toFixed(1)} ${baseY} Z`;
+
+  const xTicks: { label: string; at: number }[] = [];
+  if (hours <= 24) {
+    pts.forEach((p, i) => {
+      const d = new Date(p.t);
+      if (d.getHours() % 4 === 0) {
+        xTicks.push({ label: `${String(d.getHours()).padStart(2, "0")}:00`, at: x(i) / LINE_W });
+      }
+    });
+    if (xTicks.length < 2) {
+      xTicks.length = 0;
+      xTicks.push({ label: "24 jam", at: 0 }, { label: "sekarang", at: 1 });
+    }
+  } else {
+    let lastDay = "";
+    pts.forEach((p, i) => {
+      const d = new Date(p.t);
+      const key = d.toDateString();
+      if (key !== lastDay) {
+        lastDay = key;
+        xTicks.push({ label: DAY_SHORT[d.getDay()], at: x(i) / LINE_W });
+      }
+    });
+  }
+
+  const lastPoint = pts[pts.length - 1];
+  return {
+    points: pts.length,
+    tLo,
+    tHi,
+    hLo,
+    hHi,
+    tempPath,
+    tempArea,
+    humPath,
+    targetAt: t ? yT(t.maxTemperature) / LINE_H : null,
+    xTicks,
+    last: {
+      at: x(pts.length - 1) / LINE_W,
+      tempAt: yT(lastPoint.temperature) / LINE_H,
+      humAt: yH(lastPoint.humidity) / LINE_H,
+      temperature: lastPoint.temperature,
+      humidity: lastPoint.humidity,
+      t: lastPoint.t,
+    },
+  };
+}
+
 const COND_HEX: Record<string, string> = {
   green: "#1e9e7e",
   yellow: "#c99a1f",
@@ -220,6 +316,12 @@ export function DashboardPage() {
   const week = useMemo(() => buildWeek(series, settings), [series, settings]);
   const review = useMemo(() => buildReview(series, settings), [series, settings]);
 
+  const [range, setRange] = useState<"24h" | "7d">("7d");
+  const line = useMemo(
+    () => buildLine(series, range === "24h" ? 24 : 24 * 7, settings),
+    [series, range, settings]
+  );
+
   const recentRows = useMemo(
     () =>
       [...recent]
@@ -334,10 +436,29 @@ export function DashboardPage() {
           </header>
 
           <div className="dash-top">
-            {/* ── Aktivitas 7 hari ── */}
+            {/* ── Aktivitas sensor (line chart) ── */}
             <section className="dash-activity">
               <div className="dash-activity-head">
                 <h2>Aktivitas Sensor</h2>
+                <div className="dash-range" role="group" aria-label="Rentang grafik">
+                  <button
+                    type="button"
+                    className={range === "24h" ? "on" : ""}
+                    onClick={() => setRange("24h")}
+                  >
+                    24 jam
+                  </button>
+                  <button
+                    type="button"
+                    className={range === "7d" ? "on" : ""}
+                    onClick={() => setRange("7d")}
+                  >
+                    7 hari
+                  </button>
+                </div>
+              </div>
+
+              <div className="dash-activity-sub">
                 <div className="dash-legend">
                   <span>
                     <i className="dash-dot-green" />
@@ -352,34 +473,101 @@ export function DashboardPage() {
                     Target
                   </span>
                 </div>
+                {line && (
+                  <div className="dash-line-latest">
+                    <span className="dash-line-value temp">
+                      <i />
+                      {line.last.temperature.toFixed(1)} °C
+                    </span>
+                    <span className="dash-line-value hum">
+                      <i />
+                      {line.last.humidity.toFixed(0)} %RH
+                    </span>
+                    <em>terakhir {formatTime(line.last.t)}</em>
+                  </div>
+                )}
               </div>
 
-              <div className="dash-chart">
-                {!hasData && !loading && <div className="dash-chart-empty">Belum ada data 7 hari</div>}
-                {!hasData && loading && <div className="dash-chart-empty">Memuat data…</div>}
-                <div
-                  className="dash-target"
-                  style={{ bottom: `${week.targetPx}px` }}
-                  title={`Ambang suhu ${settings?.maxTemperature?.toFixed(1) ?? "—"}°C`}
-                />
-                {week.bins.map((b) => (
-                  <div key={b.label} className="dash-chart-group" title={b.label}>
-                    <div className="dash-gly" />
-                    <div className="dash-bar-green" style={{ height: `${b.tempPx}px` }} />
-                    <div className="dash-bar-pink" style={{ height: `${b.humPx}px` }} />
-                    {b.isToday && hasData && (
-                      <div
-                        className="dash-point"
-                        style={{ bottom: `${Math.max(2, week.pointPx)}px` }}
-                        title="Hari ini"
-                      />
-                    )}
+              <div className="dash-line">
+                {!line && (
+                  <div className="dash-chart-empty">
+                    {loading ? "Memuat data…" : "Belum ada data pada rentang ini"}
                   </div>
-                ))}
+                )}
+                {line && (
+                  <>
+                    <svg
+                      viewBox={`0 0 ${LINE_W} ${LINE_H}`}
+                      preserveAspectRatio="none"
+                      className="dash-line-svg"
+                      role="img"
+                      aria-label={`Grafik suhu dan kelembapan per jam, ${line.points} titik`}
+                    >
+                      <defs>
+                        <linearGradient id="dashTempFill" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#37bc99" stopOpacity="0.3" />
+                          <stop offset="100%" stopColor="#37bc99" stopOpacity="0" />
+                        </linearGradient>
+                      </defs>
+                      {[0.25, 0.5, 0.75].map((g) => (
+                        <line
+                          key={g}
+                          x1={0}
+                          x2={LINE_W}
+                          y1={LINE_H * g}
+                          y2={LINE_H * g}
+                          className="dash-line-grid"
+                          vectorEffect="non-scaling-stroke"
+                        />
+                      ))}
+                      {line.targetAt !== null && (
+                        <line
+                          x1={0}
+                          x2={LINE_W}
+                          y1={line.targetAt * LINE_H}
+                          y2={line.targetAt * LINE_H}
+                          className="dash-line-target"
+                          vectorEffect="non-scaling-stroke"
+                        />
+                      )}
+                      <path d={line.tempArea} fill="url(#dashTempFill)" />
+                      <path
+                        d={line.tempPath}
+                        className="dash-line-temp"
+                        vectorEffect="non-scaling-stroke"
+                      />
+                      <path
+                        d={line.humPath}
+                        className="dash-line-hum"
+                        vectorEffect="non-scaling-stroke"
+                      />
+                    </svg>
+                    <span
+                      className="dash-line-dot temp"
+                      style={{ left: `${line.last.at * 100}%`, top: `${line.last.tempAt * 100}%` }}
+                    />
+                    <span
+                      className="dash-line-dot hum"
+                      style={{ left: `${line.last.at * 100}%`, top: `${line.last.humAt * 100}%` }}
+                    />
+                    <div className="dash-axis-y left">
+                      <span>{line.tHi.toFixed(0)}°C</span>
+                      <span>{((line.tHi + line.tLo) / 2).toFixed(0)}°C</span>
+                      <span>{line.tLo.toFixed(0)}°C</span>
+                    </div>
+                    <div className="dash-axis-y right">
+                      <span>{line.hHi.toFixed(0)}%</span>
+                      <span>{((line.hHi + line.hLo) / 2).toFixed(0)}%</span>
+                      <span>{line.hLo.toFixed(0)}%</span>
+                    </div>
+                  </>
+                )}
               </div>
-              <div className="dash-days">
-                {week.bins.map((b) => (
-                  <span key={b.label}>{b.label}</span>
+              <div className="dash-axis-x">
+                {line?.xTicks.map((tick) => (
+                  <span key={`${tick.label}-${tick.at}`} style={{ left: `${tick.at * 100}%` }}>
+                    {tick.label}
+                  </span>
                 ))}
               </div>
             </section>
