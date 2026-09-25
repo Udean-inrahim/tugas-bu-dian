@@ -1,5 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
+import { Prisma } from "../generated/client/index.js";
 import { prisma } from "../lib/prisma.js";
 import { readingService } from "../services/reading.service.js";
 import { SensorApiKeyError } from "../lib/apiKey.js";
@@ -147,5 +148,39 @@ export async function readingRoutes(app: FastifyInstance) {
     ]);
 
     return { data, meta: { page, limit, total, totalPages: Math.ceil(total / limit) } };
+  });
+
+  // Agregasi per jam untuk grafik dasbor: payload kecil (maks 14 hari),
+  // tidak terkena batas 200 baris pada /api/readings.
+  app.get("/api/readings/hourly", async (req) => {
+    const q = req.query as { hours?: string };
+    const hours = Math.min(24 * 14, Math.max(6, Number(q.hours ?? 24 * 7) || 24 * 7));
+    const myIds = (
+      await prisma.sensor.findMany({ where: { userId: req.user.sub }, select: { id: true } })
+    ).map((s) => s.id);
+    if (myIds.length === 0) return { data: [] };
+
+    const since = new Date(Date.now() - hours * 3_600_000);
+    const rows = await prisma.$queryRaw<
+      { bucket: Date; temperature: number; humidity: number; count: number }[]
+    >`
+      SELECT date_trunc('hour', recorded_at) AS bucket,
+             AVG(temperature)::float AS temperature,
+             AVG(humidity)::float AS humidity,
+             COUNT(*)::int AS count
+      FROM sensor_readings
+      WHERE recorded_at >= ${since} AND sensor_id IN (${Prisma.join(myIds)})
+      GROUP BY 1
+      ORDER BY 1 ASC
+    `;
+
+    return {
+      data: rows.map((r) => ({
+        t: r.bucket.toISOString(),
+        temperature: Number(r.temperature),
+        humidity: Number(r.humidity),
+        count: Number(r.count),
+      })),
+    };
   });
 }

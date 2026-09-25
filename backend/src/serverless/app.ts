@@ -3,6 +3,7 @@ import { jwt, sign } from "hono/jwt";
 import { cors } from "hono/cors";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
+import { Prisma } from "../generated/client/index.js";
 import { prisma } from "./prisma.js";
 import {
   createResetCode,
@@ -732,6 +733,41 @@ app.get("/api/readings", async (c) => {
   ]);
 
   return c.json({ data, meta: { page, limit, total, totalPages: Math.ceil(total / limit) } });
+});
+
+app.get("/api/readings/hourly", async (c) => {
+  await ensureDemoHeartbeat();
+  const hours = Math.min(
+    24 * 14,
+    Math.max(6, Number(c.req.query("hours") ?? 24 * 7) || 24 * 7)
+  );
+  const myIds = await ownedSensorIds(c.get("user").id);
+  if (myIds.length === 0) return c.json({ data: [] });
+
+  // Agregasi per jam di sisi server: payload kecil untuk grafik 7 harian,
+  // tidak terbatas batas 200 baris pada /api/readings.
+  const since = new Date(Date.now() - hours * 3_600_000);
+  const rows = await prisma.$queryRaw<
+    { bucket: Date; temperature: number; humidity: number; count: number }[]
+  >`
+    SELECT date_trunc('hour', recorded_at) AS bucket,
+           AVG(temperature)::float AS temperature,
+           AVG(humidity)::float AS humidity,
+           COUNT(*)::int AS count
+    FROM sensor_readings
+    WHERE recorded_at >= ${since} AND sensor_id IN (${Prisma.join(myIds)})
+    GROUP BY 1
+    ORDER BY 1 ASC
+  `;
+
+  return c.json({
+    data: rows.map((r) => ({
+      t: r.bucket.toISOString(),
+      temperature: Number(r.temperature),
+      humidity: Number(r.humidity),
+      count: Number(r.count),
+    })),
+  });
 });
 
 app.get("/api/alerts", async (c) => {

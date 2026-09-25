@@ -104,12 +104,12 @@ async function main() {
   });
   console.log(`✅ Demo sensor created: ${sensor.name} (${sensor.sensorCode})`);
 
-  // Backfill demo readings for the last 24h so charts are populated immediately.
-  // Dalam mode demo, jendela 24 jam dibangun ulang dengan pola yang realistis
-  // (idempotent karena data lama di jendela dihapus dulu).
+  // Backfill demo readings for the last 7 days so the 7-day chart is populated.
+  // Jendela 7 hari dibangun ulang dengan pola realistis (idempotent: data lama
+  // di jendela dihapus dulu, jadi aman dijalankan ulang tiap deploy).
   const demoMode = (process.env.DEMO_MODE ?? "true") !== "false";
   const stepMs = 5 * 60 * 1000;
-  const windowMs = 24 * 60 * 60 * 1000;
+  const windowMs = 7 * 24 * 60 * 60 * 1000;
   const now = Date.now();
   const windowStart = now - windowMs;
 
@@ -138,7 +138,7 @@ async function main() {
   if (rows.length > 0) {
     await prisma.sensorReading.createMany({ data: rows });
   }
-  console.log(`✅ Demo readings backfilled: ${rows.length} (24h window)`);
+  console.log(`✅ Demo readings backfilled: ${rows.length} (7-day window)`);
 
   console.log("Seed selesai. Login: admin@example.com / admin123");
 }

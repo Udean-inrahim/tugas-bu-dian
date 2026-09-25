@@ -69,7 +69,14 @@ type DayBin = {
   humPx: number;
 };
 
-function buildWeek(rows: SensorReading[], settings: StmSettings | null) {
+type HourlyPoint = {
+  t: string;
+  temperature: number;
+  humidity: number;
+  count: number;
+};
+
+function buildWeek(rows: HourlyPoint[], settings: StmSettings | null) {
   const days: Date[] = [];
   for (let i = 6; i >= 0; i -= 1) {
     const d = new Date();
@@ -80,7 +87,7 @@ function buildWeek(rows: SensorReading[], settings: StmSettings | null) {
 
   const groups = new Map<string, { tempSum: number; humSum: number; n: number }>();
   for (const r of rows) {
-    const k = new Date(r.recordedAt).toDateString();
+    const k = new Date(r.t).toDateString();
     const g = groups.get(k);
     if (g) {
       g.tempSum += r.temperature;
@@ -126,9 +133,9 @@ type Review = {
   barsPx: number[];
 };
 
-function buildReview(rows: SensorReading[], t: StmSettings | null): Review {
+function buildReview(rows: HourlyPoint[], t: StmSettings | null): Review {
   const since = Date.now() - 24 * 3600_000;
-  const win = rows.filter((r) => new Date(r.recordedAt).getTime() >= since);
+  const win = rows.filter((r) => new Date(r.t).getTime() >= since);
 
   const temps = win.map((r) => r.temperature);
   const min = temps.length ? Math.min(...temps) : null;
@@ -146,7 +153,7 @@ function buildReview(rows: SensorReading[], t: StmSettings | null): Review {
     const start = since + i * segmentMs;
     const end = start + segmentMs;
     const s = win.filter((r) => {
-      const ts = new Date(r.recordedAt).getTime();
+      const ts = new Date(r.t).getTime();
       return ts >= start && ts < end;
     });
     segAvg.push(s.length ? s.reduce((a, b) => a + b.temperature, 0) / s.length : 0);
@@ -167,18 +174,15 @@ export function DashboardPage() {
   const { summary, list: reloadAlerts } = useAlerts({ status: "ACTIVE", limit: 5 });
   const { data: recent } = useReadings({ limit: 20 });
 
-  const [series, setSeries] = useState<SensorReading[]>([]);
+  const [series, setSeries] = useState<HourlyPoint[]>([]);
   const [loading, setLoading] = useState(true);
   const [now, setNow] = useState(() => new Date());
 
   const loadSeries = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
     try {
-      const { data } = await api.get<{ data: SensorReading[] }>("/readings", {
-        params: {
-          from: new Date(Date.now() - 8 * 24 * 3600_000).toISOString(),
-          limit: 2000,
-        },
+      const { data } = await api.get<{ data: HourlyPoint[] }>("/readings/hourly", {
+        params: { hours: 24 * 7 },
       });
       setSeries(data.data);
     } catch {
